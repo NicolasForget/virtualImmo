@@ -1,0 +1,446 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+    	<meta charset="UTF-8">
+	    <link rel="stylesheet" type="text/css" href="style-svg.css" />
+	    <!-- Latest compiled and minified CSS -->
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+	    <!-- jQuery library -->
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+	    <!-- Latest compiled JavaScript -->
+	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	    <!-- library of d3 -->
+	    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	    <!-- pie menu -->
+	    <script type="text/javascript" src="js/menu.js"></script>
+	    <!-- button -->
+	    <script type="text/javascript" src="js/button.js"></script>
+	    <!-- checkbox -->
+	    <script type="text/javascript" src="js/checkbox.js"></script>
+	</head>
+	<body>
+		<!-- header -->
+	    <nav class="navbar navbar-default navbar-fixed-top">
+	      	<div class="container">
+	        	<div class="navbar-header">
+		          	<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+		            	<span class="sr-only">Toggle navigation</span>
+		            	<span class="icon-bar"></span>
+		            	<span class="icon-bar"></span>
+		            	<span class="icon-bar"></span>
+		          	</button>
+		          	<a class="navbar-brand" href="#">VirtualImmo</a>
+	        	</div>
+	        	<div id="navbar" class="collapse navbar-collapse">
+	          		<ul class="nav navbar-nav">
+			            <li class="active"><a href="#">Home</a></li>
+			            <li><a href="#help">Help</a></li>
+			            <li><a href="#contact">Contact</a></li>
+			            <li class="dropdown">
+			              	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Members<span class="caret"></span></a>
+			              	<ul class="dropdown-menu">
+				                <li><a href="#">Mesnier Maylanie</a></li>
+				                <li><a href="#">Saraïs Anthony</a></li>
+				                <li><a href="#">Forget Nicolas</a></li>
+				                <li><a href="#">Ding Feng</a></li>
+			              	</ul>
+	            		</li>
+	          		</ul>
+	        	</div><!--/.nav-collapse -->
+	      	</div>
+	    </nav>
+	    <!-- main div -->
+	    <div class="container-fluid">
+	    	<div class="row">
+		    	<div id="sofaRotate" class="center-block" style="visibility: hidden">
+					<input id="nAngle" type="range" min="0" max="360">
+					<span id="nAngle-value">0</span>
+					<div id="checkSofaPlaced"></div>
+		    	</div>
+			</div>
+	      	<div class="row">
+	        	<div class="center-block" id="main-content">
+	             	<svg id="roomMap" width="800" height="800"></svg>
+	        	</div>
+	      	</div>
+	    </div>
+	    <!-- pie menu div -->
+	    <div id="piemenu">
+	      	<svg width="400" height="400">
+	        	<g id="menu-holder" transform="translate(200,200)"></g>
+	      	</svg>
+	    </div>
+
+	    <div id="resetButton"></div>
+
+	    
+
+	    <!-- footer -->
+	    <footer class="footer">
+	      	<div class="container">
+	        	<p class="text-muted">©VirtualImmo  BY Mesnier Maylanie, Saraïs Anthony, Forget Nicolas, Ding Feng</p>
+	      	</div>
+	    </footer>
+
+        <script>
+        	// the sofa data array 
+        	var sofas = [
+	            { icon : "img/1.png", action: "sofaSelect(0);", size : {length: 100, width : 180} },
+	            { icon : "img/2.png", action: "sofaSelect(1);", size : {length: 100, width : 200}  },
+	            { icon : "img/4.png", action: "sofaSelect(2);", size : {length: 80, width : 150}  },
+	            { icon : "img/9.png", action: "sofaSelect(3);", size : {length: 90, width : 250}  },
+	            { icon : "img/8.png", action: "sofaSelect(4);", size : {length: 110, width : 220}  }
+        	];
+
+        	// the four points of a sofa
+        	var sofaPoints = [
+        		{x : 0, y : 0},
+        		{x : 0, y : 0},
+        		{x : 0, y : 0},
+        		{x : 0, y : 0}
+        	];
+
+        	var m;
+        	//mouse click position
+        	var clickX,clickY;
+        	//sofa position relative to the room
+        	var rectX = 0;
+        	var rectY = 0;
+
+        	var checkBox = new CheckBox();
+
+        	var sofaPlacedCheck;
+
+        	var sofaSelectedCenterX = 0;
+        	var sofaSelectedCenterY = 0;
+
+        	var sofaDemiDiagonal;
+
+        	var currentAngle = 0;
+        	var buttonSvg;
+
+        	var imgHeight = 800, imgWidth = 800,      // Image dimensions (don't change these)
+            	width =  800, height = 800,             // Dimensions of cropped region
+            	translate0 = [0, 0], scale0 = 1;  // Initial offset & scale
+
+        	var zoom = d3.behavior.zoom()
+		    	.scaleExtent([1, 8])
+		    	.on("zoom", zoomed);
+
+        	svg = d3.select("#roomMap")
+            	.attr("width",  width + "px")
+            	.attr("height", height + "px")
+            	.append("g")
+            	.attr("transform", "translate(" + translate0 + ")")
+            	.call(zoom)
+            	.on("dblclick.zoom", null);
+
+          	var rect = svg.append("rect")
+              	.attr("fill","#ffffff")
+              	.attr("class", "overlay")
+              	.attr("width", width + "px")
+              	.attr("height", height + "px");
+
+          	var container = svg.append("g").attr("class","zoomArea").attr("transform","translate(0,0)scale(1)");
+          	container.append("g").attr("class","imgMap").attr("transform","translate(0,0)").append("image")
+              	.attr("width",  imgWidth + "px")
+              	.attr("height", imgHeight + "px")
+              	.attr("xlink:href", "img/room-small.png");
+
+          	container.append("g")
+		    	.attr("class", "x axis")
+		  		.selectAll("line")
+		    	.data(d3.range(60, width - 60, 10))
+		  		.enter().append("line")
+			    .attr("x1", function(d) { return d; })
+			    .attr("y1", 60)
+			    .attr("x2", function(d) { return d; })
+			    .attr("y2", height - 60);
+
+			container.append("g")
+			    .attr("class", "y axis")
+			  	.selectAll("line")
+			    .data(d3.range(60, height - 60, 10))
+			  	.enter().append("line")
+			    .attr("x1", 60)
+			    .attr("y1", function(d) { return d; })
+			    .attr("x2", width - 60)
+			    .attr("y2", function(d) { return d; });
+
+			container.append("g")
+				.attr("class","legend")
+				.append("g")
+				.attr("class","legend-line")
+				.selectAll("line")
+			    .data(d3.range(10, 30, 10))
+			  	.enter().append("line")
+			    .attr("x1", 10)
+			    .attr("y1", function(d) { return d; })
+			    .attr("x2", 20)
+			    .attr("y2", function(d) { return d; });
+
+			container.select(".legend")
+				.append("g")
+				.attr("class","legend-line")
+				.selectAll("line")
+			    .data(d3.range(10, 30, 10))
+			  	.enter().append("line")
+			    .attr("x1", function(d) { return d; })
+			    .attr("y1", 10)
+			    .attr("x2", function(d) { return d; })
+			    .attr("y2", 20);
+			container.select(".legend").append("text").attr("x","30").attr("y","20").text("Each square is 10px × 10px");
+
+			container.append("g").attr("class","g-sofa").attr("transform","translate(0,0)").append("text");
+
+          	svg.on("dblclick",doubleClick);
+
+          	var drag = d3.behavior.drag()
+			    .on("dragstart", dragstarted)
+			    .on("drag", dragged)
+			    .on("dragend", dragended);
+
+			function doubleClick(){
+				var zoomAreaPosition = d3.select(".zoomArea").attr("transform").split(/\(|\,|\)/);
+	            
+	            clickX = d3.mouse(this)[0] - parseFloat(zoomAreaPosition[1],10);
+	            clickY = d3.mouse(this)[1] - parseFloat(zoomAreaPosition[2],10);
+
+	            rectX = clickX;
+	            rectY = clickY;
+
+	            // console.log(clickX);
+	            // console.log(clickY);
+	            createMenu(d3.event.pageX, d3.event.pageY);
+			}	
+
+
+          	function zoomed() {
+          		showResetButton();
+            	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+          	}
+
+          	function dragstarted(d) {
+          		var postion = d3.select(this).attr("transform").split(/\(|\)|\,/);
+	          	rectX = parseFloat(postion[1],10);
+				rectY = parseFloat(postion[2],10);
+
+			  	d3.event.sourceEvent.stopPropagation();
+			  	d3.select(this).classed("dragging", true);
+			  	d3.select(this.parentNode).select("text").text("Moving").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+			  	sofaPlacedCheck.style("visibility","hidden");
+			}
+
+			function dragged(d) {
+				rectX += d3.event.dx;
+				rectY += d3.event.dy;
+				var sofaWidth = parseFloat(d3.select(this).attr("width"),10);
+				var sofaHeight = parseFloat(d3.select(this).attr("height"),10);
+
+				setSofaPoints();
+			    // console.log(sofaPoints);
+			    // console.log(isSofaBadPlaced());
+				if(isSofaBadPlaced()){
+					d3.select(this).classed("badPlace",true);
+					d3.select(this.parentNode).select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+				}else{
+					d3.select(this).classed("badPlace",false);
+					d3.select(this.parentNode).select("text").text("Moving").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");;
+				}
+				d3.select(this).attr('transform', "translate(" + rectX + "," + rectY + ")rotate(" + currentAngle + "," + sofaSelectedCenterX + "," + sofaSelectedCenterY + ")");;
+				
+			    sofaPlacedCheck.attr("transform","translate(" + (sofaPoints[2].x - 10) + "," + (sofaPoints[2].y - 10) + ")");
+			}
+
+			function dragended(d) {
+				
+			  	d3.select(this).classed("dragging", false);
+			  	if(isSofaBadPlaced()){
+			  		sofaPlacedCheck.style("visibility","hidden");
+			  		d3.select(this.parentNode).select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+			  	}else{
+			  		sofaPlacedCheck.style("visibility","visible");
+			  		d3.select(this.parentNode).select("text").text("Check to place it.").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");;
+			  	}
+			}
+          
+
+
+          	function createMenu(x,y){
+	            changeLayer(true);
+	            if(m){
+	              m.hide();
+	            }
+	            
+	            d3.select("#menu-holder").selectAll("g").each(function(){
+	              d3.select(this).remove();
+	            });
+	            
+	            m = new d3.radialMenu().radius(50).thickness(150).iconSize(120)
+	                        .appendTo("#menu-holder").show(sofas);
+
+	            var menu = $("#piemenu");
+	            menu.css('position', 'absolute');
+	            menu.css("left", x - 200);
+	            menu.css("top", y - 200);
+          	}
+
+          
+
+          	function changeLayer(flag){
+	            if(flag){
+	              d3.select("#piemenu").attr("class","piemenufirstLayer");
+	            }else{
+	              d3.select("#piemenu").attr("class","piemenuLastLayer");
+	            }
+          	}
+
+          	function sofaSelect(index){
+	            // console.log(index);
+	            if(m)m.hide();
+	            changeLayer(false);
+	            var sofa = sofas[index];
+	            createSofa(clickX,clickY,sofa.size.width,sofa.size.length);
+	            // console.log(sofa.size);
+          	}
+
+          	function createSofa(x,y,width,height){
+          		showResetButton();
+          		update(0);
+          		currentAngle = 0;
+          		sofaDemiDiagonal = Math.sqrt(width * width + height * height) / 2;
+          		sofaSelectedCenterX = width / 2;
+	            sofaSelectedCenterY = height / 2;
+	            setSofaPoints();
+
+	            if(container.select(".g-sofa").select('rect')[0][0] !== null){
+	              container.select(".g-sofa").select('rect').remove();
+	            }
+	            container.select(".g-sofa").attr("transform","translate(0,0)").append('rect').attr("transform","translate(" + x + "," + y + ")rotate(0,0,0)").attr("fill-opacity","0.8").attr("width",width)
+	            	.attr("height",height).call(drag);
+	            if(sofaPlacedCheck)	
+	            	sofaPlacedCheck.remove();
+
+	            checkBox.size(20).x(sofaPoints[2].x - 10).y(sofaPoints[2].y - 10).rx(5).ry(5).markStrokeWidth(2).boxStrokeWidth(3).checked(false).clickEvent(function(){
+	            	if(checkBox.checked()){
+	            		d3.select("#sofaRotate").style("visibility","hidden");
+	            		container.select(".g-sofa").select("rect").classed("sofaPlaced",true).on('mousedown.drag', null);
+	            		container.select(".g-sofa").select("text").text("Placed").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+	            	}else{
+	            		d3.select("#sofaRotate").style("visibility","visible");
+	            		container.select(".g-sofa").select("rect").classed("sofaPlaced",false).call(drag);
+	            		container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+	            	}
+	            });
+
+	            
+	            d3.select("#sofaRotate").style("visibility","visible");
+	            container.select(".g-sofa").call(checkBox);
+	            sofaPlacedCheck = d3.select(".placeSofa");
+	            if(isSofaBadPlaced()){
+					container.select(".g-sofa").select('rect').classed("badPlace",true);
+					container.select(".g-sofa").select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+					if(sofaPlacedCheck)
+						sofaPlacedCheck.style("visibility","hidden");
+				}else{
+					container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+					container.select(".g-sofa").select('rect').classed("badPlace",false);
+					if(sofaPlacedCheck)
+						sofaPlacedCheck.style("visibility","visible");
+				}
+	            
+          	}
+
+			function showResetButton(){
+				if(buttonSvg == null){
+					buttonSvg = d3.select('#resetButton').append('svg')
+					    .attr('width', 200)
+					    .attr('height', 100)
+
+					var gButton = buttonSvg.append('g')
+					    .attr('class', 'button')
+					    .attr('transform', 'translate(100,50)')
+
+					var text = gButton.append('text')
+					    .text('Map Reset');
+
+					button()
+					  .container(gButton)
+					  .text(text)
+					  .count(0)
+					  .cb(function() { hideResetButton(); })();
+				}
+			}
+
+			function hideResetButton(){
+				buttonSvg = null;
+				zoom.scale(1);
+				zoom.translate([0,0]);
+				d3.select('#resetButton').select("svg").remove();
+				d3.select(".zoomArea").attr("transform","translate(0,0)scale(1)");
+				if(container.select(".g-sofa").select('rect')[0][0] !== null){
+	              container.select(".g-sofa").select('rect').remove();
+	            }
+	            d3.select("#sofaRotate").style("visibility","hidden");
+	            container.select(".g-sofa").select("text").text("");
+	            if(sofaPlacedCheck)
+	            	sofaPlacedCheck.remove();
+			}
+
+			// when the input range changes update the angle 
+			d3.select("#nAngle").on("input", function() {
+			  	update(+this.value);
+			});
+
+			// update the element
+			function update(nAngle) {
+			  	currentAngle = nAngle;
+			  	// adjust the text on the range slider
+			  	d3.select("#nAngle-value").text(nAngle);
+			  	d3.select("#nAngle").property("value", nAngle);
+
+			  	// rotate
+			  	container.select(".g-sofa").select('rect') 
+			    	.attr("transform", "translate(" + rectX + "," + rectY + ")rotate(" + nAngle + "," + sofaSelectedCenterX + "," + sofaSelectedCenterY + ")");
+			    setSofaPoints();
+			    // console.log(sofaPoints);
+			    if(isSofaBadPlaced()){
+					container.select(".g-sofa").select('rect').classed("badPlace",true);
+					container.select(".g-sofa").select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+					if(sofaPlacedCheck)
+						sofaPlacedCheck.style("visibility","hidden");
+				}else{
+					container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+					container.select(".g-sofa").select('rect').classed("badPlace",false);
+					if(sofaPlacedCheck)
+						sofaPlacedCheck.style("visibility","visible");
+				}
+				if(sofaPlacedCheck)
+					sofaPlacedCheck.attr("transform","translate(" + (sofaPoints[2].x - 10) + "," + (sofaPoints[2].y - 10) + ")");
+			}
+
+			function setSofaPoints(){
+				sofaPoints[0].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
+				sofaPoints[0].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
+				sofaPoints[1].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
+				sofaPoints[1].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
+				sofaPoints[2].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
+				sofaPoints[2].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
+				sofaPoints[3].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
+				sofaPoints[3].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
+			}
+
+			function isSofaBadPlaced(){
+				for(var i = 0; i < sofaPoints.length; i++){
+					if(sofaPoints[i].x < 60 || sofaPoints[i].x > 740 || sofaPoints[i].y < 60 || sofaPoints[i].y > 740)
+						return true;
+				}
+				return false;
+			}
+
+        </script>
+  </body>
+</html>
+
