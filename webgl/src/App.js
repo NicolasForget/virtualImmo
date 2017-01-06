@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import THREE from "three.js";
+import $ from "jquery";
 import PointerLockControls from "./libs/PointerLockControls";
 import io from 'socket.io-client'
 
@@ -250,6 +251,15 @@ export default React.createClass({
         var camera, scene, renderer, glRenderer, stereoEffect;
         var geometry, material, mesh;
         var controls;
+        var controls2;
+        var controlsEnabled = false;
+        var moveForward = false;
+        var moveBackward = false;
+        var moveLeft = false;
+        var moveRight = false;
+        var canJump = false;
+        var prevTime = performance.now();
+        var velocity = new THREE.Vector3();
         var objects = [];
         var raycaster;
         var activate = document.getElementById('activate');
@@ -286,7 +296,10 @@ export default React.createClass({
                 // Ask the browser to lock the pointer
                 element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
                 element.requestPointerLock();
+                controls.enabled = true;
+                controlsEnabled = true;
             }, false);
+            
         } else {
             activate.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
         }
@@ -294,14 +307,75 @@ export default React.createClass({
 
         init();
         animate();
-        var controlsEnabled = false;
-        var moveForward = false;
-        var moveBackward = false;
-        var moveLeft = false;
-        var moveRight = false;
-        var canJump = false;
-        var prevTime = performance.now();
-        var velocity = new THREE.Vector3();
+
+
+        /** for gamepad */
+    var hasGP = false;
+    var repGP;
+ 
+    function canGame() {
+        return "getGamepads" in navigator;
+    }
+ 
+    function reportOnGamepad() {
+        if(canGame){
+            $(".key").html("can game");
+
+            var gp = navigator.getGamepads()[0];
+            var html = "";
+            for(var i=0;i<gp.buttons.length;i++) {
+                html+= "Button "+(i+1)+": ";
+                html+= gp.buttons[i].pressed;
+            }
+
+            if (gp.buttons[3].pressed){
+               console.log(gp.buttons[3].pressed);
+               $(activate).trigger("click");
+            }
+
+            for(var i=0;i<gp.axes.length; i+=2) {
+                html= "Stick "+(Math.ceil(i/2)+1)+": "+gp.axes[i]+","+gp.axes[i+1];
+                if (gp.axes[i+1]==1){
+                    moveBackward = true;
+                    moveForward = false;
+                    $(".key").html("moveBackward", moveBackward.toString());
+                }
+                else if (gp.axes[i+1]==-1){
+                    moveForward = true;
+                    moveBackward = false;
+                    $(".key").html("moveForward", moveForward.toString());
+
+                }
+                else{
+                    moveBackward = false;
+                    moveForward = false;
+                }
+
+                if (gp.axes[i]==1){
+                    moveRight = true;
+                    moveLeft = false;
+                    $(".key").html("moveRight", moveRight.toString());
+
+                }
+                else if (gp.axes[i]==-1){
+                    moveLeft = true;
+                    moveRight = false;
+                    $(".key").html("moveLeft",moveLeft.toString());
+                }
+                else{
+                    moveLeft = false;
+                    moveRight = false;
+                }
+                
+            }
+
+     
+            console.log(html);
+        }
+        else{
+            $(".key").html("cant game");
+        }
+    }
 
         function init() {
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
@@ -452,9 +526,9 @@ export default React.createClass({
                 return;
             }
 
-            controls = new THREE.DeviceOrientationControls(camera, true);
-            controls.connect();
-            controls.update();
+            controls2 = new THREE.DeviceOrientationControls(camera, true);
+            controls2.connect();
+            controls2.update();
 
 
         }
@@ -470,6 +544,8 @@ export default React.createClass({
         function animate() {
             requestAnimationFrame(animate);
             if (controlsEnabled) {
+                $(".animatelog").html("controlsEnabled");
+                reportOnGamepad();
                 raycaster.ray.origin.copy(controls.getObject().position);
                 raycaster.ray.origin.y -= 10;
                 var intersections = raycaster.intersectObjects(objects);
@@ -483,6 +559,12 @@ export default React.createClass({
                 if (moveBackward) velocity.z += 40.0 * delta;
                 if (moveLeft) velocity.x -= 40.0 * delta;
                 if (moveRight) velocity.x += 40.0 * delta;
+
+                if (moveForward) $(".animatelog").html("up");
+                if (moveBackward) $(".animatelog").html("down");
+                if (moveLeft) $(".animatelog").html("left");
+                if (moveRight) $(".animatelog").html("right");
+
                 if (isOnObject === true) {
                     velocity.y = Math.max(0, velocity.y);
                 }
@@ -491,6 +573,8 @@ export default React.createClass({
                 controls.getObject().translateZ(velocity.z * delta);
                 controls.getObject().position.y = 2;
                 prevTime = time;
+            }else{
+                $(".animatelog").html("controls disabled");
             }
             stereoEffect.render(scene, camera);
         }
@@ -503,6 +587,12 @@ export default React.createClass({
                     <div className="text">
                         Pause, click anywhere to resume
                     </div>
+                </div>
+                <div className = "animatelog">
+                    animate
+                </div>
+                <div className = "key">
+                    key
                 </div>
             </div>
         );
