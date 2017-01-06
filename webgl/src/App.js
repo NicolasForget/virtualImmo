@@ -6,6 +6,34 @@ import io from 'socket.io-client'
 let socket = io(`http://localhost:4200`)
 let StereoEffect = require('three-stereo-effect')(THREE);
 
+let walls = [
+    {
+        id: 1,
+        x: 0,
+        y: 0,
+        length: 10,
+        radius: 0
+    }, {
+        id: 2,
+        x: 10,
+        y: 0,
+        length: 10,
+        radius: 270
+    }, {
+        id: 3,
+        x: 10,
+        y: 10,
+        length: 10,
+        radius: 180
+    }, {
+        id: 4,
+        x: 0,
+        y: 10,
+        length: 10,
+        radius: 90
+    }
+];
+
 export default React.createClass({
     getInitialState(){
         return {}
@@ -14,11 +42,17 @@ export default React.createClass({
     componentDidMount(){
         var socket = io.connect('http://localhost:4200');
 
-        socket.on('wallVR', function (data) {
-            console.log("yeah : ", data)
+        socket.on("connect", (server) => {
+            console.log("connected");
+
+            socket.on('wallVR', function (data) {
+                walls = data;
+                console.log("yeah : ", data)
+            });
         });
 
-        (function() {
+
+        (function () {
 
             var deviceOrientation = {};
             var screenOrientation = window.orientation || 0;
@@ -26,6 +60,7 @@ export default React.createClass({
             function onDeviceOrientationChangeEvent(evt) {
                 deviceOrientation = evt;
             }
+
             window.addEventListener('deviceorientation', onDeviceOrientationChangeEvent, false);
 
             function getOrientation() {
@@ -49,10 +84,11 @@ export default React.createClass({
             function onScreenOrientationChangeEvent() {
                 screenOrientation = getOrientation();
             }
+
             window.addEventListener('orientationchange', onScreenOrientationChangeEvent, false);
 
 
-            THREE.DeviceOrientationControls = function(object) {
+            THREE.DeviceOrientationControls = function (object) {
 
                 this.object = object;
 
@@ -86,12 +122,12 @@ export default React.createClass({
                 var v0 = new THREE.Vector3(0, 0, 0);
                 var euler = new THREE.Euler();
                 var q0 = new THREE.Quaternion(); // - PI/2 around the x-axis
-                var q1 = new THREE.Quaternion(- Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
+                var q1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
 
 
-                this.update = (function(delta) {
+                this.update = (function (delta) {
 
-                    return function(delta) {
+                    return function (delta) {
 
                         if (this.freeze) return;
 
@@ -115,7 +151,7 @@ export default React.createClass({
                         // form a set of intrinsic Tait-Bryan angles of type Z-X'-Y''
 
                         // 'ZXY' for the device, but 'YXZ' for us
-                        euler.set(this.beta, this.alpha, - this.gamma, 'YXZ');
+                        euler.set(this.beta, this.alpha, -this.gamma, 'YXZ');
 
                         quaternion.setFromEuler(euler);
                         quaternionLerp.slerp(quaternion, 0.5); // interpolate
@@ -128,7 +164,7 @@ export default React.createClass({
                         this.orientationQuaternion.multiply(q1);
 
                         // adjust for screen orientation
-                        this.orientationQuaternion.multiply(q0.setFromAxisAngle(zee, - this.orient));
+                        this.orientationQuaternion.multiply(q0.setFromAxisAngle(zee, -this.orient));
 
                         this.object.quaternion.copy(this.alignQuaternion);
                         this.object.quaternion.multiply(this.orientationQuaternion);
@@ -161,11 +197,11 @@ export default React.createClass({
                 //   this.align();
                 // }).bind(this));
 
-                this.align = function() {
+                this.align = function () {
 
                     tempVector3
                         .set(0, 0, -1)
-                        .applyQuaternion( tempQuaternion.copy(this.orientationQuaternion).inverse(), 'ZXY' );
+                        .applyQuaternion(tempQuaternion.copy(this.orientationQuaternion).inverse(), 'ZXY');
 
                     tempEuler.setFromQuaternion(
                         tempQuaternion.setFromRotationMatrix(
@@ -178,11 +214,11 @@ export default React.createClass({
 
                 };
 
-                this.connect = function() {
+                this.connect = function () {
                     this.freeze = false;
                 };
 
-                this.disconnect = function() {
+                this.disconnect = function () {
                     this.freze = true;
                 };
 
@@ -190,6 +226,26 @@ export default React.createClass({
 
         })();
 
+
+        function initWalls() {
+            //walls
+            var wallTexture = THREE.ImageUtils.loadTexture('./images/wall.png');
+            var wallMesh = new THREE.MeshBasicMaterial({map: wallTexture});
+            for (var i = 1; i < i.length; i++) {
+                for (var y = 1; i < 4; y++) {
+                    for (var x = walls[i].x1; x < walls[i].x2; x++) {
+                        for (var z = walls[i].y1; z < walls[i].y2; z++) {
+                            var wallCube = new THREE.Mesh(cube, wallMesh);
+                            wallCube.position.x = x;
+                            wallCube.position.z = z;
+                            wallCube.position.y = y;
+                            scene.add(wallCube);
+                        }
+                    }
+                }
+            }
+
+        }
 
         var camera, scene, renderer, glRenderer, stereoEffect;
         var geometry, material, mesh;
@@ -316,8 +372,8 @@ export default React.createClass({
             cube.rotateX(-Math.PI / 2);
             var grassTexture = THREE.ImageUtils.loadTexture('./images/tile.png');
             var grassMesh = new THREE.MeshBasicMaterial({map: grassTexture});
-            for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
-                for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
+            for (var x = -WORLD_SIZE * 5; x < WORLD_SIZE * 5; x++) {
+                for (var z = -WORLD_SIZE * 5; z < WORLD_SIZE * 5; z++) {
                     var grassCube = new THREE.Mesh(cube, grassMesh);
                     grassCube.position.x = x;
                     grassCube.position.z = z;
@@ -329,32 +385,55 @@ export default React.createClass({
             //walls
             var wallTexture = THREE.ImageUtils.loadTexture('./images/wall.png');
             var wallMesh = new THREE.MeshBasicMaterial({map: wallTexture});
-            for (var y = 1; y < 4; y++) {
-                for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
-                    for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
-                        if (x === -WORLD_SIZE || z === -WORLD_SIZE || x === WORLD_SIZE - 1 || z === WORLD_SIZE - 1) {
-                            var wallCube = new THREE.Mesh(cube, wallMesh);
-                            wallCube.position.x = x;
-                            wallCube.position.z = z;
-                            wallCube.position.y = y;
-                            scene.add(wallCube);
-                        }
-                    }
-                }
+            /*            for (var y = 1; y < 4; y++) {
+             for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
+             for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
+             if (x === -WORLD_SIZE || z === -WORLD_SIZE || x === WORLD_SIZE - 1 || z === WORLD_SIZE - 1) {
+             var wallCube = new THREE.Mesh(cube, wallMesh);
+             wallCube.position.x = x;
+             wallCube.position.z = z;
+             wallCube.position.y = y;
+             scene.add(wallCube);
+             }
+             }
+             }
+             }*/
+
+            function rotateObject(object,degreeX=0, degreeY=0, degreeZ=0){
+                degreeX = (degreeX * Math.PI)/180;
+                degreeY = (degreeY * Math.PI)/180;
+                degreeZ = (degreeZ * Math.PI)/180;
+                object.rotateX(degreeX);
+                object.rotateY(degreeY);
+                object.rotateZ(degreeZ);
             }
 
-            //ceiling
-            var ceilingTexture = THREE.ImageUtils.loadTexture('./images/ceiling.png');
-            var ceilingMesh = new THREE.MeshBasicMaterial({map: ceilingTexture});
-            for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
-                for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
-                    var ceilingCube = new THREE.Mesh(cube, ceilingMesh);
-                    ceilingCube.position.x = x;
-                    ceilingCube.position.z = z;
-                    ceilingCube.position.y = 4;
-                    scene.add(ceilingCube);
+            let colors = [0x00ff00, 0x0000ff, 0xff0000, 0xf0f0f0]
+
+            for (var i = 0; i < walls.length; i++) {
+                var wallBoxx = new THREE.BoxGeometry(walls[i].length, 10, 0.01);
+                var material = new THREE.MeshBasicMaterial({color: colors[i]});
+                var wall = new THREE.Mesh(wallBoxx, material);
+                rotateObject(wall, 0, walls[i].radius, 0)
+                wall.position.x = walls[i].x;
+                wall.position.z = walls[i].y;
+                if(i == 0){
+                    wall.position.z = walls[i].length / 2;
                 }
+                if(i == 1){
+                    wall.position.x = walls[i].length / 2;
+                }
+                if(i == 2){
+                    wall.position.z = - walls[i].length / 2;
+                    wall.position.x = 0;
+                }
+                if(i == 3){
+                    wall.position.z = 0;
+                    wall.position.x = - walls[i].length / 2;
+                }
+                scene.add(wall);
             }
+
 
             renderer = glRenderer = new THREE.WebGLRenderer();
             renderer.setClearColor(0xffffff);
@@ -364,12 +443,11 @@ export default React.createClass({
 
             stereoEffect = new StereoEffect(renderer);
             stereoEffect.eyeSeparation = 1;
-            stereoEffect.setSize( window.innerWidth, window.innerHeight );
+            stereoEffect.setSize(window.innerWidth, window.innerHeight);
             window.addEventListener('resize', onWindowResize, false);
         }
 
         function setOrientationControls(e) {
-            console.log(e)
             if (!e.alpha) {
                 return;
             }
@@ -380,6 +458,7 @@ export default React.createClass({
 
 
         }
+
         window.addEventListener('deviceorientation', setOrientationControls, true);
 
         function onWindowResize() {
