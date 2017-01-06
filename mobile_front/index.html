@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>Mobile Front</title>
+</head>
+<body>
+
+<div class="root">
+    <h2>Super mobile front</h2>
+    <input id="input" type="text" placeholder="..."/>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background-color: #e74c3c;
+    }
+
+    .root {
+        border-radius: 5px;
+        color: #a9a9a9;
+        background-color: white;
+        width: 300px;
+        height: 200px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        text-align: center;
+        box-shadow: 0 0 20px -5px #656565;
+    }
+
+    h2{
+        color: #333333;
+        margin-top: 30px;
+        font-family: sans-serif;
+        margin-bottom: 0;
+        font-weight: 400;
+    }
+
+    input[type="text"]{
+        background-color: #efefef;
+        border: solid #efefef 1px;
+        height: 40px;
+        display: inline-block;
+        width: 80%;
+        margin-top: 30px;
+        text-align: center;
+    }
+
+</style>
+
+
+<script src="http://10.212.105.82:4200/socket.io/socket.io.js"></script>
+<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+<script>
+    var socket = io.connect('http://10.212.105.82:4200');
+
+    socket.on('connect', function () {
+
+        $("#input").on('input', function (data) {
+            socket.emit('outputChange', {value: data.target.value});
+        });
+
+        socket.on('inputChange', function (data) {
+            $("#input").val(data.value);
+        })
+    });
+</script>
+</body>
+</html>
