@@ -11,6 +11,7 @@
 <div class="root">
     <h2>Super desktop front</h2>
     <input id="input" type="text" placeholder="..."/>
+    <button>Send wall</button>
 </div>
 
 <style>
@@ -65,9 +66,18 @@
     socket.on('connect', function () {
 
         $("#input").on('input', function(data) {
-            socket.emit('outputChange', {value: data.target.value});
+            socket.emit('wallChange', {value: data.target.value});
         });
-
+        $("button").on('click', function(data){
+            var mur1 = {
+                id: "mur1",
+                x1:0,
+                y1:0,
+                x2: 4,
+                y2:4,
+            };
+            socket.emit('wallTable', mur1);
+        });
         socket.on('inputChange', function (data) {
             $("#input").val(data.value);
         })
