@@ -13,6 +13,12 @@ io.on('connection', function (client) {
         console.log(data);
         client.broadcast.emit("inputChange", data);
     });
+    client.on("wallTable", function (data) {
+        console.log("wall:", data);
+        client.broadcast.emit("wallVR", data);
+    });
+
+
 });
 
 app.get('/', function (req, res) {
