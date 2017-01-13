@@ -33,6 +33,7 @@
     "redux": "^3.6.0",
     "roboto-fontface": "^0.6.0",
     "rx": "^4.1.0",
+    "socket.io": "^1.7.2",
     "style-loader": "^0.13.1",
     "superagent": "^2.3.0",
     "three-stereo-effect": "^1.0.14",
