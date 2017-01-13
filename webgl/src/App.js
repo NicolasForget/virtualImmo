@@ -190,13 +190,9 @@ export default React.createClass({
                         }
 
                     };
-
                 })();
 
-                // //debug
-                // window.addEventListener('click', (function(){
-                //   this.align();
-                // }).bind(this));
+
 
                 this.align = function () {
 
@@ -310,72 +306,15 @@ export default React.createClass({
 
 
         /** for gamepad */
-    var hasGP = false;
-    var repGP;
- 
-    function canGame() {
-        return "getGamepads" in navigator;
-    }
- 
-    function reportOnGamepad() {
-        if(canGame){
-            $(".key").html("can game");
-
-            var gp = navigator.getGamepads()[0];
-            var html = "";
-            for(var i=0;i<gp.buttons.length;i++) {
-                html+= "Button "+(i+1)+": ";
-                html+= gp.buttons[i].pressed;
-            }
-
-            if (gp.buttons[3].pressed){
-               console.log(gp.buttons[3].pressed);
-               $(activate).trigger("click");
-            }
-
-            for(var i=0;i<gp.axes.length; i+=2) {
-                html= "Stick "+(Math.ceil(i/2)+1)+": "+gp.axes[i]+","+gp.axes[i+1];
-                if (gp.axes[i+1]==1){
-                    moveBackward = true;
-                    moveForward = false;
-                    $(".key").html("moveBackward", moveBackward.toString());
-                }
-                else if (gp.axes[i+1]==-1){
-                    moveForward = true;
-                    moveBackward = false;
-                    $(".key").html("moveForward", moveForward.toString());
-
-                }
-                else{
-                    moveBackward = false;
-                    moveForward = false;
-                }
-
-                if (gp.axes[i]==1){
-                    moveRight = true;
-                    moveLeft = false;
-                    $(".key").html("moveRight", moveRight.toString());
-
-                }
-                else if (gp.axes[i]==-1){
-                    moveLeft = true;
-                    moveRight = false;
-                    $(".key").html("moveLeft",moveLeft.toString());
-                }
-                else{
-                    moveLeft = false;
-                    moveRight = false;
-                }
-                
-            }
-
+        var hasGP = false;
+        var repGP;
      
-            console.log(html);
+        function canGame() {
+            return "getGamepads" in navigator;
         }
-        else{
-            $(".key").html("cant game");
-        }
-    }
+     
+        var canape_cube; 
+
 
         function init() {
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
@@ -423,20 +362,6 @@ export default React.createClass({
             document.addEventListener('keyup', onKeyUp, false);
             raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 
-            // floor
-//        geometry = new THREE.PlaneGeometry(200, 200, 10, 10);
-//        geometry.rotateX(-Math.PI / 2);
-//
-//        for (var i = 0, l = geometry.faces.length; i < l; i++) {
-//            var face = geometry.faces[i];
-//            face.vertexColors[0] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-//            face.vertexColors[1] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-//            face.vertexColors[2] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-//        }
-//
-//        material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('./images/grass.jpg')});
-//        mesh = new THREE.Mesh(geometry, material);
-//        scene.add(mesh);
 
             var WORLD_SIZE = 5;
 
@@ -456,22 +381,10 @@ export default React.createClass({
                 }
             }
 
+
             //walls
             var wallTexture = THREE.ImageUtils.loadTexture('./images/wall.png');
             var wallMesh = new THREE.MeshBasicMaterial({map: wallTexture});
-            /*            for (var y = 1; y < 4; y++) {
-             for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
-             for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
-             if (x === -WORLD_SIZE || z === -WORLD_SIZE || x === WORLD_SIZE - 1 || z === WORLD_SIZE - 1) {
-             var wallCube = new THREE.Mesh(cube, wallMesh);
-             wallCube.position.x = x;
-             wallCube.position.z = z;
-             wallCube.position.y = y;
-             scene.add(wallCube);
-             }
-             }
-             }
-             }*/
 
             function rotateObject(object,degreeX=0, degreeY=0, degreeZ=0){
                 degreeX = (degreeX * Math.PI)/180;
@@ -509,6 +422,28 @@ export default React.createClass({
             }
 
 
+            var canape_toile = THREE.ImageUtils.loadTexture('./images/tissu-de-toile.jpg');
+            var canape_grass = THREE.ImageUtils.loadTexture('./images/grass.png');
+
+            var canapeMesh = new THREE.MeshBasicMaterial({map: canape_toile});
+            
+            canape_cube = new THREE.Mesh(cube, canapeMesh);
+            canape_cube.position.x = 2;
+            canape_cube.position.z = 2;
+            canape_cube.position.y = 1;
+            scene.add(canape_cube);
+
+            var i = 0;
+            canape_cube.changeTexture = function() { 
+                i = (i == 0)? 1:0;
+                console.log(this);
+                var tab = [canape_toile, canape_grass]
+                canapeMesh = new THREE.MeshBasicMaterial({map: tab[i]});
+                this.material = canapeMesh;
+            }
+
+
+
             renderer = glRenderer = new THREE.WebGLRenderer();
             renderer.setClearColor(0xffffff);
             renderer.setPixelRatio(window.devicePixelRatio);
@@ -521,16 +456,14 @@ export default React.createClass({
             window.addEventListener('resize', onWindowResize, false);
         }
 
+        var controls2_is_init = false 
         function setOrientationControls(e) {
-            if (!e.alpha) {
+            if (!e.alpha || controls2_is_init) {
                 return;
             }
-
             controls2 = new THREE.DeviceOrientationControls(camera, true);
             controls2.connect();
-            controls2.update();
-
-
+            controls2_is_init = true;
         }
 
         window.addEventListener('deviceorientation', setOrientationControls, true);
@@ -541,40 +474,91 @@ export default React.createClass({
             stereoEffect.setSize(window.innerWidth, window.innerHeight);
         }
 
+
         function animate() {
             requestAnimationFrame(animate);
+
             if (controlsEnabled) {
-                $(".animatelog").html("controlsEnabled");
-                reportOnGamepad();
-                raycaster.ray.origin.copy(controls.getObject().position);
-                raycaster.ray.origin.y -= 10;
-                var intersections = raycaster.intersectObjects(objects);
-                var isOnObject = intersections.length > 0;
-                var time = performance.now();
-                var delta = ( time - prevTime ) / 1000;
-                velocity.x -= velocity.x * 10.0 * delta;
-                velocity.z -= velocity.z * 10.0 * delta;
-                velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-                if (moveForward) velocity.z -= 40.0 * delta;
-                if (moveBackward) velocity.z += 40.0 * delta;
-                if (moveLeft) velocity.x -= 40.0 * delta;
-                if (moveRight) velocity.x += 40.0 * delta;
+                if(controls2_is_init){
+                    controls2.update();
+                    var rot = controls2.object.getWorldDirection();
+                    
+                    if(canGame()){
+                        var gp = navigator.getGamepads()[0];
 
-                if (moveForward) $(".animatelog").html("up");
-                if (moveBackward) $(".animatelog").html("down");
-                if (moveLeft) $(".animatelog").html("left");
-                if (moveRight) $(".animatelog").html("right");
+                        try{
 
-                if (isOnObject === true) {
-                    velocity.y = Math.max(0, velocity.y);
+
+                            var axes = gp.axes;
+                            controls2.object.position.x +=  rot.x * (-axes[1]) * 0.2;
+                            controls2.object.position.z +=  rot.z * (-axes[1]) * 0.2;
+                            
+                            controls2.object.position.x +=  rot.z * (-axes[0]) * 0.2;
+                            controls2.object.position.z +=  -rot.x * (-axes[0]) * 0.2;
+
+                           
+
+                        }catch(err){}
+
+                    }
+                }else{
+                    raycaster.ray.origin.copy(controls.getObject().position);
+ 
+                    raycaster.ray.origin.y -= 10;
+                    var intersections = raycaster.intersectObjects(objects);
+                    var isOnObject = intersections.length > 0;
+                    var time = performance.now();
+                    var delta = ( time - prevTime ) / 1000;
+                    velocity.x -= velocity.x * 10.0 * delta;
+                    velocity.z -= velocity.z * 10.0 * delta;
+                    velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+                    if (moveForward ) velocity.x += 40.0 * delta;
+                    if (moveBackward ) velocity.x -= 40.0 * delta;
+                    if (moveLeft ) velocity.z -= 40.0 * delta;
+                    if (moveRight ) velocity.z += 40.0 * delta;
+                
+
+                    if (isOnObject === true) {
+                        velocity.y = Math.max(0, velocity.y);
+                    }
+                        controls.getObject().translateX(velocity.x * delta);
+                        controls.getObject().translateY(velocity.y * delta);
+                        controls.getObject().translateZ(velocity.z * delta);
+
+                    controls.getObject().position.y = 2;
+
+                    prevTime = time;
                 }
-                controls.getObject().translateX(velocity.x * delta);
-                controls.getObject().translateY(velocity.y * delta);
-                controls.getObject().translateZ(velocity.z * delta);
-                controls.getObject().position.y = 2;
-                prevTime = time;
+
+                 //Control if element is in selector:
+                    //
+
+                    var pointer =  new THREE.Vector2();
+                    pointer.x = 0;
+                    pointer.y = 0; 
+                    var selector = new THREE.Raycaster();
+                    selector.setFromCamera(pointer, camera );
+
+                    var intersects = selector.intersectObjects([canape_cube]); 
+
+                    if ( intersects.length > 0 ) {
+                        $(".selector").addClass('active');
+                        //console.log(intersects[0].object);
+                        if (canGame()){
+                            var gp = navigator.getGamepads()[0];
+                            var buttons = gp.buttons
+
+                            /// TESTER LES BOUTONS POUR LE GACHETTE !!!!!
+                            if(gp.buttons[4].pressed){
+                                intersects[0].object.changeTexture();
+                            }
+                        }
+
+                    }else{
+                        $(".selector").removeClass('active');
+                    }
             }else{
-                $(".animatelog").html("controls disabled");
+                //$(".animatelog").html("controls disabled");
             }
             stereoEffect.render(scene, camera);
         }
@@ -588,11 +572,13 @@ export default React.createClass({
                         Pause, click anywhere to resume
                     </div>
                 </div>
+                <div className = "selector left">
+                </div>
+                <div className = "selector right">
+                </div>
                 <div className = "animatelog">
-                    animate
                 </div>
                 <div className = "key">
-                    key
                 </div>
             </div>
         );

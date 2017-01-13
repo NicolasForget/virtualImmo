@@ -59,6 +59,27 @@
         font-size: 2em;
         z-index:999999999999999;
     }
+
+    .selector{
+      position:fixed;
+      top:50%;
+      border: solid grey 2px;
+      border-radius: 50%;
+      width:2vw;
+      height:2vw;
+    }
+    .selector.right{
+      right:25%;
+      transform: translate(25%);
+    }
+    .selector.left{
+      left:25%;
+      transform: translate(-25%);
+    }
+    .selector.active{
+      background: #fffda7;
+      border-color: #fffda7 ;
+    }
   </style>
 </head>
 <body>
