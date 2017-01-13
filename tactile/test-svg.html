@@ -88,45 +88,33 @@
 		<script>
 		    var socket = io.connect('http://192.168.43.43:4200');
 		    socket.on('connect', function () {
-		        // $("#input").on('input', function(data) {
-		        //     socket.emit('wall', {value: data.target.value});
-		        // });
-		        // $("button").on('click', function(data){
-		            var mur1 = {
-		                id: "mur1",
-		                x1:3,
-		                y1:3,
-		                x2:37,
-		                y2:3,
-		            };
-		            var mur2 = {
-		                id: "mur2",
-		                x1:37,
-		                y1:3,
-		                x2:37,
-		                y2:37,
-		            };
-		            var mur3 = {
-		                id: "mur3",
-		                x1:3,
-		                y1:3,
-		                x2:3,
-		                y2:37,
-		            };
-		            var mur4 = {
-		                id: "mur4",
-		                x1:3,
-		                y1:37,
-		                x2:37,
-		                y2:37,
-		            };
-		            socket.emit('wallTable', [
-		            	mur1,mur2,mur3,mur4
-		            ]);
-		        // });
-		        // socket.on('inputChange', function (data) {
-		        //     $("#input").val(data.value);
-		        // })
+		            var murs = [{
+					        id: 1,
+					        x: 0,
+					        y: 0,
+					        length: 10,
+					        radius: 0
+					    }, {
+					        id: 2,
+					        x: 10,
+					        y: 0,
+					        length: 10,
+					        radius: 270
+					    }, {
+					        id: 3,
+					        x: 10,
+					        y: 10,
+					        length: 10,
+					        radius: 180
+					    }, {
+					        id: 4,
+					        x: 0,
+					        y: 10,
+					        length: 10,
+					        radius: 90
+					    }
+					];
+		            socket.emit('wallTable', murs);
 		    });
 		</script>
 
