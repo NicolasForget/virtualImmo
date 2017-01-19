@@ -300,6 +300,10 @@ export default React.createClass({
             activate.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
         }
 
+        var les_meubles = [];
+        var meubles_colors = [0xff0000, 0xf283b6, 0xb5bfa1, 0xedbfb7];
+
+
 
         init();
         animate();
@@ -313,9 +317,6 @@ export default React.createClass({
             return "getGamepads" in navigator;
         }
      
-        var canape_cube; 
-
-
         function init() {
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
             scene = new THREE.Scene();
@@ -427,12 +428,46 @@ export default React.createClass({
 
             var canapeMesh = new THREE.MeshBasicMaterial({map: canape_toile});
             
-            canape_cube = new THREE.Mesh(cube, canapeMesh);
-            canape_cube.position.x = 2;
-            canape_cube.position.z = 2;
-            canape_cube.position.y = 1;
-            scene.add(canape_cube);
+            var canape_cube = new THREE.Object3D();//create an empty container
+            var canape_part_1 = new THREE.Mesh(cube, canapeMesh);
+            var canape_part_2 = new THREE.Mesh(cube, canapeMesh);
 
+            canape_cube.add( canape_part_1 );//add a mesh with geometry to it
+            canape_cube.add( canape_part_2 );//add a mesh with geometry to it
+
+            canape_part_1.position.x = 3;
+            canape_part_1.position.z = 2;
+            canape_part_1.position.y = 1;
+            canape_part_2.position.x = 2;
+            canape_part_2.position.z = 2;
+            canape_part_2.position.y = 1;
+            scene.add(canape_cube);
+            les_meubles.push(canape_cube);
+            console.log(canape_cube);
+            canapeMesh.color.set(meubles_colors[0]);
+
+
+
+            var canapeMesh2 = new THREE.MeshBasicMaterial({map: canape_toile});
+            var other_canape = new THREE.Object3D();//create an empty container
+            var other_canape_part_1 = new THREE.Mesh(cube, canapeMesh2);
+            var other_canape_part_2 = new THREE.Mesh(cube, canapeMesh2);
+
+            other_canape.add( other_canape_part_1 );//add a mesh with geometry to it
+            other_canape.add( other_canape_part_2 );//add a mesh with geometry to it
+
+            other_canape_part_1.position.x = -2;
+            other_canape_part_1.position.z = 4;
+            other_canape_part_1.position.y = 1;
+            other_canape_part_2.position.x = -3;
+            other_canape_part_2.position.z = 4;
+            other_canape_part_2.position.y = 1;
+
+            canapeMesh2.color.set(meubles_colors[0]);
+            scene.add(other_canape);
+            les_meubles.push(other_canape);
+
+            /*
             var i = 0;
             canape_cube.changeTexture = function() { 
                 i = (i == 0)? 1:0;
@@ -441,6 +476,7 @@ export default React.createClass({
                 canapeMesh = new THREE.MeshBasicMaterial({map: tab[i]});
                 this.material = canapeMesh;
             }
+            */
 
 
 
@@ -539,8 +575,7 @@ export default React.createClass({
                     var selector = new THREE.Raycaster();
                     selector.setFromCamera(pointer, camera );
 
-                    var intersects = selector.intersectObjects([canape_cube]); 
-
+                    var intersects = selector.intersectObjects( les_meubles, true ); 
                     if ( intersects.length > 0 ) {
                         $(".selector").addClass('active');
                         //console.log(intersects[0].object);
@@ -548,12 +583,23 @@ export default React.createClass({
                             var gp = navigator.getGamepads()[0];
                             var buttons = gp.buttons
 
-                            /// TESTER LES BOUTONS POUR LE GACHETTE !!!!!
                             if(gp.buttons[4].pressed){
-                                intersects[0].object.changeTexture();
+                                console.log(intersects[0].object.material.color);
+
+                                var current_color = intersects[0].object.material.color.getHex(); 
+                                for (var i = 0; i < meubles_colors.length; i++){
+                                    $(".key").html(current_color+ " "+meubles_colors[i].toString(16))
+                                    if (current_color == meubles_colors[i]){
+                                        i++;
+                                        i = (i == meubles_colors.length)?0:i;
+                                        intersects[0].object.material.color.set( meubles_colors[i]);
+                                        break;
+                                    }
+                                }
+                                //intersects[0].object.changeTexture();
+                                //intersects[0].object.material.color.set( 0xff0000 );
                             }
                         }
-
                     }else{
                         $(".selector").removeClass('active');
                     }
