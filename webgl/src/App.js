@@ -6,33 +6,31 @@ import io from 'socket.io-client'
 let socket = io(`http://localhost:4200`)
 let StereoEffect = require('three-stereo-effect')(THREE);
 
-let walls = [
-    {
-        id: 1,
-        x: 0,
-        y: 0,
-        length: 10,
-        radius: 0
-    }, {
-        id: 2,
-        x: 10,
-        y: 0,
-        length: 10,
-        radius: 270
-    }, {
-        id: 3,
-        x: 10,
-        y: 10,
-        length: 10,
-        radius: 180
-    }, {
-        id: 4,
-        x: 0,
-        y: 10,
-        length: 10,
-        radius: 90
-    }
-];
+let walls = [{
+    id: 3,
+    x: 0,
+    y: 0,
+    length: 10,
+    radius: 0
+}, {
+    id: 4,
+    x: 10,
+    y: 0,
+    length: 10,
+    radius: 90
+}, {
+    id: 5,
+    x: 10,
+    y: 10,
+    length: 10,
+    radius: 180
+}, {
+    id: 5,
+    x: 0,
+    y: 10,
+    length: 10,
+    radius: 270
+}];
 
 export default React.createClass({
     getInitialState(){
@@ -47,10 +45,21 @@ export default React.createClass({
 
             socket.on('wallVR', function (data) {
                 walls = data;
-                console.log("yeah : ", data)
+                initWalls();
+            });
+
+            socket.on('objectVR', function (data) {
+                var loader = new THREE.JSONLoader();
+                loader.load(data, function (geometryss) {
+                    var material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/grass.png')});
+                    var mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.x = -5;
+                    mesh.position.y = 0.5;
+                    mesh.position.z = -5;
+                    scene.add(mesh);
+                });
             });
         });
-
 
         (function () {
 
@@ -227,28 +236,49 @@ export default React.createClass({
         })();
 
 
-        function initWalls() {
-            //walls
-            var wallTexture = THREE.ImageUtils.loadTexture('./images/wall.png');
-            var wallMesh = new THREE.MeshBasicMaterial({map: wallTexture});
-            for (var i = 1; i < i.length; i++) {
-                for (var y = 1; i < 4; y++) {
-                    for (var x = walls[i].x1; x < walls[i].x2; x++) {
-                        for (var z = walls[i].y1; z < walls[i].y2; z++) {
-                            var wallCube = new THREE.Mesh(cube, wallMesh);
-                            wallCube.position.x = x;
-                            wallCube.position.z = z;
-                            wallCube.position.y = y;
-                            scene.add(wallCube);
-                        }
-                    }
-                }
-            }
+        function rotateObject(object, degreeX = 0, degreeY = 0, degreeZ = 0) {
+            degreeX = (degreeX * Math.PI) / 180;
+            degreeY = (degreeY * Math.PI) / 180;
+            degreeZ = (degreeZ * Math.PI) / 180;
+            object.rotateX(degreeX);
+            object.rotateY(degreeY);
+            object.rotateZ(degreeZ);
+        }
 
+        function initWalls() {
+            for (var i = 0; i < walls.length; i++) {
+                var wallBox = new THREE.BoxGeometry(walls[i].length, 5, 0.01);
+                var material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/brick.jpg')});
+                var wall = new THREE.Mesh(wallBox, material);
+
+                var pivot = new THREE.Object3D();
+                pivot.position.x = 0;
+                pivot.position.z = 0;
+                pivot.position.y = 2.5;
+                wall.position.x = walls[i].x - walls[i].length / 2;
+                wall.position.z = walls[i].y;
+                pivot.rotation.y = walls[i].radius * 0.00872665 * 2;
+                pivot.add(wall);
+                scene.add(pivot);
+
+
+                var loader = new THREE.JSONLoader();
+                loader.load('../images/sofa2.json', function (geometry) {
+                    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/mufiber03.png')});
+                    var mesh = new THREE.Mesh(geometry, sofaMaterial);
+                    mesh.position.x = -5;
+                    mesh.position.y = 0.5;
+                    mesh.position.z = -5;
+                    scene.add(mesh);
+
+                });
+
+
+            }
         }
 
         var camera, scene, renderer, glRenderer, stereoEffect;
-        var geometry, material, mesh;
+        var geometry;
         var controls;
         var objects = [];
         var raycaster;
@@ -316,15 +346,19 @@ export default React.createClass({
             var onKeyDown = function (event) {
                 switch (event.keyCode) {
                     case 38: // up
+                    case 90: // z
                         moveForward = true;
                         break;
                     case 37: // left
+                    case 81: // q
                         moveLeft = true;
                         break;
                     case 40: // down
+                    case 83: // s
                         moveBackward = true;
                         break;
                     case 39: // right
+                    case 68: // d
                         moveRight = true;
                         break;
                 }
@@ -332,15 +366,19 @@ export default React.createClass({
             var onKeyUp = function (event) {
                 switch (event.keyCode) {
                     case 38: // up
+                    case 90: // up
                         moveForward = false;
                         break;
                     case 37: // left
+                    case 81: // q
                         moveLeft = false;
                         break;
                     case 40: // down
+                    case 83: // s
                         moveBackward = false;
                         break;
                     case 39: // right
+                    case 68: // d
                         moveRight = false;
                         break;
                 }
@@ -350,90 +388,47 @@ export default React.createClass({
             raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 
             // floor
-//        geometry = new THREE.PlaneGeometry(200, 200, 10, 10);
-//        geometry.rotateX(-Math.PI / 2);
-//
-//        for (var i = 0, l = geometry.faces.length; i < l; i++) {
-//            var face = geometry.faces[i];
-//            face.vertexColors[0] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-//            face.vertexColors[1] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-//            face.vertexColors[2] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-//        }
-//
-//        material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('./images/grass.jpg')});
-//        mesh = new THREE.Mesh(geometry, material);
-//        scene.add(mesh);
+            //        geometry = new THREE.PlaneGeometry(200, 200, 10, 10);
+            //        geometry.rotateX(-Math.PI / 2);
+            //
+            //        for (var i = 0, l = geometry.faces.length; i < l; i++) {
+            //            var face = geometry.faces[i];
+            //            face.vertexColors[0] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            //            face.vertexColors[1] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            //            face.vertexColors[2] = new THREE.Color().setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            //        }
+            //
+            //        material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('./images/grass.jpg')});
+            //        mesh = new THREE.Mesh(geometry, material);
+            //        scene.add(mesh);
 
-            var WORLD_SIZE = 5;
-
+            var WORLD_SIZE = 15;
 
             //ground
             var cube = new THREE.BoxGeometry(1, 1, 1);
-            cube.rotateX(-Math.PI / 2);
-            var grassTexture = THREE.ImageUtils.loadTexture('./images/tile.png');
+            var grassTexture = THREE.ImageUtils.loadTexture('../images/ground.jpg   ');
             var grassMesh = new THREE.MeshBasicMaterial({map: grassTexture});
-            for (var x = -WORLD_SIZE * 5; x < WORLD_SIZE * 5; x++) {
-                for (var z = -WORLD_SIZE * 5; z < WORLD_SIZE * 5; z++) {
+            for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
+                for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
                     var grassCube = new THREE.Mesh(cube, grassMesh);
                     grassCube.position.x = x;
                     grassCube.position.z = z;
                     grassCube.position.y = 0;
+
+
                     scene.add(grassCube);
+                    //var pivot = new THREE.Object3D();
+                    //pivot.position.x = 0;
+                    //pivot.position.z = 0;
+                    //pivot.rotation.y = 0.3;
+                    //scene.add(pivot);
+                    //pivot.add(grassCube);
+
                 }
             }
 
             //walls
-            var wallTexture = THREE.ImageUtils.loadTexture('./images/wall.png');
-            var wallMesh = new THREE.MeshBasicMaterial({map: wallTexture});
-            /*            for (var y = 1; y < 4; y++) {
-             for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
-             for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
-             if (x === -WORLD_SIZE || z === -WORLD_SIZE || x === WORLD_SIZE - 1 || z === WORLD_SIZE - 1) {
-             var wallCube = new THREE.Mesh(cube, wallMesh);
-             wallCube.position.x = x;
-             wallCube.position.z = z;
-             wallCube.position.y = y;
-             scene.add(wallCube);
-             }
-             }
-             }
-             }*/
-
-            function rotateObject(object,degreeX=0, degreeY=0, degreeZ=0){
-                degreeX = (degreeX * Math.PI)/180;
-                degreeY = (degreeY * Math.PI)/180;
-                degreeZ = (degreeZ * Math.PI)/180;
-                object.rotateX(degreeX);
-                object.rotateY(degreeY);
-                object.rotateZ(degreeZ);
-            }
-
-            let colors = [0x00ff00, 0x0000ff, 0xff0000, 0xf0f0f0]
-
-            for (var i = 0; i < walls.length; i++) {
-                var wallBoxx = new THREE.BoxGeometry(walls[i].length, 10, 0.01);
-                var material = new THREE.MeshBasicMaterial({color: colors[i]});
-                var wall = new THREE.Mesh(wallBoxx, material);
-                rotateObject(wall, 0, walls[i].radius, 0)
-                wall.position.x = walls[i].x;
-                wall.position.z = walls[i].y;
-                if(i == 0){
-                    wall.position.z = walls[i].length / 2;
-                }
-                if(i == 1){
-                    wall.position.x = walls[i].length / 2;
-                }
-                if(i == 2){
-                    wall.position.z = - walls[i].length / 2;
-                    wall.position.x = 0;
-                }
-                if(i == 3){
-                    wall.position.z = 0;
-                    wall.position.x = - walls[i].length / 2;
-                }
-                scene.add(wall);
-            }
-
+            initWalls();
 
             renderer = glRenderer = new THREE.WebGLRenderer();
             renderer.setClearColor(0xffffff);
@@ -445,6 +440,8 @@ export default React.createClass({
             stereoEffect.eyeSeparation = 1;
             stereoEffect.setSize(window.innerWidth, window.innerHeight);
             window.addEventListener('resize', onWindowResize, false);
+
+
         }
 
         function setOrientationControls(e) {
@@ -470,8 +467,6 @@ export default React.createClass({
         function animate() {
             requestAnimationFrame(animate);
             if (controlsEnabled) {
-                raycaster.ray.origin.copy(controls.getObject().position);
-                raycaster.ray.origin.y -= 10;
                 var intersections = raycaster.intersectObjects(objects);
                 var isOnObject = intersections.length > 0;
                 var time = performance.now();
