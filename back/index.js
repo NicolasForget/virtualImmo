@@ -17,17 +17,17 @@ var sofas = {
             beige : {
                 name: 'Beige clair',
                 topImg : "./furnitures/sofas/basic_sofa/top_beige.png",
-                "all": "./furnitures/sofas/basic_sofa/toile_beige.jpg",
+                texture: "./furnitures/sofas/basic_sofa/toile_beige.jpg",
             },
             gris: {
                 name: 'Gris clair',
                 topImg : "./furnitures/sofas/basic_sofa/top_gris.png",
-                "all": "./furnitures/sofas/basic_sofa/toile_grise.jpg",
+                texture: "./furnitures/sofas/basic_sofa/toile_grise.jpg",
             },
             noir : {
                 name: 'Antracite',
                 topImg : "./furnitures/sofas/basic_sofa/top_noir.png",
-                "all": "./furnitures/sofas/basic_sofa/toile_noire.jpg",
+                texture: "./furnitures/sofas/basic_sofa/toile_noire.jpg",
             },
         },
         size: {
@@ -83,11 +83,93 @@ io.on('connection', function (client) {
                 client.emit("err", "furniture not found");
         }
     });
+
+
+    /**
+     * data = {
+     *     type : "furniture_type",
+     *     id: 'furniture_id',
+     *     textureId: 'textureId',
+     *     position: {
+     *         x: number
+     *         y: number
+     *         z: number
+     *         angle: number
+     *     }
+     * }
+     */
+    client.on("tableAddFurniture", function(data){
+        console.log(data);
+        switch (data.type){
+            case "sofa":
+                if (sofas[data.id]){
+                    var selected_sofa = {};
+                    selected_sofa.id = sofas[data.id].id;
+                    selected_sofa.name = sofas[data.id].name;
+                    var model3D = fs.readFileSync(sofas[data.id].model3D);
+                    selected_sofa.model3D = JSON.parse(new Buffer(model3D).toString());
+
+                    selected_sofa.selected_texture = data.textureId;
+                    selected_sofa.position = data.position;
+
+                    selected_sofa.textures_availables = {};
+                    selected_sofa.type = "sofa";
+                    var keys = Object.keys(sofas[data.id].textures_availables);
+
+                    for (var i = 0; i < keys.length; i++){
+                        var texture = fs.readFileSync(sofas[data.id].textures_availables[keys[i]].texture);
+                        selected_sofa.textures_availables[keys[i]] = {
+                            name: sofas[data.id].textures_availables[keys[i]].name,
+                            texture : new Buffer(texture).toString('base64')
+                        };
+                    }
+                    //client.emit("addFurniture", selected_sofa);
+                    client.broadcast.emit("addFurniture", selected_sofa);
+
+                }else{
+                    client.emit("err", "sofa id doesnt exist");
+                }
+                break;
+            default:
+                client.emit("err", "sofa id doesnt exist");
+                break;
+        }
+
+    });
+    /*
+        data = {
+            id : "furniture id",
+            type: "furniture type",
+            position: {
+                x: ...
+                y: ...
+                z: ...
+                angle: ...
+            }
+        }
+     */
+    client.on("moveFurniture", function(data){
+        client.broadcast.emit("movedFurniture", data);
+    });
+
+    /*
+        data = {
+            id : "furniture id",
+            type: "furniture type",
+            texture_id: "texture_id"
+        }
+     */
+    client.on("changeFurnitureTexture", function(data){
+        client.broadcast.emit("changedFurnitureTexture", data);
+    });
+
+
+
 });
 
 app.get('/', function (req, res) {
     return res.status(200)
-        .json({value: "it works !"})
+        .json({value: "it works !"});
 });
 
-server.listen(4200);
+server.listen(8080);

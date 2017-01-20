@@ -1,83 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>three.js - pointerlock controls</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-  <style>
-    html, body {
-      width: 100%;
-      height: 100%;
-    }
+    <title>three.js - pointerlock controls</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
 
-    body {
-      background-color: #ffffff;
-      margin: 0;
-      overflow: hidden;
-      font-family: arial;
-    }
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            overflow: hidden;
+            font-family: arial;
+        }
 
-    #blocker {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-    }
+        #blocker {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
 
-    #activate {
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: block;
-      text-align: center;
-      cursor: pointer;
-    }
+        #activate {
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: block;
+            text-align: center;
+            cursor: pointer;
+        }
 
-    .text {
-      color: white;
-      font-size: 36px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-50%);
-    }
-     .key {
-        position: absolute;
-        top:0px;
-        left:50%;
-        transform: translate(-50%);
-        color: black;
-        font-size: 2em;
-        z-index:999999999999999;
-    }
+        .text {
+            color: white;
+            font-size: 36px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+        }
 
-    .animatelog {
-        position: absolute;
-        top:25px;
-        left:50%;
-        transform: translate(-50%);
-        color: green;
-        font-size: 2em;
-        z-index:999999999999999;
-    }
-  </style>
+        .key {
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            transform: translate(-50%);
+            color: black;
+            font-size: 2em;
+            z-index: 999999999999999;
+        }
+
+        .animatelog {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translate(-50%);
+            color: green;
+            font-size: 2em;
+            z-index: 999999999999999;
+        }
+
+        .selector {
+            position: fixed;
+            top: 50%;
+            border: solid grey 2px;
+            border-radius: 50%;
+            width: 2vw;
+            height: 2vw;
+        }
+
+        .selector.right {
+            right: 25%;
+            transform: translate(25%);
+        }
+
+        .selector.left {
+            left: 25%;
+            transform: translate(-25%);
+        }
+
+        .selector.active {
+            background: #fffda7;
+            border-color: #fffda7;
+        }
+
+        #infos {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: green;
+            background-color: black;
+            font-size: 24px;
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
 <!--<script src="./libs/PointerLockControls.js"></script>-->
-
+<div id="infos">nothing</div>
 <div id="root"></div>
 <script src="/dist/bundle.js"></script>
 
 <script>
-//      if (window.DeviceOrientationEvent) {
-//          window.addEventListener("deviceorientation", function () {
-//          }, true);
-//      } else if (window.DeviceMotionEvent) {
-//          window.addEventListener('devicemotion', function () {
-//          }, true);
-//      } else {
-//          window.addEventListener("MozOrientation", function () {
-//          }, true);
-//      }
+    //      if (window.DeviceOrientationEvent) {
+    //          window.addEventListener("deviceorientation", function () {
+    //          }, true);
+    //      } else if (window.DeviceMotionEvent) {
+    //          window.addEventListener('devicemotion', function () {
+    //          }, true);
+    //      } else {
+    //          window.addEventListener("MozOrientation", function () {
+    //          }, true);
+    //      }
 
 
 </script>

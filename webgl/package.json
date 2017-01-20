@@ -87,7 +87,7 @@
   },
   "scripts": {
     "build": "webpack",
-    "start": "webpack-dashboard -- webpack-dev-server --progress --colors",
+    "start": "sudo node ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 80 --host 0.0.0.0",
     "dev": "webpack-dev-server --progress --colors"
   },
   "engines": {
