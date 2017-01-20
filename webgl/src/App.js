@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import THREE from "three.js";
 import $ from "jquery";
 import PointerLockControls from "./libs/PointerLockControls";
-import io from 'socket.io-client'
+import io from 'socket.io-client';
 
-let socket = io(`http://10.212.116.178:8080`);
+let socket = io(`http://10.212.105.82:8080`);
 let StereoEffect = require('three-stereo-effect')(THREE);
 
 let walls = [{
@@ -39,7 +39,9 @@ export default React.createClass({
     },
 
     componentDidMount(){
-        socket = io.connect('http://10.212.116.178:8080');
+        socket = io.connect('http://10.212.105.82:8080');
+        var les_meubles = [];
+        var meubles_colors = [0xff0000, 0xf283b6, 0xb5bfa1, 0xedbfb7];
 
         socket.on("connect", () => {
             console.log("connected");
@@ -68,7 +70,30 @@ export default React.createClass({
                 mesh.position.z = data.position.z * -1;
                 mesh.rotation.y = data.position.angle;
                 scene.add(mesh);
+                mesh.textures_availables = data.textures_availables;
+                mesh.selected_texture = data.selected_texture;
+                mesh.furnitureType = data.type;
+                mesh.furnitureId = data.id;
+                les_meubles.push(mesh);
             });
+        });
+
+        socket.on("changedFurnitureTexture", function(data){
+            var id = data.id;
+            for (var i  = 0; i< les_meubles.length; i++){
+                if (les_meubles[i].furnitureId == data.id){
+                    var image = new Image();
+                    var texture = new THREE.Texture();
+                    image.src = "data:image/jpeg;base64," + les_meubles[i].textures_availables[data.texture_id].texture;
+                    texture.image = image;
+                    image.onload = function () {
+                        texture.needsUpdate = true;
+                    };
+                    les_meubles[i].selected_texture = data.texture_id;
+
+                    les_meubles[i].material = new THREE.MeshBasicMaterial({map: texture});
+                }
+            }
         });
 
         (function () {
@@ -367,8 +392,7 @@ export default React.createClass({
             activate.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
         }
 
-        var les_meubles = [];
-        var meubles_colors = [0xff0000, 0xf283b6, 0xb5bfa1, 0xedbfb7];
+        
 
 
         init();
@@ -462,7 +486,7 @@ export default React.createClass({
 
             //walls
             initWalls();
-
+            /*
             var canape_toile = THREE.ImageUtils.loadTexture('./images/tissu-de-toile.jpg');
             var canape_grass = THREE.ImageUtils.loadTexture('./images/grass.png');
 
@@ -501,22 +525,11 @@ export default React.createClass({
             other_canape_part_2.position.x = -3;
             other_canape_part_2.position.z = 4;
             other_canape_part_2.position.y = 1;
-
+            
             canapeMesh2.color.set(meubles_colors[0]);
             scene.add(other_canape);
             les_meubles.push(other_canape);
-
-            /*
-             var i = 0;
-             canape_cube.changeTexture = function() {
-             i = (i == 0)? 1:0;
-             console.log(this);
-             var tab = [canape_toile, canape_grass]
-             canapeMesh = new THREE.MeshBasicMaterial({map: tab[i]});
-             this.material = canapeMesh;
-             }
-             */
-
+            */
 
             renderer = glRenderer = new THREE.WebGLRenderer();
             renderer.setClearColor(0xffffff);
@@ -551,7 +564,7 @@ export default React.createClass({
             stereoEffect.setSize(window.innerWidth, window.innerHeight);
         }
 
-
+        var gachetteR =false;
         function animate() {
             requestAnimationFrame(animate);
 
@@ -620,12 +633,53 @@ export default React.createClass({
                 if (intersects.length > 0) {
                     $(".selector").addClass('active');
                     //console.log(intersects[0].object);
+                    console.log(intersects[0].object.selected_texture);
+                    var texture_keys = Object.keys(intersects[0].object.textures_availables);
+                    if (canGame()) {
+                        var gp = navigator.getGamepads()[0];
+                        var buttons = gp.buttons
+                        //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+                        if (gp.buttons[4].pressed) {
+                            $("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+
+                            gachetteR = true;
+                        }
+                        else if(gachetteR == true && (!gp.buttons[4].pressed) ){
+                            gachetteR = false;
+                            for (var i = 0; i < texture_keys.length; i++){
+                               if (texture_keys[i] == intersects[0].object.selected_texture){
+
+                                    i++;
+                                    i = (i >=texture_keys.length )?0:i;
+
+                                    var image = new Image();
+                                    var texture = new THREE.Texture();
+                                    image.src = "data:image/jpeg;base64," + intersects[0].object.textures_availables[texture_keys[i]].texture;
+                                    texture.image = image;
+                                    image.onload = function () {
+                                        texture.needsUpdate = true;
+                                    };
+                                    intersects[0].object.selected_texture = texture_keys[i];
+                                    intersects[0].object.material = new THREE.MeshBasicMaterial({map: texture});
+
+                                    var data = {
+                                        id : intersects[0].object.furnitureId,
+                                        type: intersects[0].object.furnitureType,
+                                        texture_id: texture_keys[i]
+                                    }
+                                    socket.emit("changeFurnitureTexture",data);
+                                }
+                            }
+                        }else{
+                            gachetteR = false;
+                        }
+                    }
+                    /*
                     if (canGame()) {
                         var gp = navigator.getGamepads()[0];
                         var buttons = gp.buttons
 
                         if (gp.buttons[4].pressed) {
-                            console.log(intersects[0].object.material.color);
 
                             var current_color = intersects[0].object.material.color.getHex();
                             for (var i = 0; i < meubles_colors.length; i++) {
@@ -641,6 +695,7 @@ export default React.createClass({
                             //intersects[0].object.material.color.set( 0xff0000 );
                         }
                     }
+                    */
                 } else {
                     $(".selector").removeClass('active');
                 }
