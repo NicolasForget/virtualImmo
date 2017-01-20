@@ -58,13 +58,13 @@
 }
 
 .g-sofa rect {
-  fill: lightsteelblue;
+  /*fill: lightsteelblue;*/
   stroke: #F0FFFF;
   stroke-width: 2px;
 }
 
 .g-sofa rect.dragging {
-  fill: steelblue;
+  /*fill: steelblue;*/
   stroke: #6495ED;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .g-sofa rect.sofaPlaced {
-  fill: green;
+  /*fill: green;*/
   stroke: #006400;
 }
 

@@ -256,7 +256,14 @@ d3.radialMenu = function() {
         // Add the icons   
         menuSegments.append("image")
                     .attr("class", "menu-icon")
-                    .attr("xlink:href", function(d) { return d.data.icon; })
+                    .attr("xlink:href", function(d) {
+                        if(d.data.icon.length > 30){
+                            return "data:image/png;base64," + d.data.icon;
+                        
+                        } else{
+                            return d.data.icon;
+                        }
+                    })
                     .attr("width", iconSize)
                     .attr("height", iconSize)
                     .attr("x", function(d) { return calcMidPoint(d).x - iconSize / 2; })
