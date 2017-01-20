@@ -56,6 +56,26 @@
         text-align: center;
     }
 
+    .key {
+        position: absolute;
+        top:0px;
+        left:50%;
+        transform: translate(-50%);
+        color: blue;
+        font-size: 2em;
+        z-index:999999999999999;
+    }
+
+    .animatelog {
+        position: absolute;
+        top:25px;
+        left:50%;
+        transform: translate(-50%);
+        color: green;
+        font-size: 2em;
+        z-index:999999999999999;
+    }
+
 </style>
 
 <script src="http://localhost:4200/socket.io/socket.io.js"></script>
@@ -76,11 +96,15 @@
                 x2: 4,
                 y2:4,
             };
-            socket.emit('wallTable', mur1);
+            //socket.emit('wallTable', mur1);
+            socket.emit('tableWantFurniture', 'sofa');
+            socket.on("availableSofas", function(data){
+                console.log("sofas", data);
+            });
         });
         socket.on('inputChange', function (data) {
             $("#input").val(data.value);
-        })
+        });
     });
 </script>
 </body>
