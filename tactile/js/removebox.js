@@ -1,4 +1,4 @@
-function CheckBox () {
+function RemoveBox () {
 
     var size = 20,
         x = 0,
@@ -7,12 +7,12 @@ function CheckBox () {
         ry = 0,
         markStrokeWidth = 3,
         boxStrokeWidth = 3,
-        checked = false,
+        checked = true,
         clickEvent;
 
-    function checkBox (selection) {
+    function removeBox (selection) {
 
-        var g = selection.append("g").attr("class","placeObject").attr("transform","translate(" + x + "," + y + ")"),
+        var g = selection.append("g").attr("class","removeObject").attr("transform","translate(" + x + "," + y + ")"),
             box = g.append("rect")
             .attr("width", size)
             .attr("height", size)
@@ -21,15 +21,17 @@ function CheckBox () {
             .style({
                 "fill-opacity": 0,
                 "stroke-width": boxStrokeWidth,
-                "stroke": "black"
+                "stroke": "red"
             });
 
         //Data to represent the check mark
-        var coordinates = [
-            {x: (size / 8), y: (size / 3)},
-            {x: (size / 2.2), y: (size) - (size / 4)},
-            {x: (size) - (size / 8), y: ((size / 10))}
-        ];
+        // var coordinates = [
+        //     {x: (size / 8), y: (size / 3)},
+        //     {x: (size / 2.2), y: (size) - (size / 4)},
+        //     {x: (size) - (size / 8), y: ((size / 10))}
+        // ];
+
+        var d = "M" + (size / 8) + "," + (size / 8) + " L" + (size/8*7) + "," + (size/8*7) + " M" + (size/8*7) + "," + (size / 8) + " L" + (size / 8) + "," + (size/8*7); 
 
         var line = d3.svg.line()
                 .x(function(d){ return d.x; })
@@ -37,10 +39,10 @@ function CheckBox () {
                 .interpolate("basic");
 
         var mark = g.append("path")
-            .attr("d", line(coordinates))
+            .attr("d", d)
             .style({
                 "stroke-width" : markStrokeWidth,
-                "stroke" : "black",
+                "stroke" : "red",
                 "fill" : "none",
                 "opacity": (checked)? 1 : 0
             });
@@ -57,55 +59,55 @@ function CheckBox () {
 
     }
 
-    checkBox.size = function (val) {
+    removeBox.size = function (val) {
         size = val;
-        return checkBox;
+        return removeBox;
     }
 
-    checkBox.x = function (val) {
+    removeBox.x = function (val) {
         x = val;
-        return checkBox;
+        return removeBox;
     }
 
-    checkBox.y = function (val) {
+    removeBox.y = function (val) {
         y = val;
-        return checkBox;
+        return removeBox;
     }
 
-    checkBox.rx = function (val) {
+    removeBox.rx = function (val) {
         rx = val;
-        return checkBox;
+        return removeBox;
     }
 
-    checkBox.ry = function (val) {
+    removeBox.ry = function (val) {
         ry = val;
-        return checkBox;
+        return removeBox;
     }
 
-    checkBox.markStrokeWidth = function (val) {
+    removeBox.markStrokeWidth = function (val) {
         markStrokeWidth = val;
-        return checkBox;
+        return removeBox;
     }
 
-    checkBox.boxStrokeWidth = function (val) {
+    removeBox.boxStrokeWidth = function (val) {
         boxStrokeWidth = val;
-        return checkBox;
+        return removeBox;
     }
 
-    checkBox.checked = function (val) {
+    removeBox.checked = function (val) {
 
         if(val === undefined) {
             return checked;
         } else {
             checked = val;
-            return checkBox;
+            return removeBox;
         }
     }
 
-    checkBox.clickEvent = function (val) {
+    removeBox.clickEvent = function (val) {
         clickEvent = val;
-        return checkBox;
+        return removeBox;
     }
 
-    return checkBox;
+    return removeBox;
 }

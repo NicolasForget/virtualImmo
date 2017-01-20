@@ -60,7 +60,7 @@
 .g-sofa rect {
   fill: lightsteelblue;
   stroke: #F0FFFF;
-  stroke-width: 1px;
+  stroke-width: 2px;
 }
 
 .g-sofa rect.dragging {
@@ -78,6 +78,8 @@
   stroke: #006400;
 }
 
+
+
 .g-sofa text{
   font-size: 250%;
 }
@@ -88,6 +90,16 @@
   bottom:100px;
 }
 
+
+.g-element rect {
+    fill: lightsteelblue;
+    stroke: #F0FFFF;
+    stroke-width: 2px;
+}
+
+.g-element rect.placed{
+    opacity: 1;
+}
 /*-------------------------button---------------------------*/
 body {
   font-family: Univers, Arial, sans-serif;

@@ -17,11 +17,15 @@ d3.radialMenu = function() {
     var onClick = function(a) { alert(a); };
 
     // Private Variables
-    var offsetAngleDeg = -180 / data.length;    // Initial rotation angle designed to put centre the first segment at the top
+    // var offsetAngleDeg = -180 / data.length;    // Initial rotation angle designed to put centre the first segment at the top
+    var offsetAngleDeg = 0; 
     var control = {};                           // The control that will be augmented and returned
     var pie;                                    // The pie layout
     var arc;                                    // The arc generator
     var segmentLayer;                           // The layer that contains the segments
+
+    var arrowImg = "";
+    var arrowSize = 60;
     
     //#endregion
 
@@ -143,10 +147,43 @@ d3.radialMenu = function() {
 
          // Create the visualiziation   
         segmentLayer = target.append("g")
-                             .attr("transform", "rotate(" + offsetAngleDeg + ")");
+                             .attr("transform", "rotate(" + offsetAngleDeg + ")").on("mousemove",function(){
+            var x = d3.mouse(this)[0];
+            var y = d3.mouse(this)[1];
+            var ro = 0;
+            if(x > 0 && y > 0){
+                ro = - (Math.atan(x/y) / 2 / Math.PI * 360) ;
+            }else if(x > 0 && y < 0){
+                ro = - (180 - Math.atan(x/(-y)) / 2 / Math.PI * 360) ;
+            }else if(x < 0 && y > 0){
+                ro = Math.atan((-x)/y) / 2 / Math.PI * 360 ;
+            }else if(x < 0 && y < 0){
+                ro = 180 - Math.atan(x/y) / 2 / Math.PI * 360 ;
+            }
+            
+            arrow.attr("transform","rotate(" + ro + ")");
+            console.log(x);
+            console.log(y);
+            console.log("--"+ro);
+        });
+        //arrow for menu
+        arrow = target.append("g").attr("transform", "rotate(0)").attr("class","arrow");
+        arrow.append("image").attr("href",arrowImg).attr("width",arrowSize).attr("height",arrowSize).attr("x",-arrowSize/2).attr("y",-arrowSize/2);
         
         return control;
     };
+
+    control.arrow = function(_){
+        if (!arguments.length) return arrowImg;
+        arrowImg = _;
+        return control;
+    }
+
+    control.arrowSize = function(_){
+        if (!arguments.length) return arrowSize;
+        arrowSize = _;
+        return control;
+    }
     
     /**
     * Display the menu
@@ -157,7 +194,8 @@ d3.radialMenu = function() {
         // Calculate the new offset angle based on the number of data items and
         // then rotate the menu to re-centre the first segment
         data = _;
-        offsetAngleDeg = -180 / data.length;
+        // offsetAngleDeg = -180 / data.length;
+        var offsetAngleDeg = 0; 
         segmentLayer.attr("transform", "rotate(" + offsetAngleDeg + ")");
                
         // Join the data to the elements

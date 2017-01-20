@@ -19,6 +19,8 @@
 	    <script type="text/javascript" src="js/button.js"></script>
 	    <!-- checkbox -->
 	    <script type="text/javascript" src="js/checkbox.js"></script>
+
+	    <script type="text/javascript" src="js/removebox.js"></script>
 	</head>
 	<body>
 		<!-- header -->
@@ -84,49 +86,76 @@
 	      	</div>
 	    </footer>
 
-	    <script src="http://192.168.43.43:4200/socket.io/socket.io.js"></script>
+	    <!-- <script src="http://192.168.43.43:4200/socket.io/socket.io.js"></script> -->
 		<script>
-		    var socket = io.connect('http://192.168.43.43:4200');
-		    socket.on('connect', function () {
-		            var murs = [{
-					        id: 1,
-					        x: 0,
-					        y: 0,
-					        length: 10,
-					        radius: 0
-					    }, {
-					        id: 2,
-					        x: 10,
-					        y: 0,
-					        length: 10,
-					        radius: 270
-					    }, {
-					        id: 3,
-					        x: 10,
-					        y: 10,
-					        length: 10,
-					        radius: 180
-					    }, {
-					        id: 4,
-					        x: 0,
-					        y: 10,
-					        length: 10,
-					        radius: 90
-					    }
-					];
-		            socket.emit('wallTable', murs);
-		    });
+
+			//init socket for create the wall.
+		   //  var socket = io.connect('http://192.168.43.43:4200');
+		   //  socket.on('connect', function () {
+		   //          var murs = [{
+					//         id: 1,
+					//         x: 0,
+					//         y: 0,
+					//         length: 10,
+					//         radius: 0
+					//     }, {
+					//         id: 2,
+					//         x: 10,
+					//         y: 0,
+					//         length: 10,
+					//         radius: 270
+					//     }, {
+					//         id: 3,
+					//         x: 10,
+					//         y: 10,
+					//         length: 10,
+					//         radius: 180
+					//     }, {
+					//         id: 4,
+					//         x: 0,
+					//         y: 10,
+					//         length: 10,
+					//         radius: 90
+					//     }
+					// ];
+		   //          socket.emit('wallTable', murs);
+		   //  });
 		</script>
 
         <script>
+
+        	// the sofa data array 
+        	var meubleMenu = [
+	            { icon : "img/1.png", action: "createMenu(menuPositionX,menuPositionY,sofas);"},
+	            { icon : "img/bed-1.png", action: "createMenu(menuPositionX,menuPositionY,beds);"},
+	            { icon : "img/table-1.png", action: "createMenu(menuPositionX,menuPositionY,tables);"},
+        	];
+
         	// the sofa data array 
         	var sofas = [
-	            { icon : "img/1.png", action: "sofaSelect(0);", size : {length: 100, width : 180} },
-	            { icon : "img/2.png", action: "sofaSelect(1);", size : {length: 100, width : 200}  },
-	            { icon : "img/4.png", action: "sofaSelect(2);", size : {length: 80, width : 150}  },
-	            { icon : "img/9.png", action: "sofaSelect(3);", size : {length: 90, width : 250}  },
-	            { icon : "img/8.png", action: "sofaSelect(4);", size : {length: 110, width : 220}  }
+	            { icon : "img/1.png", action: "sofaSelect(0);", size : {length: 100, width : 180} , color : "black"},
+	            { icon : "img/2.png", action: "sofaSelect(1);", size : {length: 100, width : 200} , color : "blue" },
+	            { icon : "img/4.png", action: "sofaSelect(2);", size : {length: 80, width : 150} , color : "green" },
+	            { icon : "img/9.png", action: "sofaSelect(3);", size : {length: 90, width : 250} , color : "red" },
+	            { icon : "img/8.png", action: "sofaSelect(4);", size : {length: 110, width : 220} , color : "yellow" }
         	];
+
+        	// the beds data array 
+        	var beds = [
+	            { icon : "img/bed-1.png", action: "objectSelect(beds,0,\"bed\");", size : {length: 240, width : 220} },
+	            { icon : "img/bed-2.png", action: "objectSelect(beds,1,\"bed\");", size : {length: 200, width : 180} }
+        	];
+
+        	// the tables data array 
+        	var tables = [
+	            { icon : "img/table-1.png", action: "objectSelect(tables,0,\"table\");", size : {length: 100, width : 60} },
+	            { icon : "img/table-2.png", action: "objectSelect(tables,1,\"table\");", size : {length: 80, width : 40}  },
+	            { icon : "img/table-3.png", action: "objectSelect(tables,2,\"table\");", size : {length: 120, width : 80}  }
+        	];
+
+
+
+
 
         	// the four points of a sofa
         	var sofaPoints = [
@@ -136,12 +165,17 @@
         		{x : 0, y : 0}
         	];
 
+        	var sofaColor;
+
         	var m;
         	//mouse click position
         	var clickX,clickY;
         	//sofa position relative to the room
         	var rectX = 0;
         	var rectY = 0;
+
+        	var menuPositionX = 0;
+        	var menuPositionY = 0;
 
         	var checkBox = new CheckBox();
 
@@ -229,12 +263,36 @@
 
 			container.append("g").attr("class","g-sofa").attr("transform","translate(0,0)").append("text");
 
+			var meuble = container.append("g").attr("class","g-meuble").attr("transform","translate(0,0)");
+			var domBeds = meuble.append("g").attr("class","g-beds").attr("transform","translate(0,0)");
+			var domTables = meuble.append("g").attr("class","g-tables").attr("transform","translate(0,0)");
+
           	svg.on("dblclick",doubleClick);
 
           	var drag = d3.behavior.drag()
 			    .on("dragstart", dragstarted)
 			    .on("drag", dragged)
 			    .on("dragend", dragended);
+
+
+			function createMeubleSelectMenu(x,y){
+				changeLayer(true);
+	            if(m){
+	              m.hide();
+	            }
+	            
+	            d3.select("#menu-holder").selectAll("g").each(function(){
+	              d3.select(this).remove();
+	            });
+	            
+	            m = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
+	                        .appendTo("#menu-holder").show(meubleMenu);
+
+	            var menu = $("#piemenu");
+	            menu.css('position', 'absolute');
+	            menu.css("left", x - 200);
+	            menu.css("top", y - 200);
+			}
 
 			function doubleClick(){
 				var zoomAreaPosition = d3.select(".zoomArea").attr("transform").split(/\(|\,|\)/);
@@ -245,9 +303,11 @@
 	            rectX = clickX;
 	            rectY = clickY;
 
+	            menuPositionX = d3.event.pageX;
+	            menuPositionY = d3.event.pageY;
 	            // console.log(clickX);
 	            // console.log(clickY);
-	            createMenu(d3.event.pageX, d3.event.pageY);
+	            createMeubleSelectMenu(d3.event.pageX, d3.event.pageY);
 			}	
 
 
@@ -302,7 +362,7 @@
           
 
 
-          	function createMenu(x,y){
+          	function createMenu(x,y,menuElements){
 	            changeLayer(true);
 	            if(m){
 	              m.hide();
@@ -312,8 +372,8 @@
 	              d3.select(this).remove();
 	            });
 	            
-	            m = new d3.radialMenu().radius(50).thickness(150).iconSize(120)
-	                        .appendTo("#menu-holder").show(sofas);
+	            m = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
+	                        .appendTo("#menu-holder").show(menuElements);
 
 	            var menu = $("#piemenu");
 	            menu.css('position', 'absolute');
@@ -337,6 +397,8 @@
 	            changeLayer(false);
 	            var sofa = sofas[index];
 	            createSofa(clickX,clickY,sofa.size.width,sofa.size.length);
+	            sofaColor = sofa.color;
+	            console.log(sofaColor);
 	            // console.log(sofa.size);
           	}
 
@@ -362,6 +424,43 @@
 	            		d3.select("#sofaRotate").style("visibility","hidden");
 	            		container.select(".g-sofa").select("rect").classed("sofaPlaced",true).on('mousedown.drag', null);
 	            		container.select(".g-sofa").select("text").text("Placed").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+
+	            		//Create sofa dimension table and send it to server
+	            		
+	            		var sofaObject = [{
+					        id: 1,
+					        x: sofaPoints[3].x,
+					        y: sofaPoints[3].y,
+					        length: width,
+					        radius: (currentAngle == 0) ? 0 : 360 - currentAngle,
+					        color : sofaColor
+					    }, {
+					        id: 2,
+					        x: sofaPoints[2].x,
+					        y: sofaPoints[2].y,
+					        length: height,
+					        radius: (270 - currentAngle) >= 0 ? (270 - currentAngle) : (360 + 270 - currentAngle),
+					        color : sofaColor
+					    }, {
+					        id: 3,
+					        x: sofaPoints[1].x,
+					        y: sofaPoints[1].y,
+					        length: width,
+					        radius: (180 - currentAngle) >= 0 ? (180 - currentAngle) : (360 + 180 - currentAngle),
+					        color : sofaColor
+					    }, {
+					        id: 4,
+					        x: sofaPoints[0].x,
+					        y: sofaPoints[0].y,
+					        length: height,
+					        radius: (90 - currentAngle) >= 0 ? (90 - currentAngle) : (360 + 90 - currentAngle),
+					        color : sofaColor
+					    }];
+					    // console.log(sofaObject);
+					    // socket.emit('objectTable', sofaObject);
+
+
+
 	            	}else{
 	            		d3.select("#sofaRotate").style("visibility","visible");
 	            		container.select(".g-sofa").select("rect").classed("sofaPlaced",false).call(drag);
@@ -372,7 +471,7 @@
 	            
 	            d3.select("#sofaRotate").style("visibility","visible");
 	            container.select(".g-sofa").call(checkBox);
-	            sofaPlacedCheck = d3.select(".placeSofa");
+	            sofaPlacedCheck = d3.select(".g-sofa").select(".placeObject");
 	            if(isSofaBadPlaced()){
 					container.select(".g-sofa").select('rect').classed("badPlace",true);
 					container.select(".g-sofa").select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
@@ -473,6 +572,155 @@
 				}
 				return false;
 			}
+
+			//------------------------------------------------BEDS------------------------------------------------------
+        	var bedsOnMap = [];
+        	var tablesOnMap = [];
+        	//------------------------------------------------BEDS------------------------------------------------------
+
+        	function objectSelect(meuble, index, type){
+	            // console.log(index);
+	            if(m)m.hide();
+	            changeLayer(false);
+	            objectCreate(clickX,clickY,meuble[index].size.width,meuble[index].size.length,type);
+          	}
+
+
+          	function objectCreate(px,py,width,height,type){
+          		var angle = 0;
+          		var demiDiagonal = Math.sqrt(width * width + height * height) / 2;
+          		var objectCenterX = width / 2;
+	            var objectCenterY = height / 2;
+	            var objectPoints = [
+	        		{x : 0, y : 0},
+	        		{x : 0, y : 0},
+	        		{x : 0, y : 0},
+	        		{x : 0, y : 0}
+	        	];
+	            initObjectPointsPosition(objectPoints,px,py,width,height);
+
+          		var dataObject = {
+          			angle : angle,
+          			demiDiagonal : demiDiagonal,
+          			objectCenterX : objectCenterX,
+          			objectCenterY : objectCenterY,
+          			objectPoints : objectPoints,
+          			rectX : rectX,
+          			rectY : rectY,
+          			width : width,
+          			height : height
+          		};
+          		
+
+
+          		switch(type){
+          			case "bed":
+          				bedsOnMap.push(dataObject);
+          				addObjectOnMap(domBeds,bedsOnMap,bedsOnMap.length - 1,"bed");
+          				break;
+          			case "table":
+          				tablesOnMap.push(dataObject);
+          				addObjectOnMap(domTables,tablesOnMap,tablesOnMap.length - 1,"table");
+          				break;
+          			case "sofa":;break;
+          			default:;
+          		}
+
+          	}
+
+          	function initObjectPointsPosition(objectPoints,px,py,width,height){
+          		objectPoints[0].x = px;
+				objectPoints[0].y = py + height;
+				objectPoints[1].x = px + width;
+				objectPoints[1].y = py + height;
+				objectPoints[2].x = px + width;
+				objectPoints[2].y = py;
+				objectPoints[3].x = px;
+				objectPoints[3].y = py;
+          	}
+
+          	function setObjectPoints(objectList, index){
+          		var objectMeuble = objectList[index];
+          		objectMeuble.objectPoints[0].x = objectMeuble.objectCenterX + objectMeuble.rectX + objectMeuble.demiDiagonal * Math.cos(objectMeuble.angle / 180 * Math.PI - Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
+				objectMeuble.objectPoints[0].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI - Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
+				objectMeuble.objectPoints[1].x = objectMeuble.objectCenterX + objectMeuble.rectX + objectMeuble.demiDiagonal * Math.cos(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX));
+				objectMeuble.objectPoints[1].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX));
+				objectMeuble.objectPoints[2].x = objectMeuble.objectCenterX + objectMeuble.rectX + objectMeuble.demiDiagonal * Math.cos(objectMeuble.angle / 180 * Math.PI - Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX));
+				objectMeuble.objectPoints[2].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI - Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX));
+				objectMeuble.objectPoints[3].x = objectMeuble.objectCenterX + objectMeuble.rectX + objectMeuble.demiDiagonal * Math.cos(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
+				objectMeuble.objectPoints[3].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
+          	}
+
+          	function addObjectOnMap(meubleParent,objectList,index,type){
+          		var color;
+          		switch(type){
+          			case "bed":
+          				color = "#8A2BE2";
+          				break;
+          			case "table":
+          				color = "#A52A2A";
+          				break;
+          			case "sofa":
+          				color = "#FFD700";
+          				break;
+          			default:;
+          		}
+
+          		var dragObject = d3.behavior.drag()
+			    	.on("dragstart", function(d){
+			   //  		objRectX = ;
+						// objRectY = ;
+						d3.event.sourceEvent.stopPropagation();
+						d3.select(this).attr("opacity",0.9).style("stroke",color);
+			    	})
+			    	.on("drag", function(d){
+			    		
+			    		objectList[index].rectX += d3.event.dx;
+						objectList[index].rectY += d3.event.dy;
+
+			    		setObjectPoints(objectList,index);
+						d3.select(this).attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")");
+						d3.select(this.parentNode).select("text").attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")");
+						d3.select(this.parentNode).select(".placeObject").attr("transform","translate(" + (objectList[index].objectPoints[2].x - 10) + "," + (objectList[index].objectPoints[2].y - 10) + ")");
+						d3.select(this.parentNode).select(".removeObject").attr("transform","translate(" + (objectList[index].objectPoints[0].x - 10) + "," + (objectList[index].objectPoints[0].y - 10) + ")");
+
+						
+			    	})
+			    	.on("dragend", function(d){
+			    		d3.select(this).attr("opacity",0.5).style("stroke","#FFFFFF");
+			    	});
+
+			    var element = meubleParent.append("g").attr("class","g-element").attr("transform","translate(0,0)");
+				
+          		element.append("rect").attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")").attr("width",objectList[index].width).attr("height",objectList[index].height).attr("opacity",0.5).style("fill",color).call(dragObject);
+
+          		var objCheckBox = new CheckBox();
+          		var objRemoveBox = new RemoveBox();
+
+          		objCheckBox.size(20).x(objectList[index].objectPoints[2].x - 10).y(objectList[index].objectPoints[2].y - 10).rx(5).ry(5).markStrokeWidth(2).boxStrokeWidth(3).checked(false).clickEvent(function(){
+          				if(objCheckBox.checked()){
+          					element.select("rect").on('mousedown.drag', null).classed("placed",true);
+          				}else{
+          					element.select("rect").call(dragObject).classed("placed",false);
+          				}
+
+          		});
+
+          		objRemoveBox.size(20).x(objectList[index].objectPoints[0].x - 10).y(objectList[index].objectPoints[0].y-10).rx(10).ry(10).markStrokeWidth(3).boxStrokeWidth(3).checked(true).clickEvent(function(){
+          			element.remove();
+          		});
+          		
+          		// element.append("path").attr("d",attrPathDValue).style("stroke-width","2").style("stroke","black").style("fill","blue").style("opacity",0.6).call(dragObject);
+          		element.append("text").attr("transform","translate(" + objectList[index].objectPoints[3].x + "," + objectList[index].objectPoints[3].y + ")").text(type + "-" + index);
+          		element.call(objCheckBox).call(objRemoveBox);
+          		// console.log(objectList);
+
+          		
+           	}
+
+           	// function getPathDAttr(dataObject){
+           	// 	return "M" + dataObject.objectPoints[0].x + "," + dataObject.objectPoints[0].y + " L" + dataObject.objectPoints[1].x + "," + dataObject.objectPoints[1].y +  " L" + dataObject.objectPoints[2].x + "," + dataObject.objectPoints[2].y +  " L" + dataObject.objectPoints[3].x + "," + dataObject.objectPoints[3].y +  " L" + dataObject.objectPoints[0].x + "," + dataObject.objectPoints[0].y;
+           	// }
 
         </script>
   </body>
