@@ -99,6 +99,13 @@
 
 .g-element rect.placed{
     opacity: 1;
+    stroke: green !important;
+    stroke-width: 4px !important;
+}
+
+.g-element rect.badPlaceObject{
+    stroke: #ff0000 !important;
+    stroke-width: 4px !important;
 }
 /*-------------------------button---------------------------*/
 body {
