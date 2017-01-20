@@ -78,10 +78,10 @@
 
 </style>
 
-<script src="http://localhost:4200/socket.io/socket.io.js"></script>
+<script src="http://localhost:8080/socket.io/socket.io.js"></script>
 <script src="./node_modules/jquery/dist/jquery.min.js"></script>
 <script>
-    var socket = io.connect('http://localhost:4200');
+    var socket = io.connect('http://localhost:8080');
 
     socket.on('connect', function () {
 
@@ -97,10 +97,26 @@
                 y2:4,
             };
             //socket.emit('wallTable', mur1);
-            socket.emit('tableWantFurniture', 'sofa');
-            socket.on("availableSofas", function(data){
-                console.log("sofas", data);
+            //socket.emit('tableWantFurniture', 'sofa');
+            // socket.on("availableSofas", function(data){
+            //     console.log("sofas", data);
+            // });
+            var sofa = {
+                type : "sofa",
+                id: 0,
+                textureId: 'beige',
+                position: {
+                    x: 2,
+                    y: 0.5,
+                    z: 2,
+                    angle: 45
+                }
+            };
+            socket.emit("tableAddFurniture", sofa);
+            socket.on("addFurniture", function(data){
+                console.log(data);
             });
+
         });
         socket.on('inputChange', function (data) {
             $("#input").val(data.value);
