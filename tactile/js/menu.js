@@ -147,25 +147,28 @@ d3.radialMenu = function() {
 
          // Create the visualiziation   
         segmentLayer = target.append("g")
-                             .attr("transform", "rotate(" + offsetAngleDeg + ")").on("mousemove",function(){
-            var x = d3.mouse(this)[0];
-            var y = d3.mouse(this)[1];
-            var ro = 0;
-            if(x > 0 && y > 0){
-                ro = - (Math.atan(x/y) / 2 / Math.PI * 360) ;
-            }else if(x > 0 && y < 0){
-                ro = - (180 - Math.atan(x/(-y)) / 2 / Math.PI * 360) ;
-            }else if(x < 0 && y > 0){
-                ro = Math.atan((-x)/y) / 2 / Math.PI * 360 ;
-            }else if(x < 0 && y < 0){
-                ro = 180 - Math.atan(x/y) / 2 / Math.PI * 360 ;
-            }
+                             .attr("transform", "rotate(" + offsetAngleDeg + ")")
+
+        //                      .on("mousemove",function(){
+        //     var x = d3.mouse(this)[0];
+        //     var y = d3.mouse(this)[1];
+        //     var ro = 0;
+        //     if(x > 0 && y > 0){
+        //         ro = - (Math.atan(x/y) / 2 / Math.PI * 360) ;
+        //     }else if(x > 0 && y < 0){
+        //         ro = - (180 - Math.atan(x/(-y)) / 2 / Math.PI * 360) ;
+        //     }else if(x < 0 && y > 0){
+        //         ro = Math.atan((-x)/y) / 2 / Math.PI * 360 ;
+        //     }else if(x < 0 && y < 0){
+        //         ro = 180 - Math.atan(x/y) / 2 / Math.PI * 360 ;
+        //     }
             
-            arrow.attr("transform","rotate(" + ro + ")");
-            console.log(x);
-            console.log(y);
-            console.log("--"+ro);
-        });
+        //     arrow.attr("transform","rotate(" + ro + ")");
+        //     console.log(x);
+        //     console.log(y);
+        //     console.log("--"+ro);
+        // })
+                             ;
         //arrow for menu
         arrow = target.append("g").attr("transform", "rotate(0)").attr("class","arrow");
         arrow.append("image").attr("href",arrowImg).attr("width",arrowSize).attr("height",arrowSize).attr("x",-arrowSize/2).attr("y",-arrowSize/2);
@@ -226,6 +229,7 @@ d3.radialMenu = function() {
                 .attr("transform", function(d) { 
                     var mp = calcMidPoint(d);                          
                     var angle = -offsetAngleDeg;
+                    // var angle = 60;
                     return "rotate(" + angle + "," + mp.x + "," + mp.y + ")";
                 });
         
@@ -268,11 +272,16 @@ d3.radialMenu = function() {
                     .attr("height", iconSize)
                     .attr("x", function(d) { return calcMidPoint(d).x - iconSize / 2; })
                     .attr("y", function(d) { return calcMidPoint(d).y - iconSize / 2; })
-                    .attr("transform", function(d) { 
+                    .attr("transform", function(d,i) { 
                         // We need to rotate the images backwards to compensate for the rotation of the menu as a whole
                         var mp = calcMidPoint(d);                          
-                        var angle = -offsetAngleDeg;
-                        return "rotate(" + angle + "," + mp.x + "," + mp.y + ")";
+                        // var angle = -offsetAngleDeg;
+                        var angle = 360 / data.length;
+                        var angle1 = ( 0.5 + i ) * angle;
+
+                        console.log(i);
+                        console.log(data.length);
+                        return "rotate(" + angle1 + "," + mp.x + "," + mp.y + ")";
                     })
                     .style("opacity", 0)
                     .transition()

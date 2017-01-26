@@ -24,7 +24,7 @@
 	</head>
 	<body>
 		<!-- header -->
-	    <nav class="navbar navbar-default navbar-fixed-top">
+	   <!--  <nav class="navbar navbar-default navbar-fixed-top">
 	      	<div class="container">
 	        	<div class="navbar-header">
 		          	<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -50,13 +50,20 @@
 			              	</ul>
 	            		</li>
 	          		</ul>
-	        	</div><!--/.nav-collapse -->
+	        	</div>
 	      	</div>
-	    </nav>
+	    </nav> -->
 
 	    <!-- main div -->
 	    <div class="container-fluid">
+	    	<div class="row">
+		    	<div id="rotateController" class="center-block" style="visibility: visible">
+					<input id="rAngle" type="range" min="0" max="360">
+					<span id="rAngle-value">0</span>
+		    	</div>
+			</div>
 	    	<div id="selectBox"></div>
+	    	<div id="selectBoxRot"></div>
 	    	<div class="row">
 		    	<div id="sofaRotate" class="center-block" style="visibility: hidden">
 					<input id="nAngle" type="range" min="0" max="360">
@@ -64,9 +71,12 @@
 					<div id="checkSofaPlaced"></div>
 		    	</div>
 			</div>
+
+			
+
 	      	<div class="row">
 	        	<div class="center-block" id="main-content">
-	             	<svg id="roomMap" width="800" height="800"></svg>
+	             	<svg id="roomMap" width="1500" height="800"></svg>
 	        	</div>
 	      	</div>
 	    </div>
@@ -82,11 +92,11 @@
 	    
 
 	    <!-- footer -->
-	    <footer class="footer">
+	   <!--  <footer class="footer">
 	      	<div class="container">
 	        	<p class="text-muted">©VirtualImmo  BY Mesnier Maylanie, Saraïs Anthony, Forget Nicolas, Ding Feng</p>
 	      	</div>
-	    </footer>
+	    </footer> -->
 
 	    <!-- <script src="http://192.168.43.43:4200/socket.io/socket.io.js"></script> -->
 	    <script src="http://mayl.me:8080/socket.io/socket.io.js"></script>
@@ -190,7 +200,7 @@
 						.text(function (d) { return d; });
 
 				function onchange() {
-					selectValue = d3.select('select').property('value')
+					selectValue = d3.select('#selectBox').select('select').property('value')
 					// console.log(selectValue);
 				};
 				// -----------------------------------select Meuble -------------------------------------------------
@@ -214,6 +224,28 @@
 		</script>
 
         <script>
+
+        	//-----------------select rotate element -------------------
+
+        	var rotElement = "map";
+        	var selectRot = d3.select('#selectBoxRot')
+				  .append('select')
+				  	.attr('class','select')
+				    .on('change',onchangeRot);
+
+			var optionsRot = selectRot
+				  .selectAll('option')
+					.data(["map", "menu","meuble"]).enter()
+					.append('option')
+						.text(function (d) { return d; });
+
+			function onchangeRot() {
+				rotElement = d3.select('#selectBoxRot').select('select').property('value')
+					// console.log(selectValue);
+			};
+
+			
+			//---------------- select rotate elment -----------------------
 
 
         	// the sofa data array 
@@ -283,8 +315,8 @@
         	var currentAngle = 0;
         	var buttonSvg;
 
-        	var imgHeight = 800, imgWidth = 800,      // Image dimensions (don't change these)
-            	width =  800, height = 800,             // Dimensions of cropped region
+        	var imgHeight = 800, imgWidth = 1500,      // Image dimensions (don't change these)
+            	width =  1500, height = 800,             // Dimensions of cropped region
             	translate0 = [0, 0], scale0 = 1;  // Initial offset & scale
 
         	var zoom = d3.behavior.zoom()
@@ -295,7 +327,7 @@
             	.attr("width",  width + "px")
             	.attr("height", height + "px")
             	.append("g")
-            	.attr("transform", "translate(" + translate0 + ")")
+            	.attr("transform", "translate(" + translate0 + ")").attr("id","g-map")
             	.call(zoom)
             	.on("dblclick.zoom", null);
 
@@ -309,7 +341,7 @@
           	container.append("g").attr("class","imgMap").attr("transform","translate(0,0)").append("image")
               	.attr("width",  imgWidth + "px")
               	.attr("height", imgHeight + "px")
-              	.attr("xlink:href", "img/room-small.png");
+              	.attr("xlink:href", "img/big-room.png");
 
           	container.append("g")
 		    	.attr("class", "x axis")
@@ -367,6 +399,8 @@
 			    .on("dragstart", dragstarted)
 			    .on("drag", dragged)
 			    .on("dragend", dragended);
+			updateR(0);
+
 
 
 			function createMeubleSelectMenu(x,y){
@@ -412,7 +446,8 @@
 
           	function zoomed() {
           		showResetButton();
-            	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+          		var rotateValue = container.attr("transform").split("rotate")[1];
+            	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")rotate"+rotateValue);
           	}
 
           	function dragstarted(d) {
@@ -622,6 +657,72 @@
 			  	update(+this.value);
 			});
 
+			// when the input range changes update the angle 
+			d3.select("#rAngle").on("input", function() {
+			  	updateR(+this.value);
+			});
+
+			// update the element
+			function updateR(nAngle) {
+			  	d3.select("#rAngle-value").text(nAngle);
+			  	d3.select("#rAngle").property("value", nAngle);
+
+			  	if(rotElement == 'map'){
+			  		rotateMap(nAngle);
+			  	}else if(rotElement == 'menu'){
+			  		rotateMenu(nAngle);
+			  	}else if(rotElement == 'meuble'){
+			  		rotateMeubleSelected(nAngle);
+			  	}
+
+			}
+
+			//------------------------------------------   rotate function --------------------------------------------------
+			function rotateMap(nAngle){
+				var transformZoomArea = d3.select(".zoomArea").attr("transform");
+			  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
+			  	d3.select('.zoomArea').attr("transform",splitTransformZoomArea + "rotate("+nAngle+",750,400)");
+			}
+
+			function rotateMenu(nAngle){
+				var transformZoomArea = d3.select("#menu-holder").attr("transform");
+			  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
+			  	d3.select('#menu-holder').attr("transform",splitTransformZoomArea + "rotate("+nAngle+")");
+			  	d3.select(".arrow").attr("transform","rotate(" + (-nAngle) + ")");
+				
+			}
+
+			function rotateMeubleSelected(nAngle){
+				var transformZoomArea = d3.select(".meubleSelected").attr("transform");
+			  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
+			  	var rotateCenter = transformZoomArea.split("rotate")[1].split(",");
+			  	console.log(rotateCenter);
+			  	d3.select('.meubleSelected').attr("transform",splitTransformZoomArea + "rotate("+nAngle+","+rotateCenter[1]+","+rotateCenter[2]);
+			  	var objectList;
+			  	switch(d3.select('.meubleSelected').attr("meubleType")){
+			  		case "bed":
+			  			objectList = bedsOnMap;
+			  			break;
+			  		case "table":
+			  			objectList = tablesOnMap;
+			  			break;
+			  		default:;
+			  	}
+
+			  	objectList[d3.select('.meubleSelected').attr("meubleIndex")].angle = nAngle;
+			  			setObjectPoints(objectList,d3.select('.meubleSelected').attr("meubleIndex"));
+
+			  	if(isObjectBadPlaced(objectList,d3.select('.meubleSelected').attr("meubleIndex"))){
+			    	d3.select('.meubleSelected').classed("badPlaceObject",true);
+			    }else{
+			    	d3.select('.meubleSelected').classed("badPlaceObject",false);
+			    };
+			    // console.log(d3.select('.meubleSelected'));
+			    // d3.select('.meubleSelected').parentNode.select(".removeObject").attr("transform","translate(" + (objectList[index].objectPoints[0].x - 10) + "," + (objectList[index].objectPoints[0].y - 10) + ")");
+			}
+
+			//--------------------------------------------  rotate function ---------------------------------------------------
+
 			// update the element
 			function update(nAngle) {
 			  	currentAngle = nAngle;
@@ -762,8 +863,8 @@
           			default:;
           		}
 
-          		var objCheckBox = new CheckBox();
-          		var objRemoveBox = new RemoveBox();
+          		// var objCheckBox = new CheckBox();
+          		// var objRemoveBox = new RemoveBox();
 
           		var dragObject = d3.behavior.drag()
 			    	.on("dragstart", function(d){
@@ -771,8 +872,12 @@
 						// objRectY = ;
 						d3.event.sourceEvent.stopPropagation();
 						d3.select(this).attr("opacity",0.9).style("stroke",color);
-						d3.select(this.parentNode).select(".placeObject").attr("visibility","hidden");
-						d3.select(this.parentNode).select(".removeObject").attr("visibility","hidden");
+						// d3.select(this.parentNode).select(".placeObject").attr("visibility","hidden");
+						// d3.select(this.parentNode).select(".removeObject").attr("visibility","hidden");
+						d3.select('.meubleSelected').classed("meubleSelected",false);
+			    		d3.select(this).classed("meubleSelected",true);
+			    		var r = d3.select('.meubleSelected').attr("transform").split("rotate(")[1].split(",")[0];
+			    		updateR(r);
 			    	})
 			    	.on("drag", function(d){
 			    		
@@ -789,46 +894,53 @@
 
 						d3.select(this).attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")");
 						d3.select(this.parentNode).select("text").attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")");
-						d3.select(this.parentNode).select(".placeObject").attr("transform","translate(" + (objectList[index].objectPoints[2].x - 10) + "," + (objectList[index].objectPoints[2].y - 10) + ")");
-						d3.select(this.parentNode).select(".removeObject").attr("transform","translate(" + (objectList[index].objectPoints[0].x - 10) + "," + (objectList[index].objectPoints[0].y - 10) + ")");
+						// d3.select(this.parentNode).select(".placeObject").attr("transform","translate(" + (objectList[index].objectPoints[2].x - 10) + "," + (objectList[index].objectPoints[2].y - 10) + ")");
+						// d3.select(this.parentNode).select(".removeObject").attr("transform","translate(" + (objectList[index].objectPoints[0].x - 10) + "," + (objectList[index].objectPoints[0].y - 10) + ")");
+
+
 
 						
 			    	})
 			    	.on("dragend", function(d){
 			    		d3.select(this).attr("opacity",0.5).style("stroke","#FFFFFF");
 			    		if(isObjectBadPlaced(objectList,index)){
-			    			d3.select(this.parentNode).select(".placeObject").attr("visibility","hidden");
-							d3.select(this.parentNode).select(".removeObject").attr("visibility","hidden");
-							d3.select(this).classed("badPlaceObject",true);
+			    			d3.select(this.parentNode).remove();
+			    // 			d3.select(this.parentNode).select(".placeObject").attr("visibility","hidden");
+							// d3.select(this.parentNode).select(".removeObject").attr("visibility","hidden");
+							// d3.select(this).classed("badPlaceObject",true);
 			    		}else{
-			    			d3.select(this.parentNode).select(".placeObject").attr("visibility","visible");
-							d3.select(this.parentNode).select(".removeObject").attr("visibility","visible");
+			    			// d3.select(this.parentNode).select(".placeObject").attr("visibility","visible");
+			    			
+							// d3.select(this.parentNode).select(".removeObject").attr("visibility","visible");
 							d3.select(this).classed("badPlaceObject",false);
 			    		};
 			    	});
 
 			    var element = meubleParent.append("g").attr("class","g-element").attr("transform","translate(0,0)");
-				
-          		element.append("rect").attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")").attr("width",objectList[index].width).attr("height",objectList[index].height).attr("opacity",0.5).style("fill",color).call(dragObject);
+				d3.select('.meubleSelected').classed("meubleSelected",false);
 
+          		element.append("rect").attr("meubleIndex",index).attr("meubleType",type).classed("meubleSelected",true).attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")").attr("width",objectList[index].width).attr("height",objectList[index].height).attr("opacity",0.5).style("fill",color).call(dragObject);
 
+          		updateR(0);
 
-          		objCheckBox.size(20).x(objectList[index].objectPoints[2].x - 10).y(objectList[index].objectPoints[2].y - 10).rx(5).ry(5).markStrokeWidth(2).boxStrokeWidth(3).checked(false).clickEvent(function(){
-          				if(objCheckBox.checked()){
-          					element.select("rect").on('mousedown.drag', null).classed("placed",true);
-          				}else{
-          					element.select("rect").call(dragObject).classed("placed",false);
-          				}
+          		// objCheckBox.size(20).x(objectList[index].objectPoints[2].x - 10).y(objectList[index].objectPoints[2].y - 10).rx(5).ry(5).markStrokeWidth(2).boxStrokeWidth(3).checked(false).clickEvent(function(){
+          		// 		if(objCheckBox.checked()){
+          		// 			element.select("rect").on('mousedown.drag', null).classed("placed",true);
+          		// 		}else{
+          		// 			element.select("rect").call(dragObject).classed("placed",false);
+          		// 		}
 
-          		});
+          		// });
 
-          		objRemoveBox.size(20).x(objectList[index].objectPoints[0].x - 10).y(objectList[index].objectPoints[0].y-10).rx(10).ry(10).markStrokeWidth(3).boxStrokeWidth(3).checked(true).clickEvent(function(){
-          			element.remove();
-          		});
+          		// objRemoveBox.size(20).x(objectList[index].objectPoints[0].x - 10).y(objectList[index].objectPoints[0].y-10).rx(10).ry(10).markStrokeWidth(3).boxStrokeWidth(3).checked(true).clickEvent(function(){
+          		// 	element.remove();
+          		// });
           		
           		// element.append("path").attr("d",attrPathDValue).style("stroke-width","2").style("stroke","black").style("fill","blue").style("opacity",0.6).call(dragObject);
           		element.append("text").attr("transform","translate(" + objectList[index].objectPoints[3].x + "," + objectList[index].objectPoints[3].y + ")").text(type + "-" + index);
-          		element.call(objCheckBox).call(objRemoveBox);
+          		// element
+          		// // .call(objCheckBox)
+          		// .call(objRemoveBox);
 
           		// console.log(objectList);
            	}
