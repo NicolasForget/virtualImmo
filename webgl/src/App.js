@@ -4,32 +4,32 @@ import $ from "jquery";
 import PointerLockControls from "./libs/PointerLockControls";
 import io from 'socket.io-client';
 
-let socket = io(`http://10.212.105.82:8080`);
+let socket = io(`http://mayl.me:8080`);
 let StereoEffect = require('three-stereo-effect')(THREE);
 
 let walls = [{
     id: 3,
     x: 0,
     y: 0,
-    length: 10,
+    length: 8,
     radius: 0
 }, {
     id: 4,
-    x: 10,
+    x: 8,
     y: 0,
-    length: 10,
+    length: 8,
     radius: 90
 }, {
     id: 5,
-    x: 10,
-    y: 10,
-    length: 10,
+    x: 8,
+    y: 8,
+    length: 8,
     radius: 180
 }, {
     id: 5,
     x: 0,
-    y: 10,
-    length: 10,
+    y: 8,
+    length: 8,
     radius: 270
 }];
 
@@ -39,7 +39,7 @@ export default React.createClass({
     },
 
     componentDidMount(){
-        socket = io.connect('http://10.212.105.82:8080');
+        socket = io.connect('http://mayl.me:8080');
         var les_meubles = [];
         var meubles_colors = [0xff0000, 0xf283b6, 0xb5bfa1, 0xedbfb7];
 
@@ -52,6 +52,12 @@ export default React.createClass({
             });
 
             socket.on('addFurniture', function (data) {
+
+                for (var i = 0; i < les_meubles.length; i++){
+                    if (les_meubles[i].furnitureId == data.id){
+                        scene.remove(les_meubles[i]);
+                    }
+                }
                 let loader = new THREE.JSONLoader();
                 let json = loader.parse(data.model3D);
 
@@ -565,6 +571,8 @@ export default React.createClass({
         }
 
         var gachetteR =false;
+        var gachetteD =false;
+
         function animate() {
             requestAnimationFrame(animate);
 
@@ -640,7 +648,7 @@ export default React.createClass({
                         var buttons = gp.buttons
                         //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
                         if (gp.buttons[4].pressed) {
-                            $("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
 
                             gachetteR = true;
                         }
@@ -672,6 +680,42 @@ export default React.createClass({
                             }
                         }else{
                             gachetteR = false;
+                        }
+
+
+                        if (gp.buttons[3].pressed) {
+                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+
+                            gachetteD = true;
+                        }
+                        else if(gachetteD == true && (!gp.buttons[3].pressed) ){
+                            gachetteD = false;
+                            for (var i = texture_keys.length; i >=0 ; i--){
+                               if (texture_keys[i] == intersects[0].object.selected_texture){
+
+                                    i--;
+                                    i = (i < 0 )?(texture_keys.length-1):i;
+
+                                    var image = new Image();
+                                    var texture = new THREE.Texture();
+                                    image.src = "data:image/jpeg;base64," + intersects[0].object.textures_availables[texture_keys[i]].texture;
+                                    texture.image = image;
+                                    image.onload = function () {
+                                        texture.needsUpdate = true;
+                                    };
+                                    intersects[0].object.selected_texture = texture_keys[i];
+                                    intersects[0].object.material = new THREE.MeshBasicMaterial({map: texture});
+
+                                    var data = {
+                                        id : intersects[0].object.furnitureId,
+                                        type: intersects[0].object.furnitureType,
+                                        texture_id: texture_keys[i]
+                                    }
+                                    socket.emit("changeFurnitureTexture",data);
+                                }
+                            }
+                        }else{
+                            gachetteD = false;
                         }
                     }
                     /*
