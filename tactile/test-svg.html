@@ -128,6 +128,7 @@
 
 		   socket.on('availableSofas', function (data) {
 		   		console.log(data);
+		   		// if(data.length > 1){
 		   		for (var i = 0; i < data.length;i++){
 		   			var sofaMenuInfo = data[i];
 		   			// var sofas=[];
@@ -158,11 +159,13 @@
 					var sofa = {
 						id:i,
 						icon:sofaMenuInfo.miniature,
-						action:"createMenuMeuble(menuPositionX,menuPositionY,sofas,\"sofa\");",
+						action:"createMenuMeuble(menuPositionX,menuPositionY,sofas,\"sofa\","+i+");",
 						object: data[i]
 					}
 					meubleSofaMenu.push(sofa);
 				}
+			// }
+			// console.log(meubleSofaMenu);
 				// console.log(sofass);
 				//-------------------------------------select Meuble-----------------------------------------------
 
@@ -219,7 +222,7 @@
 					var tv = {
 						id:i,
 						icon:tvMenuInfo.miniature,
-						action:"createMenuMeuble(menuPositionX,menuPositionY,tvs,\"tv\");",
+						action:"createMenuMeuble(menuPositionX,menuPositionY,tvs,\"tv\","+i+");",
 						object: data[i]
 					}
 					meubleTvMenu.push(tv);
@@ -234,7 +237,7 @@
 
 				var options = select
 				  .selectAll('option')
-					.data(["sofa", "table", "tv"]).enter()
+					.data(["sofa", "tv"]).enter()
 					.append('option')
 						.text(function (d) { return d; });
 
@@ -254,6 +257,7 @@
 	            switch(data.texture_id){
 	            	case "beige":c = "#f5f5dc";break;
 	            	case "noir":c = "black";break;
+	            	case "bordeau": c = "red";break;
 	            	case "blanc":c = "white";break;
 	            	default : c = "#A9A9A9";
 	            }
@@ -291,7 +295,7 @@
 
 			var optionsRot = selectRot
 				  .selectAll('option')
-					.data(["map", "sofamenu","tablemenu","tvmenu","meuble"]).enter()
+					.data(["map", "sofamenu","tvmenu","meuble"]).enter()
 					.append('option')
 						.text(function (d) { return d; });
 
@@ -536,7 +540,7 @@
 	            	// case "table":createMenu(menuPositionX,menuPositionY,tables);break;
 	            	// case "bed":createMenu(menuPositionX,menuPositionY,beds);break;
 	            	case "table":
-	            		createMenuMeuble(menuPositionX,menuPositionY,tables,"table");
+	            		createMenuMeuble(menuPositionX,menuPositionY,tables,"table",null);
 	            		break;
 	            	case "tv":
 	            		createMeubleSelectMenu(d3.event.pageX, d3.event.pageY,"tv");
@@ -1023,6 +1027,7 @@
           		switch(objectColor){
 	            	case "beige":objectColor = "#f5f5dc";break;
 	            	case "noir":objectColor = "black";break;
+	            	case "bordeau":objectColor = "red";break;
 	            	case "blanc":objectColor = "white";break;
 	            	case "gris":objectColor = "#A9A9A9";break;
 	            	default:;
@@ -1182,9 +1187,19 @@
 
           	var mtv, mTable;
 
-          	function createMenuMeuble(x,y,menuElements,type){
+          	function createMenuMeuble(x,y,menuElements,type, id){
           		var idMenu = "piemenu";
           		var svgMenu = "menu-holder";
+
+          		var menuCorrespondantId = [];
+
+          		for(var i = 0; i < menuElements.length;i++){
+          			if(menuElements[i].id == id){
+          				menuCorrespondantId.push(menuElements[i]);
+          			}
+          		}
+
+          		console.log(menuCorrespondantId);
           		
 	            
           		switch(type){
@@ -1199,7 +1214,7 @@
 	              			mTable.hide();
 	            		}
 	            		mTable = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
-	                        .appendTo("#" + svgMenu).show(menuElements);
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId);
 	            		break;
 	            	case "tv":
 	            		idMenu = "tvMenu";
@@ -1212,7 +1227,7 @@
 	              			mtv.hide();
 	            		}
 	            		mtv = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
-	                        .appendTo("#" + svgMenu).show(menuElements);
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId);
 	            		break;
 	            	default: 
 	            		idMenu = "piemenu";
@@ -1225,7 +1240,7 @@
 	              			m.hide();
 	            		}
 	            		m = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
-	                        .appendTo("#" + svgMenu).show(menuElements);
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId);
 	            };
 
 	            if(idMenu == "tableMenu"){
