@@ -54,7 +54,7 @@ export default React.createClass({
             socket.on('addFurniture', function (data) {
 
                 for (var i = 0; i < les_meubles.length; i++){
-                    if (les_meubles[i].furnitureId == data.id){
+                    if (les_meubles[i].furnitureIndex == data.index){
                         scene.remove(les_meubles[i]);
                     }
                 }
@@ -80,27 +80,42 @@ export default React.createClass({
                 mesh.selected_texture = data.selected_texture;
                 mesh.furnitureType = data.type;
                 mesh.furnitureId = data.id;
+                console.log(data.index);
+                mesh.furnitureIndex = data.index;
+
                 les_meubles.push(mesh);
+            });
+
+            socket.on("changedFurnitureTexture", function(data){
+                var id = data.id;
+                for (var i  = 0; i< les_meubles.length; i++){
+                    if (les_meubles[i].furnitureIndex == data.index){
+                        var image = new Image();
+                        var texture = new THREE.Texture();
+                        image.src = "data:image/jpeg;base64," + les_meubles[i].textures_availables[data.texture_id].texture;
+                        texture.image = image;
+                        image.onload = function () {
+                            texture.needsUpdate = true;
+                        };
+                        les_meubles[i].selected_texture = data.texture_id;
+
+                        les_meubles[i].material = new THREE.MeshBasicMaterial({map: texture});
+                    }
+                }
+            });
+
+            socket.on('removeFurniture', function (data){
+                console.log("removing", data.index);
+                var index = data.index;
+                console.log(les_meubles);
+                for (var i = 0; i < les_meubles.length; i++){
+                    if (les_meubles[i].furnitureIndex == data.index){
+                        scene.remove(les_meubles[i]);
+                    }
+                }
             });
         });
 
-        socket.on("changedFurnitureTexture", function(data){
-            var id = data.id;
-            for (var i  = 0; i< les_meubles.length; i++){
-                if (les_meubles[i].furnitureId == data.id){
-                    var image = new Image();
-                    var texture = new THREE.Texture();
-                    image.src = "data:image/jpeg;base64," + les_meubles[i].textures_availables[data.texture_id].texture;
-                    texture.image = image;
-                    image.onload = function () {
-                        texture.needsUpdate = true;
-                    };
-                    les_meubles[i].selected_texture = data.texture_id;
-
-                    les_meubles[i].material = new THREE.MeshBasicMaterial({map: texture});
-                }
-            }
-        });
 
         (function () {
 
@@ -572,6 +587,7 @@ export default React.createClass({
 
         var gachetteR =false;
         var gachetteD =false;
+        var buttonRemove = false;
 
         function animate() {
             requestAnimationFrame(animate);
@@ -672,6 +688,8 @@ export default React.createClass({
 
                                     var data = {
                                         id : intersects[0].object.furnitureId,
+                                        index : intersects[0].object.furnitureIndex,
+
                                         type: intersects[0].object.furnitureType,
                                         texture_id: texture_keys[i]
                                     }
@@ -708,6 +726,8 @@ export default React.createClass({
 
                                     var data = {
                                         id : intersects[0].object.furnitureId,
+                                        index : intersects[0].object.furnitureIndex,
+
                                         type: intersects[0].object.furnitureType,
                                         texture_id: texture_keys[i]
                                     }
@@ -717,29 +737,31 @@ export default React.createClass({
                         }else{
                             gachetteD = false;
                         }
-                    }
-                    /*
-                    if (canGame()) {
-                        var gp = navigator.getGamepads()[0];
-                        var buttons = gp.buttons
 
-                        if (gp.buttons[4].pressed) {
+                        
 
-                            var current_color = intersects[0].object.material.color.getHex();
-                            for (var i = 0; i < meubles_colors.length; i++) {
-                                $(".key").html(current_color + " " + meubles_colors[i].toString(16))
-                                if (current_color == meubles_colors[i]) {
-                                    i++;
-                                    i = (i == meubles_colors.length) ? 0 : i;
-                                    intersects[0].object.material.color.set(meubles_colors[i]);
-                                    break;
+                        if (gp.buttons[2].pressed) {
+                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+
+                            buttonRemove = true;
+                        }
+                        else if(buttonRemove == true && (!gp.buttons[2].pressed) ){
+                            buttonRemove = false;
+
+                            var index = intersects[0].object.furnitureIndex
+                                  
+                            socket.emit("removeFurniture",{index : index});
+                            for (var i = 0; i < les_meubles.length; i++){
+                                if (les_meubles[i].furnitureIndex == index){
+                                    scene.remove(les_meubles[i]);
                                 }
                             }
-                            //intersects[0].object.changeTexture();
-                            //intersects[0].object.material.color.set( 0xff0000 );
+                                            
+                        }else{
+                            buttonRemove = false;
                         }
                     }
-                    */
+                    
                 } else {
                     $(".selector").removeClass('active');
                 }
