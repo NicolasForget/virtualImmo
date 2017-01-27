@@ -2,34 +2,34 @@ import React, { Component } from 'react';
 import THREE from "three.js";
 import $ from "jquery";
 import PointerLockControls from "./libs/PointerLockControls";
-import io from 'socket.io-client'
+import io from 'socket.io-client';
 
-let socket = io(`http://10.212.116.178:8080`);
+let socket = io(`http://mayl.me:8080`);
 let StereoEffect = require('three-stereo-effect')(THREE);
 
 let walls = [{
     id: 3,
     x: 0,
     y: 0,
-    length: 10,
+    length: 8,
     radius: 0
 }, {
     id: 4,
-    x: 10,
+    x: 8,
     y: 0,
-    length: 10,
+    length: 8,
     radius: 90
 }, {
     id: 5,
-    x: 10,
-    y: 10,
-    length: 10,
+    x: 8,
+    y: 8,
+    length: 8,
     radius: 180
 }, {
     id: 5,
     x: 0,
-    y: 10,
-    length: 10,
+    y: 8,
+    length: 8,
     radius: 270
 }];
 
@@ -39,7 +39,9 @@ export default React.createClass({
     },
 
     componentDidMount(){
-        socket = io.connect('http://10.212.116.178:8080');
+        socket = io.connect('http://mayl.me:8080');
+        var les_meubles = [];
+        var meubles_colors = [0xff0000, 0xf283b6, 0xb5bfa1, 0xedbfb7];
 
         socket.on("connect", () => {
             console.log("connected");
@@ -50,6 +52,12 @@ export default React.createClass({
             });
 
             socket.on('addFurniture', function (data) {
+
+                for (var i = 0; i < les_meubles.length; i++){
+                    if (les_meubles[i].furnitureIndex == data.index){
+                        scene.remove(les_meubles[i]);
+                    }
+                }
                 let loader = new THREE.JSONLoader();
                 let json = loader.parse(data.model3D);
 
@@ -68,8 +76,46 @@ export default React.createClass({
                 mesh.position.z = data.position.z * -1;
                 mesh.rotation.y = data.position.angle;
                 scene.add(mesh);
+                mesh.textures_availables = data.textures_availables;
+                mesh.selected_texture = data.selected_texture;
+                mesh.furnitureType = data.type;
+                mesh.furnitureId = data.id;
+                console.log(data.index);
+                mesh.furnitureIndex = data.index;
+
+                les_meubles.push(mesh);
+            });
+
+            socket.on("changedFurnitureTexture", function(data){
+                var id = data.id;
+                for (var i  = 0; i< les_meubles.length; i++){
+                    if (les_meubles[i].furnitureIndex == data.index){
+                        var image = new Image();
+                        var texture = new THREE.Texture();
+                        image.src = "data:image/jpeg;base64," + les_meubles[i].textures_availables[data.texture_id].texture;
+                        texture.image = image;
+                        image.onload = function () {
+                            texture.needsUpdate = true;
+                        };
+                        les_meubles[i].selected_texture = data.texture_id;
+
+                        les_meubles[i].material = new THREE.MeshBasicMaterial({map: texture});
+                    }
+                }
+            });
+
+            socket.on('removeFurniture', function (data){
+                console.log("removing", data.index);
+                var index = data.index;
+                console.log(les_meubles);
+                for (var i = 0; i < les_meubles.length; i++){
+                    if (les_meubles[i].furnitureIndex == data.index){
+                        scene.remove(les_meubles[i]);
+                    }
+                }
             });
         });
+
 
         (function () {
 
@@ -367,8 +413,7 @@ export default React.createClass({
             activate.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
         }
 
-        var les_meubles = [];
-        var meubles_colors = [0xff0000, 0xf283b6, 0xb5bfa1, 0xedbfb7];
+        
 
 
         init();
@@ -462,7 +507,7 @@ export default React.createClass({
 
             //walls
             initWalls();
-
+            /*
             var canape_toile = THREE.ImageUtils.loadTexture('./images/tissu-de-toile.jpg');
             var canape_grass = THREE.ImageUtils.loadTexture('./images/grass.png');
 
@@ -501,22 +546,11 @@ export default React.createClass({
             other_canape_part_2.position.x = -3;
             other_canape_part_2.position.z = 4;
             other_canape_part_2.position.y = 1;
-
+            
             canapeMesh2.color.set(meubles_colors[0]);
             scene.add(other_canape);
             les_meubles.push(other_canape);
-
-            /*
-             var i = 0;
-             canape_cube.changeTexture = function() {
-             i = (i == 0)? 1:0;
-             console.log(this);
-             var tab = [canape_toile, canape_grass]
-             canapeMesh = new THREE.MeshBasicMaterial({map: tab[i]});
-             this.material = canapeMesh;
-             }
-             */
-
+            */
 
             renderer = glRenderer = new THREE.WebGLRenderer();
             renderer.setClearColor(0xffffff);
@@ -551,6 +585,9 @@ export default React.createClass({
             stereoEffect.setSize(window.innerWidth, window.innerHeight);
         }
 
+        var gachetteR =false;
+        var gachetteD =false;
+        var buttonRemove = false;
 
         function animate() {
             requestAnimationFrame(animate);
@@ -620,27 +657,111 @@ export default React.createClass({
                 if (intersects.length > 0) {
                     $(".selector").addClass('active');
                     //console.log(intersects[0].object);
+                    console.log(intersects[0].object.selected_texture);
+                    var texture_keys = Object.keys(intersects[0].object.textures_availables);
                     if (canGame()) {
                         var gp = navigator.getGamepads()[0];
                         var buttons = gp.buttons
-
+                        //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
                         if (gp.buttons[4].pressed) {
-                            console.log(intersects[0].object.material.color);
+                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
 
-                            var current_color = intersects[0].object.material.color.getHex();
-                            for (var i = 0; i < meubles_colors.length; i++) {
-                                $(".key").html(current_color + " " + meubles_colors[i].toString(16))
-                                if (current_color == meubles_colors[i]) {
+                            gachetteR = true;
+                        }
+                        else if(gachetteR == true && (!gp.buttons[4].pressed) ){
+                            gachetteR = false;
+                            for (var i = 0; i < texture_keys.length; i++){
+                               if (texture_keys[i] == intersects[0].object.selected_texture){
+
                                     i++;
-                                    i = (i == meubles_colors.length) ? 0 : i;
-                                    intersects[0].object.material.color.set(meubles_colors[i]);
-                                    break;
+                                    i = (i >=texture_keys.length )?0:i;
+
+                                    var image = new Image();
+                                    var texture = new THREE.Texture();
+                                    image.src = "data:image/jpeg;base64," + intersects[0].object.textures_availables[texture_keys[i]].texture;
+                                    texture.image = image;
+                                    image.onload = function () {
+                                        texture.needsUpdate = true;
+                                    };
+                                    intersects[0].object.selected_texture = texture_keys[i];
+                                    intersects[0].object.material = new THREE.MeshBasicMaterial({map: texture});
+
+                                    var data = {
+                                        id : intersects[0].object.furnitureId,
+                                        index : intersects[0].object.furnitureIndex,
+
+                                        type: intersects[0].object.furnitureType,
+                                        texture_id: texture_keys[i]
+                                    }
+                                    socket.emit("changeFurnitureTexture",data);
                                 }
                             }
-                            //intersects[0].object.changeTexture();
-                            //intersects[0].object.material.color.set( 0xff0000 );
+                        }else{
+                            gachetteR = false;
+                        }
+
+
+                        if (gp.buttons[3].pressed) {
+                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+
+                            gachetteD = true;
+                        }
+                        else if(gachetteD == true && (!gp.buttons[3].pressed) ){
+                            gachetteD = false;
+                            for (var i = texture_keys.length; i >=0 ; i--){
+                               if (texture_keys[i] == intersects[0].object.selected_texture){
+
+                                    i--;
+                                    i = (i < 0 )?(texture_keys.length-1):i;
+
+                                    var image = new Image();
+                                    var texture = new THREE.Texture();
+                                    image.src = "data:image/jpeg;base64," + intersects[0].object.textures_availables[texture_keys[i]].texture;
+                                    texture.image = image;
+                                    image.onload = function () {
+                                        texture.needsUpdate = true;
+                                    };
+                                    intersects[0].object.selected_texture = texture_keys[i];
+                                    intersects[0].object.material = new THREE.MeshBasicMaterial({map: texture});
+
+                                    var data = {
+                                        id : intersects[0].object.furnitureId,
+                                        index : intersects[0].object.furnitureIndex,
+
+                                        type: intersects[0].object.furnitureType,
+                                        texture_id: texture_keys[i]
+                                    }
+                                    socket.emit("changeFurnitureTexture",data);
+                                }
+                            }
+                        }else{
+                            gachetteD = false;
+                        }
+
+                        
+
+                        if (gp.buttons[2].pressed) {
+                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+
+                            buttonRemove = true;
+                        }
+                        else if(buttonRemove == true && (!gp.buttons[2].pressed) ){
+                            buttonRemove = false;
+
+                            var index = intersects[0].object.furnitureIndex
+                                  
+                            socket.emit("removeFurniture",{index : index});
+                            for (var i = 0; i < les_meubles.length; i++){
+                                if (les_meubles[i].furnitureIndex == index){
+                                    scene.remove(les_meubles[i]);
+                                }
+                            }
+                                            
+                        }else{
+                            buttonRemove = false;
                         }
                     }
+                    
                 } else {
                     $(".selector").removeClass('active');
                 }

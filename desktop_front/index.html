@@ -11,7 +11,8 @@
 <div class="root">
     <h2>Super desktop front</h2>
     <input id="input" type="text" placeholder="..."/>
-    <button>Send wall</button>
+    <button id="action1">Send canape</button>
+    <button id="action2">change color : gris</button>
 </div>
 
 <style>
@@ -78,17 +79,17 @@
 
 </style>
 
-<script src="http://localhost:8080/socket.io/socket.io.js"></script>
+<script src="http://10.212.105.82:8080/socket.io/socket.io.js"></script>
 <script src="./node_modules/jquery/dist/jquery.min.js"></script>
 <script>
-    var socket = io.connect('http://localhost:8080');
+    var socket = io.connect('http://10.212.105.82:8080');
 
     socket.on('connect', function () {
 
         $("#input").on('input', function(data) {
             socket.emit('wallChange', {value: data.target.value});
         });
-        $("button").on('click', function(data){
+        $("#action1").on('click', function(data){
             var mur1 = {
                 id: "mur1",
                 x1:0,
@@ -118,6 +119,15 @@
             });
 
         });
+        $("#action2").on('click', function(data){
+            var tosend = {
+                id : 0,
+                type: "sofa",
+                texture_id : "gris"
+            };
+            socket.emit("changeFurnitureTexture", tosend);
+        });
+
         socket.on('inputChange', function (data) {
             $("#input").val(data.value);
         });
