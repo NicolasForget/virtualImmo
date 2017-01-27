@@ -57,7 +57,9 @@ export default React.createClass({
 
                 for (var i = 0; i < les_meubles.length; i++){
                     if (les_meubles[i].furnitureIndex == data.index){
-                        scene.remove(les_meubles[i]);
+                        if (les_meubles[i].furnitureType == data.type){
+                            scene.remove(les_meubles[i]);
+                        }
                     }
                 }
                 let loader = new THREE.JSONLoader();
@@ -91,7 +93,9 @@ export default React.createClass({
             socket.on("changedFurnitureTexture", function(data){
                 var id = data.id;
                 for (var i  = 0; i< les_meubles.length; i++){
-                    if (les_meubles[i].furnitureIndex == data.index){
+                    if (les_meubles[i].furnitureIndex == data.index &&
+                        les_meubles[i].furnitureType == data.type){
+
                         var image = new Image();
                         var texture = new THREE.Texture();
                         image.src = "data:image/jpeg;base64," + les_meubles[i].textures_availables[data.texture_id].texture;
@@ -112,7 +116,9 @@ export default React.createClass({
                 console.log(les_meubles);
                 for (var i = 0; i < les_meubles.length; i++){
                     if (les_meubles[i].furnitureIndex == data.index){
-                        scene.remove(les_meubles[i]);
+                        if (les_meubles[i].furnitureType == data.type){
+                            scene.remove(les_meubles[i]);
+                        }
                     }
                 }
             });
@@ -121,7 +127,7 @@ export default React.createClass({
                 console.log("moving", data);
                 console.log(les_meubles);
                 for (var i = 0; i < les_meubles.length; i++){
-                    if (les_meubles[i].furnitureIndex == data.index){
+                    if (les_meubles[i].furnitureIndex == data.index && les_meubles[i].furnitureType == data.type){
                         console.log(les_meubles[i]);
                         les_meubles[i].position.x = -data.position.x;
                         les_meubles[i].position.y = data.position.y;
@@ -458,7 +464,7 @@ export default React.createClass({
 
             //ground
             var cube = new THREE.BoxGeometry(1, 1, 1);
-            var grassTexture = THREE.ImageUtils.loadTexture('../images/dev_sol.jpg');
+            var grassTexture = THREE.ImageUtils.loadTexture('../images/wood.png');
 
             var grassMesh = new THREE.MeshBasicMaterial({map: grassTexture});
             for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
@@ -470,7 +476,7 @@ export default React.createClass({
                     scene.add(grassCube);
                 }
             }
-            var zeroTexture = THREE.ImageUtils.loadTexture('../images/dev_sol0.jpg');
+            var zeroTexture = THREE.ImageUtils.loadTexture('../images/wood.png');
             var zeroMesh = new THREE.MeshBasicMaterial({map: zeroTexture});
 
             var zero = new THREE.Mesh(cube, zeroMesh);
@@ -723,12 +729,14 @@ export default React.createClass({
                         else if(buttonRemove == true && (!gp.buttons[2].pressed) ){
                             buttonRemove = false;
 
-                            var index = intersects[0].object.furnitureIndex
+                            var index = intersects[0].object.furnitureIndex;
+                            var type = intersects[0].object.furnitureType;
+
                                   
                             socket.emit("removeFurniture",{index : index,
                                 type: intersects[0].object.furnitureType});
                             for (var i = 0; i < les_meubles.length; i++){
-                                if (les_meubles[i].furnitureIndex == index){
+                                if (les_meubles[i].furnitureIndex == index && les_meubles[i].furnitureType == type ){
                                     scene.remove(les_meubles[i]);
                                 }
                             }
