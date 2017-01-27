@@ -6,32 +6,34 @@ import io from 'socket.io-client';
 
 let socket = io(`http://mayl.me:8080`);
 let StereoEffect = require('three-stereo-effect')(THREE);
+let pi = Math.PI;
+let walls = [];
 
-let walls = [{
-    id: 3,
-    x: 0,
-    y: 0,
-    length: 8,
-    radius: 0
-}, {
-    id: 4,
-    x: 8,
-    y: 0,
-    length: 8,
-    radius: 90
-}, {
-    id: 5,
-    x: 8,
-    y: 8,
-    length: 8,
-    radius: 180
-}, {
-    id: 5,
-    x: 0,
-    y: 8,
-    length: 8,
-    radius: 270
-}];
+//[{
+//     id: 3,
+//     x: 0,
+//     y: 0,
+//     length: 8,
+//     radius: 0
+// }, {
+//     id: 4,
+//     x: 8,
+//     y: 0,
+//     length: 8,
+//     radius: 90
+// }, {
+//     id: 5,
+//     x: 8,
+//     y: 8,
+//     length: 8,
+//     radius: 180
+// }, {
+//     id: 5,
+//     x: 0,
+//     y: 8,
+//     length: 8,
+//     radius: 270
+// }];
 
 export default React.createClass({
     getInitialState(){
@@ -74,7 +76,7 @@ export default React.createClass({
                 mesh.position.x = data.position.x * -1;
                 mesh.position.y = data.position.y;
                 mesh.position.z = data.position.z * -1;
-                mesh.rotation.y = data.position.angle;
+                mesh.rotation.y = data.position.angle*(2.0*pi)/360.0;
                 scene.add(mesh);
                 mesh.textures_availables = data.textures_availables;
                 mesh.selected_texture = data.selected_texture;
@@ -111,6 +113,21 @@ export default React.createClass({
                 for (var i = 0; i < les_meubles.length; i++){
                     if (les_meubles[i].furnitureIndex == data.index){
                         scene.remove(les_meubles[i]);
+                    }
+                }
+            });
+
+            socket.on('movedFurniture', function (data){
+                console.log("moving", data);
+                console.log(les_meubles);
+                for (var i = 0; i < les_meubles.length; i++){
+                    if (les_meubles[i].furnitureIndex == data.index){
+                        console.log(les_meubles[i]);
+                        les_meubles[i].position.x = -data.position.x;
+                        les_meubles[i].position.y = data.position.y;
+                        les_meubles[i].position.z = -data.position.z;
+                        // (angle en radian) = (angles en degrés)*(2.0*pi)/360.0 
+                        les_meubles[i].rotation.y =  data.position.angle*(2.0*pi)/360.0;
                     }
                 }
             });
@@ -196,12 +213,7 @@ export default React.createClass({
 
                         if (this.freeze) return;
 
-                        // should not need this
-                        //var orientation = getOrientation();
-                        //if (orientation !== this.screenOrientation) {
-                        //this.screenOrientation = orientation;
-                        //this.autoAlign = true;
-                        //}
+
 
                         this.alpha = deviceOrientation.gamma ?
                             THREE.Math.degToRad(deviceOrientation.alpha) : 0; // Z
@@ -297,63 +309,24 @@ export default React.createClass({
         }
 
         function initWalls() {
-            for (var i = 0; i < walls.length; i++) {
+            console.log(walls);
+            for (var i = 0; i < 2; i++) {
                 var wallBox = new THREE.BoxGeometry(walls[i].length, 5, 0.01);
                 var material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/brick.jpg')});
                 var wall = new THREE.Mesh(wallBox, material);
 
                 var pivot = new THREE.Object3D();
-                pivot.position.x = 0;
-                pivot.position.z = 0;
+                console.log(walls);
+                pivot.position.x = walls[i].x;
+                pivot.position.z = walls[i].y;
                 pivot.position.y = 2.5;
-                wall.position.x = walls[i].x - walls[i].length / 2;
-                wall.position.z = walls[i].y;
-                pivot.rotation.y = walls[i].radius * 0.00872665 * 2;
+                wall.position.x = - walls[i].length / 2;
+                wall.position.z = 0;
+                // (angle en radian) = (angles en degrés)*(2.0*pi)/360.0 
+
+                pivot.rotation.y = walls[i].radius *(2.0*pi)/360.0 ;
                 pivot.add(wall);
                 scene.add(pivot);
-
-
-                //var loader = new THREE.JSONLoader();
-                //loader.load('../images/sofa2.json', function (geometry) {
-                //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/mufiber03.png')});
-                //    var mesh = new THREE.Mesh(geometry, sofaMaterial);
-                //    mesh.position.x = -5;
-                //    mesh.position.y = 0.5;
-                //    mesh.position.z = -6;
-                //    scene.add(mesh);
-                //});
-                //
-                //loader.load('../images/tapis.json', function (geometry) {
-                //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/carpet.jpg')});
-                //    var mesh = new THREE.Mesh(geometry, sofaMaterial);
-                //    mesh.position.x = -3.5;
-                //    mesh.position.y = 0.5;
-                //    mesh.position.z = -3.7;
-                //    rotateObject(mesh, 0, 90, 0);
-                //    scene.add(mesh);
-                //});
-                //
-                //loader.load('../images/gros-meuble.json', function (geometry) {
-                //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/wood.png')});
-                //    var mesh = new THREE.Mesh(geometry, sofaMaterial);
-                //    mesh.position.x = -3.5;
-                //    mesh.position.y = 0.5;
-                //    mesh.position.z = -0.1;
-                //    rotateObject(mesh, 0, 180, 0);
-                //    scene.add(mesh);
-                //});
-                //
-                //loader.load('../images/lcd.json', function (geometry) {
-                //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/plasticpourri.jpg')});
-                //    var mesh = new THREE.Mesh(geometry, sofaMaterial);
-                //    mesh.position.x = -3.5;
-                //    mesh.position.y = 1;
-                //    mesh.position.z = -0.6;
-                //    rotateObject(mesh, 0, 180, 0);
-                //    scene.add(mesh);
-                //});
-
-
             }
         }
 
@@ -485,7 +458,8 @@ export default React.createClass({
 
             //ground
             var cube = new THREE.BoxGeometry(1, 1, 1);
-            var grassTexture = THREE.ImageUtils.loadTexture('../images/ground.jpg   ');
+            var grassTexture = THREE.ImageUtils.loadTexture('../images/dev_sol.jpg');
+
             var grassMesh = new THREE.MeshBasicMaterial({map: grassTexture});
             for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
                 for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
@@ -493,20 +467,21 @@ export default React.createClass({
                     grassCube.position.x = x;
                     grassCube.position.z = z;
                     grassCube.position.y = 0;
-
                     scene.add(grassCube);
-                    //var pivot = new THREE.Object3D();
-                    //pivot.position.x = 0;
-                    //pivot.position.z = 0;
-                    //pivot.rotation.y = 0.3;
-                    //scene.add(pivot);
-                    //pivot.add(grassCube);
-
                 }
             }
+            var zeroTexture = THREE.ImageUtils.loadTexture('../images/dev_sol0.jpg');
+            var zeroMesh = new THREE.MeshBasicMaterial({map: zeroTexture});
+
+            var zero = new THREE.Mesh(cube, zeroMesh);
+            zero.position.x = 0;
+            zero.position.y = 0;
+            zero.position.z = 0;
+            scene.add(zero);
+
 
             //walls
-            initWalls();
+           // initWalls();
             /*
             var canape_toile = THREE.ImageUtils.loadTexture('./images/tissu-de-toile.jpg');
             var canape_grass = THREE.ImageUtils.loadTexture('./images/grass.png');
@@ -750,7 +725,8 @@ export default React.createClass({
 
                             var index = intersects[0].object.furnitureIndex
                                   
-                            socket.emit("removeFurniture",{index : index});
+                            socket.emit("removeFurniture",{index : index,
+                                type: intersects[0].object.furnitureType});
                             for (var i = 0; i < les_meubles.length; i++){
                                 if (les_meubles[i].furnitureIndex == index){
                                     scene.remove(les_meubles[i]);
