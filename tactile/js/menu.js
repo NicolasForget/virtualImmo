@@ -279,8 +279,8 @@ d3.radialMenu = function() {
                         var angle = 360 / data.length;
                         var angle1 = ( 0.5 + i ) * angle;
 
-                        console.log(i);
-                        console.log(data.length);
+                        // console.log(i);
+                        // console.log(data.length);
                         return "rotate(" + angle1 + "," + mp.x + "," + mp.y + ")";
                     })
                     .style("opacity", 0)
