@@ -7,31 +7,37 @@ import io from 'socket.io-client';
 let socket = io(`http://mayl.me:8080`);
 let StereoEffect = require('three-stereo-effect')(THREE);
 
-let walls = [{
-    id: 3,
-    x: 0,
-    y: 0,
-    length: 8,
-    radius: 0
-}, {
-    id: 4,
-    x: 8,
-    y: 0,
-    length: 8,
-    radius: 90
-}, {
-    id: 5,
-    x: 8,
-    y: 8,
-    length: 8,
-    radius: 180
-}, {
-    id: 5,
-    x: 0,
-    y: 8,
-    length: 8,
-    radius: 270
-}];
+let walls = [
+    {
+        id: 3,
+        x: 0,
+        y: 0,
+        length: 8,
+        radius: 0
+    },
+    {
+        id: 4,
+        x: 8,
+        y: 0,
+        length: 8,
+        radius: 90
+    },
+
+    {
+        id: 5,
+        x: 8,
+        y: 8,
+        length: 8,
+        radius: 180
+    },
+    {
+        id: 5,
+        x: 0,
+        y: 8,
+        length: 10,
+        radius: 180
+    }
+];
 
 export default React.createClass({
     getInitialState(){
@@ -53,8 +59,8 @@ export default React.createClass({
 
             socket.on('addFurniture', function (data) {
 
-                for (var i = 0; i < les_meubles.length; i++){
-                    if (les_meubles[i].furnitureIndex == data.index){
+                for (var i = 0; i < les_meubles.length; i++) {
+                    if (les_meubles[i].furnitureIndex == data.index) {
                         scene.remove(les_meubles[i]);
                     }
                 }
@@ -86,10 +92,10 @@ export default React.createClass({
                 les_meubles.push(mesh);
             });
 
-            socket.on("changedFurnitureTexture", function(data){
+            socket.on("changedFurnitureTexture", function (data) {
                 var id = data.id;
-                for (var i  = 0; i< les_meubles.length; i++){
-                    if (les_meubles[i].furnitureIndex == data.index){
+                for (var i = 0; i < les_meubles.length; i++) {
+                    if (les_meubles[i].furnitureIndex == data.index) {
                         var image = new Image();
                         var texture = new THREE.Texture();
                         image.src = "data:image/jpeg;base64," + les_meubles[i].textures_availables[data.texture_id].texture;
@@ -104,12 +110,12 @@ export default React.createClass({
                 }
             });
 
-            socket.on('removeFurniture', function (data){
+            socket.on('removeFurniture', function (data) {
                 console.log("removing", data.index);
                 var index = data.index;
                 console.log(les_meubles);
-                for (var i = 0; i < les_meubles.length; i++){
-                    if (les_meubles[i].furnitureIndex == data.index){
+                for (var i = 0; i < les_meubles.length; i++) {
+                    if (les_meubles[i].furnitureIndex == data.index) {
                         scene.remove(les_meubles[i]);
                     }
                 }
@@ -297,31 +303,53 @@ export default React.createClass({
         }
 
         function initWalls() {
+
+            var colors = [0xff0000, 0x00ff00, 0x0000ff, 0x000000];
+            var a = new THREE.MeshBasicMaterial({color: 0x00ff00});
+            var b = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5), a);
+
             for (var i = 0; i < walls.length; i++) {
                 var wallBox = new THREE.BoxGeometry(walls[i].length, 5, 0.01);
                 var material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/brick.jpg')});
                 var wall = new THREE.Mesh(wallBox, material);
 
-                var pivot = new THREE.Object3D();
-                pivot.position.x = 0;
-                pivot.position.z = 0;
+                var pivotMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+                var pivot = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.2), pivotMaterial);
+                pivot.position.x = walls[i].x;
+                pivot.position.z = walls[i].y;
                 pivot.position.y = 2.5;
-                wall.position.x = walls[i].x - walls[i].length / 2;
-                wall.position.z = walls[i].y;
-                pivot.rotation.y = walls[i].radius * 0.00872665 * 2;
                 pivot.add(wall);
+
+                switch (walls[i].radius) {
+                    case 0:
+                        wall.position.x = pivot.position.x + walls[i].length / 2;
+                        break;
+                    case 90:
+                        wall.position.x = -walls[i].length / 2;
+                        break;
+                    case 180:
+                        wall.position.x = walls[i].x - walls[i].length / 2;
+                        break;
+                    case 270:
+                        wall.position.x = -walls[i].length / 2;
+                        break;
+                }
+                pivot.rotation.y = walls[i].radius * 0.00872665 * 2;
                 scene.add(pivot);
 
 
-                //var loader = new THREE.JSONLoader();
-                //loader.load('../images/sofa2.json', function (geometry) {
-                //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/mufiber03.png')});
-                //    var mesh = new THREE.Mesh(geometry, sofaMaterial);
-                //    mesh.position.x = -5;
-                //    mesh.position.y = 0.5;
-                //    mesh.position.z = -6;
-                //    scene.add(mesh);
-                //});
+                var loader = new THREE.JSONLoader();
+                loader.load('../images/sofa2.json', function (geometry) {
+                    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/mufiber03.png')});
+                    var mesh = new THREE.Mesh(geometry, sofaMaterial);
+                    console.log( mesh.min, mesh.max, mesh.size() );
+                    mesh.scale.set(0.02, 0.02, 0.02);
+                    console.log( mesh.min, mesh.max, mesh.size() );
+                    mesh.position.x = -5;
+                    mesh.position.y = 0.5;
+                    mesh.position.z = -6;
+                    scene.add(mesh);
+                });
                 //
                 //loader.load('../images/tapis.json', function (geometry) {
                 //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/carpet.jpg')});
@@ -412,8 +440,6 @@ export default React.createClass({
         } else {
             activate.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
         }
-
-        
 
 
         init();
@@ -508,49 +534,49 @@ export default React.createClass({
             //walls
             initWalls();
             /*
-            var canape_toile = THREE.ImageUtils.loadTexture('./images/tissu-de-toile.jpg');
-            var canape_grass = THREE.ImageUtils.loadTexture('./images/grass.png');
+             var canape_toile = THREE.ImageUtils.loadTexture('./images/tissu-de-toile.jpg');
+             var canape_grass = THREE.ImageUtils.loadTexture('./images/grass.png');
 
-            var canapeMesh = new THREE.MeshBasicMaterial({map: canape_toile});
+             var canapeMesh = new THREE.MeshBasicMaterial({map: canape_toile});
 
-            var canape_cube = new THREE.Object3D();//create an empty container
-            var canape_part_1 = new THREE.Mesh(cube, canapeMesh);
-            var canape_part_2 = new THREE.Mesh(cube, canapeMesh);
+             var canape_cube = new THREE.Object3D();//create an empty container
+             var canape_part_1 = new THREE.Mesh(cube, canapeMesh);
+             var canape_part_2 = new THREE.Mesh(cube, canapeMesh);
 
-            canape_cube.add(canape_part_1);//add a mesh with geometry to it
-            canape_cube.add(canape_part_2);//add a mesh with geometry to it
+             canape_cube.add(canape_part_1);//add a mesh with geometry to it
+             canape_cube.add(canape_part_2);//add a mesh with geometry to it
 
-            canape_part_1.position.x = 3;
-            canape_part_1.position.z = 2;
-            canape_part_1.position.y = 1;
-            canape_part_2.position.x = 2;
-            canape_part_2.position.z = 2;
-            canape_part_2.position.y = 1;
-            scene.add(canape_cube);
-            les_meubles.push(canape_cube);
-            console.log(canape_cube);
-            canapeMesh.color.set(meubles_colors[0]);
+             canape_part_1.position.x = 3;
+             canape_part_1.position.z = 2;
+             canape_part_1.position.y = 1;
+             canape_part_2.position.x = 2;
+             canape_part_2.position.z = 2;
+             canape_part_2.position.y = 1;
+             scene.add(canape_cube);
+             les_meubles.push(canape_cube);
+             console.log(canape_cube);
+             canapeMesh.color.set(meubles_colors[0]);
 
 
-            var canapeMesh2 = new THREE.MeshBasicMaterial({map: canape_toile});
-            var other_canape = new THREE.Object3D();//create an empty container
-            var other_canape_part_1 = new THREE.Mesh(cube, canapeMesh2);
-            var other_canape_part_2 = new THREE.Mesh(cube, canapeMesh2);
+             var canapeMesh2 = new THREE.MeshBasicMaterial({map: canape_toile});
+             var other_canape = new THREE.Object3D();//create an empty container
+             var other_canape_part_1 = new THREE.Mesh(cube, canapeMesh2);
+             var other_canape_part_2 = new THREE.Mesh(cube, canapeMesh2);
 
-            other_canape.add(other_canape_part_1);//add a mesh with geometry to it
-            other_canape.add(other_canape_part_2);//add a mesh with geometry to it
+             other_canape.add(other_canape_part_1);//add a mesh with geometry to it
+             other_canape.add(other_canape_part_2);//add a mesh with geometry to it
 
-            other_canape_part_1.position.x = -2;
-            other_canape_part_1.position.z = 4;
-            other_canape_part_1.position.y = 1;
-            other_canape_part_2.position.x = -3;
-            other_canape_part_2.position.z = 4;
-            other_canape_part_2.position.y = 1;
-            
-            canapeMesh2.color.set(meubles_colors[0]);
-            scene.add(other_canape);
-            les_meubles.push(other_canape);
-            */
+             other_canape_part_1.position.x = -2;
+             other_canape_part_1.position.z = 4;
+             other_canape_part_1.position.y = 1;
+             other_canape_part_2.position.x = -3;
+             other_canape_part_2.position.z = 4;
+             other_canape_part_2.position.y = 1;
+
+             canapeMesh2.color.set(meubles_colors[0]);
+             scene.add(other_canape);
+             les_meubles.push(other_canape);
+             */
 
             renderer = glRenderer = new THREE.WebGLRenderer();
             renderer.setClearColor(0xffffff);
@@ -585,8 +611,8 @@ export default React.createClass({
             stereoEffect.setSize(window.innerWidth, window.innerHeight);
         }
 
-        var gachetteR =false;
-        var gachetteD =false;
+        var gachetteR = false;
+        var gachetteD = false;
         var buttonRemove = false;
 
         function animate() {
@@ -668,13 +694,13 @@ export default React.createClass({
 
                             gachetteR = true;
                         }
-                        else if(gachetteR == true && (!gp.buttons[4].pressed) ){
+                        else if (gachetteR == true && (!gp.buttons[4].pressed)) {
                             gachetteR = false;
-                            for (var i = 0; i < texture_keys.length; i++){
-                               if (texture_keys[i] == intersects[0].object.selected_texture){
+                            for (var i = 0; i < texture_keys.length; i++) {
+                                if (texture_keys[i] == intersects[0].object.selected_texture) {
 
                                     i++;
-                                    i = (i >=texture_keys.length )?0:i;
+                                    i = (i >= texture_keys.length ) ? 0 : i;
 
                                     var image = new Image();
                                     var texture = new THREE.Texture();
@@ -687,16 +713,16 @@ export default React.createClass({
                                     intersects[0].object.material = new THREE.MeshBasicMaterial({map: texture});
 
                                     var data = {
-                                        id : intersects[0].object.furnitureId,
-                                        index : intersects[0].object.furnitureIndex,
+                                        id: intersects[0].object.furnitureId,
+                                        index: intersects[0].object.furnitureIndex,
 
                                         type: intersects[0].object.furnitureType,
                                         texture_id: texture_keys[i]
                                     }
-                                    socket.emit("changeFurnitureTexture",data);
+                                    socket.emit("changeFurnitureTexture", data);
                                 }
                             }
-                        }else{
+                        } else {
                             gachetteR = false;
                         }
 
@@ -706,13 +732,13 @@ export default React.createClass({
 
                             gachetteD = true;
                         }
-                        else if(gachetteD == true && (!gp.buttons[3].pressed) ){
+                        else if (gachetteD == true && (!gp.buttons[3].pressed)) {
                             gachetteD = false;
-                            for (var i = texture_keys.length; i >=0 ; i--){
-                               if (texture_keys[i] == intersects[0].object.selected_texture){
+                            for (var i = texture_keys.length; i >= 0; i--) {
+                                if (texture_keys[i] == intersects[0].object.selected_texture) {
 
                                     i--;
-                                    i = (i < 0 )?(texture_keys.length-1):i;
+                                    i = (i < 0 ) ? (texture_keys.length - 1) : i;
 
                                     var image = new Image();
                                     var texture = new THREE.Texture();
@@ -725,43 +751,42 @@ export default React.createClass({
                                     intersects[0].object.material = new THREE.MeshBasicMaterial({map: texture});
 
                                     var data = {
-                                        id : intersects[0].object.furnitureId,
-                                        index : intersects[0].object.furnitureIndex,
+                                        id: intersects[0].object.furnitureId,
+                                        index: intersects[0].object.furnitureIndex,
 
                                         type: intersects[0].object.furnitureType,
                                         texture_id: texture_keys[i]
                                     }
-                                    socket.emit("changeFurnitureTexture",data);
+                                    socket.emit("changeFurnitureTexture", data);
                                 }
                             }
-                        }else{
+                        } else {
                             gachetteD = false;
                         }
 
-                        
 
                         if (gp.buttons[2].pressed) {
                             //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
 
                             buttonRemove = true;
                         }
-                        else if(buttonRemove == true && (!gp.buttons[2].pressed) ){
+                        else if (buttonRemove == true && (!gp.buttons[2].pressed)) {
                             buttonRemove = false;
 
                             var index = intersects[0].object.furnitureIndex
-                                  
-                            socket.emit("removeFurniture",{index : index});
-                            for (var i = 0; i < les_meubles.length; i++){
-                                if (les_meubles[i].furnitureIndex == index){
+
+                            socket.emit("removeFurniture", {index: index});
+                            for (var i = 0; i < les_meubles.length; i++) {
+                                if (les_meubles[i].furnitureIndex == index) {
                                     scene.remove(les_meubles[i]);
                                 }
                             }
-                                            
-                        }else{
+
+                        } else {
                             buttonRemove = false;
                         }
                     }
-                    
+
                 } else {
                     $(".selector").removeClass('active');
                 }
