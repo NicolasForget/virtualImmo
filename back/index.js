@@ -95,7 +95,8 @@ io.on('connection', function (client) {
      *         y: number
      *         z: number
      *         angle: number
-     *     }
+     *     },
+     *     index: "furniture_id_in_display"
      * }
      */
     client.on("tableAddFurniture", function(data){
@@ -105,6 +106,8 @@ io.on('connection', function (client) {
                 if (sofas[data.id]){
                     var selected_sofa = {};
                     selected_sofa.id = sofas[data.id].id;
+                    selected_sofa.index = sofas[data.id].index;
+
                     selected_sofa.name = sofas[data.id].name;
                     var model3D = fs.readFileSync(sofas[data.id].model3D);
                     selected_sofa.model3D = JSON.parse(new Buffer(model3D).toString());
@@ -145,7 +148,8 @@ io.on('connection', function (client) {
                 y: ...
                 z: ...
                 angle: ...
-            }
+            },
+            index: "furniture_id_in_display"
         }
      */
     client.on("moveFurniture", function(data){
@@ -156,12 +160,23 @@ io.on('connection', function (client) {
         data = {
             id : "furniture id",
             type: "furniture type",
-            texture_id: "texture_id"
+            texture_id: "texture_id",
+            index: "furniture_id_in_display"
         }
      */
     client.on("changeFurnitureTexture", function(data){
         client.broadcast.emit("changedFurnitureTexture", data);
     });
+
+    /*
+        data = {
+     *     index: "furniture_id_in_display"
+        }
+     */
+    client.on("removeFurniture", function(data){
+        client.broadcast.emit("removeFurniture", data);
+    });
+
 
 
 

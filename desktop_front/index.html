@@ -11,8 +11,16 @@
 <div class="root">
     <h2>Super desktop front</h2>
     <input id="input" type="text" placeholder="..."/>
-    <button id="action1">Send canape</button>
+    <button id="action0">Send murs</button>
+
+    <button id="action1">Send amelie</button>
+    <button id="action5">Send tv</button>
+    <button id="action6">Send simple sofa</button>
+
     <button id="action2">change color : gris</button>
+    <button id="action3">Remove canape</button>
+    <button id="action4">Move canape</button>
+
 </div>
 
 <style>
@@ -79,24 +87,62 @@
 
 </style>
 
-<script src="http://10.212.105.82:8080/socket.io/socket.io.js"></script>
+<script src="http://mayl.me:8080/socket.io/socket.io.js"></script>
 <script src="./node_modules/jquery/dist/jquery.min.js"></script>
 <script>
-    var socket = io.connect('http://10.212.105.82:8080');
+    var socket = io.connect('http://mayl.me:8080');
 
     socket.on('connect', function () {
+        console.log("connected");
+
+
+        socket.emit("tableWantFurniture", "sofa");
+        socket.emit("tableWantFurniture", "tv");
+
+        socket.on("availableSofas", function(data){
+            console.log(data);
+        });
+        socket.on("availableTv", function(data){
+            console.log("TV", data);
+        });
+
 
         $("#input").on('input', function(data) {
             socket.emit('wallChange', {value: data.target.value});
         });
+
+        $("#action0").on('click', function(data){
+            var murs = [{
+                        id: 1,
+                        x: 0,
+                        y: 0,
+                        length: 10,
+                        radius: 0
+                    }, {
+                        id: 2,
+                        x: 0,
+                        y: 10,
+                        length: 10,
+                        radius: 0
+                    }, {
+                        id: 3,
+                        x: 10,
+                        y: 0,
+                        length: 10,
+                        radius: 180
+                    }, {
+                        id: 4,
+                        x: 0,
+                        y: 10,
+                        length: 10,
+                        radius: 0
+                    }
+                ];
+
+            socket.emit('wallTable', murs);
+        });
         $("#action1").on('click', function(data){
-            var mur1 = {
-                id: "mur1",
-                x1:0,
-                y1:0,
-                x2: 4,
-                y2:4,
-            };
+           
             //socket.emit('wallTable', mur1);
             //socket.emit('tableWantFurniture', 'sofa');
             // socket.on("availableSofas", function(data){
@@ -105,15 +151,61 @@
             var sofa = {
                 type : "sofa",
                 id: 0,
-                textureId: 'beige',
+                textureId: 'taupe',
                 position: {
                     x: 2,
                     y: 0.5,
                     z: 2,
                     angle: 45
-                }
+                },
+                index: "my_first_canape"
             };
             socket.emit("tableAddFurniture", sofa);
+            console.log(sofa);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+
+        });
+        $("#action6").on('click', function(data){
+           
+            
+            var sofa = {
+                type : "sofa",
+                id: 1,
+                textureId: 'red',
+                position: {
+                    x: -5,
+                    y: 0.5,
+                    z: 3,
+                    angle: 45
+                },
+                index: "big_canape"
+            };
+            socket.emit("tableAddFurniture", sofa);
+            console.log(sofa);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+
+        });
+        $("#action5").on('click', function(data){
+           
+            
+            var tv = {
+                type : "tv",
+                id: 0,
+                textureId: 'blanc',
+                position: {
+                    x: 4,
+                    y: 0.5,
+                    z: -1,
+                    angle: 90
+                },
+                index: "my_tv"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
             socket.on("addFurniture", function(data){
                 console.log(data);
             });
@@ -123,14 +215,42 @@
             var tosend = {
                 id : 0,
                 type: "sofa",
-                texture_id : "gris"
+                texture_id : "gris",
+                index: "my_first_canape"
             };
             socket.emit("changeFurnitureTexture", tosend);
         });
 
+        $("#action3").on('click', function(data){
+            console.log("removing");
+            socket.emit("removeFurniture", {index : "my_first_canape"});
+        });
+        $("#action4").on('click', function(data){
+            console.log("move");
+            socket.emit("moveFurniture", {
+                type : "sofa",
+                id: 0,
+                position: {
+                    x: 2,
+                    y: 0.5,
+                    z: 2,
+                    angle: 90
+                },
+                index: "my_first_canape"
+            });
+        });
+
+
         socket.on('inputChange', function (data) {
             $("#input").val(data.value);
         });
+        socket.on('changedFurnitureTexture', function (data) {
+            console.log(data);
+        });
+        socket.on('removeFurniture', function (data) {
+            console.log(data);
+        });
+
     });
 </script>
 </body>
