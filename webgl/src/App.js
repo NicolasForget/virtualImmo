@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import THREE from "three.js";
 import $ from "jquery";
 import PointerLockControls from "./libs/PointerLockControls";
 import io from 'socket.io-client';
@@ -11,31 +10,44 @@ let walls = [
     {
         id: 3,
         x: 0,
+        y: -5,
+        length: 15,
+        radius: 0
+    },
+    {
+        id: 4,
+        x: 15,
+        y: -5,
+        length: 5,
+        radius: 90
+    },
+    {
+        id: 4,
+        x: 4,
         y: 0,
-        length: 8,
+        length: 7,
         radius: 0
     },
     {
         id: 4,
         x: 8,
         y: 0,
-        length: 8,
+        length: 10,
         radius: 90
     },
-
     {
         id: 5,
         x: 8,
-        y: 8,
+        y: 10,
         length: 8,
         radius: 180
     },
     {
-        id: 5,
+        id: 6,
         x: 0,
-        y: 8,
-        length: 10,
-        radius: 180
+        y: 10,
+        length: 15,
+        radius: 270
     }
 ];
 
@@ -313,7 +325,13 @@ export default React.createClass({
                 var material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/brick.jpg')});
                 var wall = new THREE.Mesh(wallBox, material);
 
+                console.log(i);
+
                 var pivotMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+                if (i === 3) {
+                    pivotMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
+                }
+
                 var pivot = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.2), pivotMaterial);
                 pivot.position.x = walls[i].x;
                 pivot.position.z = walls[i].y;
@@ -339,17 +357,42 @@ export default React.createClass({
 
 
                 var loader = new THREE.JSONLoader();
-                loader.load('../images/sofa2.json', function (geometry) {
-                    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/mufiber03.png')});
-                    var mesh = new THREE.Mesh(geometry, sofaMaterial);
-                    console.log( mesh.min, mesh.max, mesh.size() );
-                    mesh.scale.set(0.02, 0.02, 0.02);
-                    console.log( mesh.min, mesh.max, mesh.size() );
-                    mesh.position.x = -5;
-                    mesh.position.y = 0.5;
-                    mesh.position.z = -6;
-                    scene.add(mesh);
+
+
+                var mtlLoader = new THREE.MTLLoader();
+                mtlLoader.setBaseUrl("../images/");
+                mtlLoader.setPath("../images/");
+                mtlLoader.load('sofa1.mtl', function (materials) {
+
+                    materials.preload();
+
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.setMaterials(materials);
+                    objLoader.setPath("../images/");
+                    objLoader.load('sofa1.obj', function (object) {
+                        object.traverse( function ( child ) {
+                            if ( child instanceof THREE.Mesh ) {
+                                child.material.color.setHex(0xFFF3E0);
+                            }
+                        });
+                        console.log(object)
+                        object.position.x = -5;
+                        object.position.y = 0.5;
+                        object.position.z = -6;
+                        scene.add(object);
+
+                    });
+
                 });
+                //loader.load('../images/sofa2.json', function (geometry) {
+                //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/mufiber03.png')});
+                //    var mesh = new THREE.Mesh(geometry, sofaMaterial);
+                //    mesh.scale.set(0.02, 0.02, 0.02);
+                //    mesh.position.x = -5;
+                //    mesh.position.y = 0.5;
+                //    mesh.position.z = -6;
+                //    scene.add(mesh);
+                //});
                 //
                 //loader.load('../images/tapis.json', function (geometry) {
                 //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/carpet.jpg')});
