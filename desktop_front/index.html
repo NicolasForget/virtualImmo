@@ -13,7 +13,10 @@
     <input id="input" type="text" placeholder="..."/>
     <button id="action0">Send murs</button>
 
-    <button id="action1">Send canape</button>
+    <button id="action1">Send basic sofa</button>
+    <button id="action5">Send tv</button>
+    <button id="action6">Send simple sofa</button>
+
     <button id="action2">change color : gris</button>
     <button id="action3">Remove canape</button>
     <button id="action4">Move canape</button>
@@ -91,6 +94,19 @@
 
     socket.on('connect', function () {
         console.log("connected");
+
+
+        socket.emit("tableWantFurniture", "sofa");
+        socket.emit("tableWantFurniture", "tv");
+
+        socket.on("availableSofas", function(data){
+            console.log(data);
+        });
+        socket.on("availableTv", function(data){
+            console.log("TV", data);
+        });
+
+
         $("#input").on('input', function(data) {
             socket.emit('wallChange', {value: data.target.value});
         });
@@ -146,6 +162,50 @@
             };
             socket.emit("tableAddFurniture", sofa);
             console.log(sofa);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+
+        });
+        $("#action6").on('click', function(data){
+           
+            
+            var sofa = {
+                type : "sofa",
+                id: 1,
+                textureId: 'red',
+                position: {
+                    x: -5,
+                    y: 0.5,
+                    z: 3,
+                    angle: 45
+                },
+                index: "big_canape"
+            };
+            socket.emit("tableAddFurniture", sofa);
+            console.log(sofa);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+
+        });
+        $("#action5").on('click', function(data){
+           
+            
+            var tv = {
+                type : "tv",
+                id: 0,
+                textureId: 'blanc',
+                position: {
+                    x: 4,
+                    y: 0.5,
+                    z: -1,
+                    angle: 90
+                },
+                index: "my_tv"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
             socket.on("addFurniture", function(data){
                 console.log(data);
             });

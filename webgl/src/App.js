@@ -63,8 +63,9 @@ export default React.createClass({
                     }
                 }
                 let loader = new THREE.JSONLoader();
+                console.log("truc", data.model3D);
                 let json = loader.parse(data.model3D);
-
+                console.log(json);
                 let image = new Image();
                 let texture = new THREE.Texture();
                 image.src = "data:image/jpeg;base64," + data.textures_availables[data.selected_texture].texture;
@@ -75,6 +76,7 @@ export default React.createClass({
 
                 let material = new THREE.MeshBasicMaterial({map: texture});
                 let mesh = new THREE.Mesh(json.geometry, material);
+                console.log("TV",data.model3D);
                 mesh.position.x = data.position.x * -1;
                 mesh.position.y = data.position.y;
                 mesh.position.z = data.position.z * -1;
@@ -86,6 +88,10 @@ export default React.createClass({
                 mesh.furnitureId = data.id;
                 console.log(data.index);
                 mesh.furnitureIndex = data.index;
+                
+
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
 
                 les_meubles.push(mesh);
             });
@@ -410,9 +416,22 @@ export default React.createClass({
         function init() {
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
             scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0xffffff, 0, 750);
-            var light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
-            light.position.set(0.5, 1, 0.75);
+            //scene.fog = new THREE.Fog(0xffffff, 0, 750);
+            //var light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
+            var light = new THREE.SpotLight( 0xffffff );
+            light.position.set( 100, 1000, 100 );
+            light.castShadow = true;
+
+            light.shadow.mapSize.width = 1024;
+            light.shadow.mapSize.height = 1024;
+
+            light.shadow.camera.near = 500;
+            light.shadow.camera.far = 4000;
+            light.shadow.camera.fov = 30;
+
+
+            
+
             scene.add(light);
             controls = new PointerLockControls(THREE, camera);
             controls.getObject().position.y = 2;
@@ -473,6 +492,10 @@ export default React.createClass({
                     grassCube.position.x = x;
                     grassCube.position.z = z;
                     grassCube.position.y = 0;
+
+                    grassCube.castShadow = true;
+                    grassCube.receiveShadow = false;
+
                     scene.add(grassCube);
                 }
             }
@@ -486,55 +509,13 @@ export default React.createClass({
             scene.add(zero);
 
 
-            //walls
-           // initWalls();
-            /*
-            var canape_toile = THREE.ImageUtils.loadTexture('./images/tissu-de-toile.jpg');
-            var canape_grass = THREE.ImageUtils.loadTexture('./images/grass.png');
 
-            var canapeMesh = new THREE.MeshBasicMaterial({map: canape_toile});
-
-            var canape_cube = new THREE.Object3D();//create an empty container
-            var canape_part_1 = new THREE.Mesh(cube, canapeMesh);
-            var canape_part_2 = new THREE.Mesh(cube, canapeMesh);
-
-            canape_cube.add(canape_part_1);//add a mesh with geometry to it
-            canape_cube.add(canape_part_2);//add a mesh with geometry to it
-
-            canape_part_1.position.x = 3;
-            canape_part_1.position.z = 2;
-            canape_part_1.position.y = 1;
-            canape_part_2.position.x = 2;
-            canape_part_2.position.z = 2;
-            canape_part_2.position.y = 1;
-            scene.add(canape_cube);
-            les_meubles.push(canape_cube);
-            console.log(canape_cube);
-            canapeMesh.color.set(meubles_colors[0]);
-
-
-            var canapeMesh2 = new THREE.MeshBasicMaterial({map: canape_toile});
-            var other_canape = new THREE.Object3D();//create an empty container
-            var other_canape_part_1 = new THREE.Mesh(cube, canapeMesh2);
-            var other_canape_part_2 = new THREE.Mesh(cube, canapeMesh2);
-
-            other_canape.add(other_canape_part_1);//add a mesh with geometry to it
-            other_canape.add(other_canape_part_2);//add a mesh with geometry to it
-
-            other_canape_part_1.position.x = -2;
-            other_canape_part_1.position.z = 4;
-            other_canape_part_1.position.y = 1;
-            other_canape_part_2.position.x = -3;
-            other_canape_part_2.position.z = 4;
-            other_canape_part_2.position.y = 1;
-            
-            canapeMesh2.color.set(meubles_colors[0]);
-            scene.add(other_canape);
-            les_meubles.push(other_canape);
-            */
 
             renderer = glRenderer = new THREE.WebGLRenderer();
-            renderer.setClearColor(0xffffff);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            //renderer.setClearColor(0xffffff);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
@@ -640,7 +621,7 @@ export default React.createClass({
                     //console.log(intersects[0].object);
                     console.log(intersects[0].object.selected_texture);
                     var texture_keys = Object.keys(intersects[0].object.textures_availables);
-                    if (canGame()) {
+                    if (navigator.getGamepads()[0]) {
                         var gp = navigator.getGamepads()[0];
                         var buttons = gp.buttons
                         //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
