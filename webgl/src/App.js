@@ -60,7 +60,7 @@ export default React.createClass({
         socket = io.connect('http://mayl.me:8080');
         var les_meubles = [];
         var meubles_colors = [0xff0000, 0xf283b6, 0xb5bfa1, 0xedbfb7];
-
+        THREE.ImageUtils.crossOrigin = '';
         socket.on("connect", () => {
             console.log("connected");
 
@@ -77,6 +77,7 @@ export default React.createClass({
                         }
                     }
                 }
+                /*
                 let loader = new THREE.JSONLoader();
                 console.log("truc", data.model3D);
                 let json = loader.parse(data.model3D);
@@ -106,9 +107,46 @@ export default React.createClass({
                 
 
                 mesh.castShadow = true;
-                mesh.receiveShadow = true;
+                mesh.receiveShadow = true;*/
 
-                les_meubles.push(mesh);
+
+                var mtlLoader = new THREE.MTLLoader();
+                mtlLoader.setPath("http://mayl.me:3000/");
+                console.log(data.textures_availables[data.selected_texture].texture);
+                mtlLoader.load(data.textures_availables[data.selected_texture].texture, function (materials) {
+
+                    materials.preload();
+
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.setMaterials(materials);
+                    objLoader.setPath("http://mayl.me:3000/");
+                    console.log(data.model3D);
+                    objLoader.load(data.model3D, function (object) {
+                        object.traverse( function ( child ) {
+                            if ( child instanceof THREE.Mesh ) {
+                                child.material.color.setHex(0xFFF3E0);
+                            }
+                        });
+                        console.log(object)
+                        object.position.x = data.position.x * -1;
+                        object.position.y = 0.5;
+                        object.position.z = data.position.z * -1;
+                        scene.add(object);
+                        
+
+
+                        object.textures_availables = data.textures_availables;
+                        object.selected_texture = data.selected_texture;
+                        object.furnitureType = data.type;
+                        object.furnitureId = data.id;
+                        object.furnitureIndex = data.index;
+
+                        console.log("after made",object);
+                        console.log("les_meubles",les_meubles);
+                        les_meubles.push(object);
+                    });
+                });
+
             });
 
             socket.on("changedFurnitureTexture", function (data) {
@@ -369,32 +407,7 @@ export default React.createClass({
                 }
                 pivot.rotation.y = walls[i].radius * 0.00872665 * 2;
                 scene.add(pivot);
-                var loader = new THREE.JSONLoader();
-                var mtlLoader = new THREE.MTLLoader();
-                mtlLoader.setBaseUrl("../images/");
-                mtlLoader.setPath("../images/");
-                mtlLoader.load('sofa1.mtl', function (materials) {
-
-                    materials.preload();
-
-                    var objLoader = new THREE.OBJLoader();
-                    objLoader.setMaterials(materials);
-                    objLoader.setPath("../images/");
-                    objLoader.load('sofa1.obj', function (object) {
-                        object.traverse( function ( child ) {
-                            if ( child instanceof THREE.Mesh ) {
-                                child.material.color.setHex(0xFFF3E0);
-                            }
-                        });
-                        console.log(object)
-                        object.position.x = -5;
-                        object.position.y = 0.5;
-                        object.position.z = -6;
-                        scene.add(object);
-
-                    });
-
-                });
+               
                 //loader.load('../images/sofa2.json', function (geometry) {
                 //    var sofaMaterial = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/mufiber03.png')});
                 //    var mesh = new THREE.Mesh(geometry, sofaMaterial);
@@ -508,19 +521,19 @@ export default React.createClass({
         }
 
         function init() {
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.2, 1000);
             scene = new THREE.Scene();
             //scene.fog = new THREE.Fog(0xffffff, 0, 750);
             //var light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
-            var light = new THREE.SpotLight( 0xffffff );
-            light.position.set( 100, 1000, 100 );
+            var light = new THREE.DirectionalLight( 0xffffff, 0.8 );
+            light.position.set( 1000, 1000, 500 );
             light.castShadow = true;
 
             light.shadow.mapSize.width = 1024;
             light.shadow.mapSize.height = 1024;
 
             light.shadow.camera.near = 500;
-            light.shadow.camera.far = 4000;
+            light.shadow.camera.far = 2000;
             light.shadow.camera.fov = 30;
 
 
@@ -528,7 +541,7 @@ export default React.createClass({
 
             scene.add(light);
             controls = new PointerLockControls(THREE, camera);
-            controls.getObject().position.y = 2;
+            controls.getObject().position.y = 2.3;
             scene.add(controls.getObject());
             var onKeyDown = function (event) {
                 switch (event.keyCode) {
@@ -652,8 +665,10 @@ export default React.createClass({
 
             renderer = glRenderer = new THREE.WebGLRenderer();
             renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.shadowMap.type = 1;
+            renderer.shadowMap.soft = true;
 
+            console.log(renderer.shadowMap);
             //renderer.setClearColor(0xffffff);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -690,7 +705,7 @@ export default React.createClass({
         var gachetteD = false;
         var buttonRemove = false;
 
-        function animate() {
+         function animate() {
             requestAnimationFrame(animate);
 
             if (controlsEnabled) {
@@ -757,9 +772,10 @@ export default React.createClass({
                 var intersects = selector.intersectObjects(les_meubles, true);
                 if (intersects.length > 0) {
                     $(".selector").addClass('active');
-                    //console.log(intersects[0].object);
+                    console.log(intersects[0]);
+                    /*
                     console.log(intersects[0].object.selected_texture);
-                    var texture_keys = Object.keys(intersects[0].object.textures_availables);
+                    var texture_keys = Object.keys(intersects[0].object.textures_availables);*/
                     if (navigator.getGamepads()[0]) {
                         var gp = navigator.getGamepads()[0];
                         var buttons = gp.buttons
@@ -769,13 +785,13 @@ export default React.createClass({
 
                             gachetteR = true;
                         }
-                        else if (gachetteR == true && (!gp.buttons[4].pressed)) {
+                        else if(gachetteR == true && (!gp.buttons[4].pressed) ){
                             gachetteR = false;
-                            for (var i = 0; i < texture_keys.length; i++) {
-                                if (texture_keys[i] == intersects[0].object.selected_texture) {
+                            for (var i = 0; i < texture_keys.length; i++){
+                              /*if (texture_keys[i] == intersects[0].object.selected_texture){
 
                                     i++;
-                                    i = (i >= texture_keys.length ) ? 0 : i;
+                                    i = (i >=texture_keys.length )?0:i;
 
                                     var image = new Image();
                                     var texture = new THREE.Texture();
@@ -788,16 +804,16 @@ export default React.createClass({
                                     intersects[0].object.material = new THREE.MeshBasicMaterial({map: texture});
 
                                     var data = {
-                                        id: intersects[0].object.furnitureId,
-                                        index: intersects[0].object.furnitureIndex,
+                                        id : intersects[0].object.furnitureId,
+                                        index : intersects[0].object.furnitureIndex,
 
                                         type: intersects[0].object.furnitureType,
                                         texture_id: texture_keys[i]
                                     }
-                                    socket.emit("changeFurnitureTexture", data);
-                                }
+                                    socket.emit("changeFurnitureTexture",data);
+                                }*/
                             }
-                        } else {
+                        }else{
                             gachetteR = false;
                         }
 
@@ -807,13 +823,13 @@ export default React.createClass({
 
                             gachetteD = true;
                         }
-                        else if (gachetteD == true && (!gp.buttons[3].pressed)) {
+                        else if(gachetteD == true && (!gp.buttons[3].pressed) ){
                             gachetteD = false;
-                            for (var i = texture_keys.length; i >= 0; i--) {
-                                if (texture_keys[i] == intersects[0].object.selected_texture) {
+                            /*for (var i = texture_keys.length; i >=0 ; i--){
+                               if (texture_keys[i] == intersects[0].object.selected_texture){
 
                                     i--;
-                                    i = (i < 0 ) ? (texture_keys.length - 1) : i;
+                                    i = (i < 0 )?(texture_keys.length-1):i;
 
                                     var image = new Image();
                                     var texture = new THREE.Texture();
@@ -826,45 +842,46 @@ export default React.createClass({
                                     intersects[0].object.material = new THREE.MeshBasicMaterial({map: texture});
 
                                     var data = {
-                                        id: intersects[0].object.furnitureId,
-                                        index: intersects[0].object.furnitureIndex,
+                                        id : intersects[0].object.furnitureId,
+                                        index : intersects[0].object.furnitureIndex,
 
                                         type: intersects[0].object.furnitureType,
                                         texture_id: texture_keys[i]
                                     }
-                                    socket.emit("changeFurnitureTexture", data);
+                                    socket.emit("changeFurnitureTexture",data);
                                 }
-                            }
-                        } else {
+                            }*/
+                        }else{
                             gachetteD = false;
                         }
 
+                        
 
                         if (gp.buttons[2].pressed) {
                             //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
 
                             buttonRemove = true;
                         }
-                        else if (buttonRemove == true && (!gp.buttons[2].pressed)) {
+                        else if(buttonRemove == true && (!gp.buttons[2].pressed) ){
                             buttonRemove = false;
-                            var index = intersects[0].object.furnitureIndex;
-                            var type = intersects[0].object.furnitureType;
+
+                            var index = intersects[0].object.parent.furnitureIndex;
+                            var type = intersects[0].object.parent.furnitureType;
 
                                   
                             socket.emit("removeFurniture",{index : index,
-                                type: intersects[0].object.furnitureType});
+                                type: intersects[0].object.parent.furnitureType});
                             for (var i = 0; i < les_meubles.length; i++){
                                 if (les_meubles[i].furnitureIndex == index && les_meubles[i].furnitureType == type ){
-
                                     scene.remove(les_meubles[i]);
                                 }
                             }
-
-                        } else {
+                                            
+                        }else{
                             buttonRemove = false;
                         }
                     }
-
+                    
                 } else {
                     $(".selector").removeClass('active');
                 }
