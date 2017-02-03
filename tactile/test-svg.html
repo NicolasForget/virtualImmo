@@ -23,36 +23,6 @@
 	    <script type="text/javascript" src="js/removebox.js"></script>
 	</head>
 	<body>
-		<!-- header -->
-	   <!--  <nav class="navbar navbar-default navbar-fixed-top">
-	      	<div class="container">
-	        	<div class="navbar-header">
-		          	<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-		            	<span class="sr-only">Toggle navigation</span>
-		            	<span class="icon-bar"></span>
-		            	<span class="icon-bar"></span>
-		            	<span class="icon-bar"></span>
-		          	</button>
-		          	<a class="navbar-brand" href="#">VirtualImmo</a>
-	        	</div>
-	        	<div id="navbar" class="collapse navbar-collapse">
-	          		<ul class="nav navbar-nav">
-			            <li class="active"><a href="#">Home</a></li>
-			            <li><a href="#help">Help</a></li>
-			            <li><a href="#contact">Contact</a></li>
-			            <li class="dropdown">
-			              	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Members<span class="caret"></span></a>
-			              	<ul class="dropdown-menu">
-				                <li><a href="#">Mesnier Maylanie</a></li>
-				                <li><a href="#">Saraïs Anthony</a></li>
-				                <li><a href="#">Forget Nicolas</a></li>
-				                <li><a href="#">Ding Feng</a></li>
-			              	</ul>
-	            		</li>
-	          		</ul>
-	        	</div>
-	      	</div>
-	    </nav> -->
 
 	    <!-- main div -->
 	    <div class="container-fluid">
@@ -64,13 +34,13 @@
 			</div>
 	    	<div id="selectBox"></div>
 	    	<div id="selectBoxRot"></div>
-	    	<div class="row">
+	    	<!-- <div class="row">
 		    	<div id="sofaRotate" class="center-block" style="visibility: hidden">
 					<input id="nAngle" type="range" min="0" max="360">
 					<span id="nAngle-value">0</span>
 					<div id="checkSofaPlaced"></div>
 		    	</div>
-			</div>
+			</div> -->
 
 			
 
@@ -79,26 +49,36 @@
 	             	<svg id="roomMap" width="1500" height="800"></svg>
 	        	</div>
 	      	</div>
+
+	     <!--  	<div class="row">
+	        	<div class="center-block" id="main-content">
+	             	<svg id="roomMap" width="800" height="800"></svg>
+	        	</div>
+	      	</div> -->
 	    </div>
 	    <!-- pie menu div -->
-	    <div id="piemenu">
+	    <div id="piemenu" class="piemenuLastLayer">
 	      	<svg width="400" height="400">
 	        	<g id="menu-holder" transform="translate(200,200)"></g>
 	      	</svg>
 	    </div>
 
+	    <div id="tvMenu" class="piemenuLastLayer">
+	      	<svg width="400" height="400">
+	        	<g id="menu-tv" transform="translate(200,200)"></g>
+	      	</svg>
+	    </div>
+
+	    <div id="tableMenu" class="piemenuLastLayer">
+	      	<svg width="400" height="400">
+	        	<g id="menu-table" transform="translate(200,200)"></g>
+	      	</svg>
+	    </div>
+
+
 	    <div id="resetButton"></div>
 
 	    
-
-	    <!-- footer -->
-	   <!--  <footer class="footer">
-	      	<div class="container">
-	        	<p class="text-muted">©VirtualImmo  BY Mesnier Maylanie, Saraïs Anthony, Forget Nicolas, Ding Feng</p>
-	      	</div>
-	    </footer> -->
-
-	    <!-- <script src="http://192.168.43.43:4200/socket.io/socket.io.js"></script> -->
 	    <script src="http://mayl.me:8080/socket.io/socket.io.js"></script>
 		<script>
 
@@ -148,6 +128,7 @@
 
 		   socket.on('availableSofas', function (data) {
 		   		console.log(data);
+		   		// if(data.length > 1){
 		   		for (var i = 0; i < data.length;i++){
 		   			var sofaMenuInfo = data[i];
 		   			// var sofas=[];
@@ -160,8 +141,10 @@
 			   			var texture = sofaMenuInfo.textures[color];
 			   			console.log(texture);
 				   		var sofaColors = {
+				   			id : sofaMenuInfo.id,
+				   			textureId:texture.id,
 							icon:texture.topImg,
-							action:"sofaSelect(" + k + ");",
+							action:"objectSelect(sofas," + k + ",\"sofa\");",
 							size:{
 								length: (size.z * 100),
 								width: (size.x * 100)
@@ -171,22 +154,81 @@
 						sofas.push(sofaColors);
 					}
 
-					sofass.push(sofas);
+					// sofass.push(sofas);
 
 					var sofa = {
 						id:i,
 						icon:sofaMenuInfo.miniature,
-						action:"createMenu(menuPositionX,menuPositionY,sofas);",
-						sofaObject: data[i]
+						action:"createMenuMeuble(menuPositionX,menuPositionY,sofas,\"sofa\","+i+");",
+						object: data[i]
 					}
-					meubleMenu.push(sofa);
+					meubleSofaMenu.push(sofa);
 				}
+			// }
+			// console.log(meubleSofaMenu);
 				// console.log(sofass);
 				//-------------------------------------select Meuble-----------------------------------------------
 
-	        	
+				// var select = d3.select('#selectBox')
+				//   .append('select')
+				//   	.attr('class','select')
+				//     .on('change',onchange);
 
-	        	
+				// var options = select
+				//   .selectAll('option')
+				// 	.data(["sofa", "table", "tv"]).enter()
+				// 	.append('option')
+				// 		.text(function (d) { return d; });
+
+				// function onchange() {
+				// 	selectValue = d3.select('#selectBox').select('select').property('value')
+				// 	// console.log(selectValue);
+				// };
+				// -----------------------------------select Meuble -------------------------------------------------
+
+		   });
+
+		   socket.emit("tableWantFurniture","tv");
+
+		   socket.on('availableTv', function (data) {
+		   		console.log(data);
+		   		for (var i = 0; i < data.length;i++){
+		   			var tvMenuInfo = data[i];
+		   			// var sofas=[];
+
+			   		var size = tvMenuInfo.size
+			   		var colors = Object.keys(tvMenuInfo.textures);
+			   		for (var k = 0; k < colors.length;k++){
+			   			// console.log(k);
+			   			var color = colors[k];
+			   			var texture = tvMenuInfo.textures[color];
+			   			console.log(texture);
+				   		var tvColors = {
+				   			id : tvMenuInfo.id,
+				   			textureId:texture.id,
+							icon:texture.topImg,
+							action:"objectSelect(tvs," + k + ",\"tv\");",
+							size:{
+								length: (size.z * 100),
+								width: (size.x * 100)
+							},
+							color: color
+						};
+						tvs.push(tvColors);
+					}
+
+					// sofass.push(sofas);
+
+					var tv = {
+						id:i,
+						icon:tvMenuInfo.miniature,
+						action:"createMenuMeuble(menuPositionX,menuPositionY,tvs,\"tv\","+i+");",
+						object: data[i]
+					}
+					meubleTvMenu.push(tv);
+				}
+				// console.log(sofass);
+				//-------------------------------------select Meuble-----------------------------------------------
 
 				var select = d3.select('#selectBox')
 				  .append('select')
@@ -195,7 +237,7 @@
 
 				var options = select
 				  .selectAll('option')
-					.data(["sofa", "table", "bed"]).enter()
+					.data(["sofa", "tv"]).enter()
 					.append('option')
 						.text(function (d) { return d; });
 
@@ -206,17 +248,35 @@
 				// -----------------------------------select Meuble -------------------------------------------------
 
 		   });
+		   
+
 
 		   	socket.on("changedFurnitureTexture",function(data){
 		   		var c = "";
+		   		console.log("[changedFurnitureTexture]" + data);
 	            switch(data.texture_id){
 	            	case "beige":c = "#f5f5dc";break;
 	            	case "noir":c = "black";break;
+	            	case "bordeau": c = "red";break;
+	            	case "blanc":c = "white";break;
 	            	default : c = "#A9A9A9";
 	            }
 		   		
-				console.log(data);
-				container.select(".g-sofa").select("rect").attr("fill",c);
+				// console.log(data);
+				container.select(".g-"+data.type+"s").selectAll(".g-element").each(function(){
+					if(data.index == d3.select(this).select("rect").attr("meubleIndex")){
+						d3.select(this).select("rect").style("fill",c);
+					}
+				});
+			});
+
+			socket.on("removeFurniture",function(data){
+		   		console.log("[removeFurniture] "+data);
+		   		container.select(".g-"+data.type+"s").selectAll(".g-element").each(function(){
+					if(data.index == d3.select(this).select("rect").attr("meubleIndex")){
+						d3.select(this).remove();
+					}
+				});
 			});
 
 
@@ -235,7 +295,7 @@
 
 			var optionsRot = selectRot
 				  .selectAll('option')
-					.data(["map", "menu","meuble"]).enter()
+					.data(["map", "sofamenu","tvmenu","meuble"]).enter()
 					.append('option')
 						.text(function (d) { return d; });
 
@@ -249,13 +309,10 @@
 
 
         	// the sofa data array 
-        	var meubleMenu = [
-	            // { icon : "img/1.png", action: "createMenu(menuPositionX,menuPositionY,sofas);"}
-	            // { icon : "img/bed-1.png", action: "createMenu(menuPositionX,menuPositionY,beds);"},
-	            // { icon : "img/table-1.png", action: "createMenu(menuPositionX,menuPositionY,tables);"},
-        	];
+        	var meubleSofaMenu = [];
+        	var meubleTvMenu = [];
 
-        	var sofass=[];
+        	// var sofass=[];
 
         	// the sofa data array 
         	var sofas = [
@@ -267,16 +324,16 @@
         	];
 
         	// the beds data array 
-        	var beds = [
-	            { icon : "img/bed-1.png", action: "objectSelect(beds,0,\"bed\");", size : {length: 240, width : 220} ,color : "blue" },
-	            { icon : "img/bed-2.png", action: "objectSelect(beds,1,\"bed\");", size : {length: 200, width : 180} ,color : "green" }
+        	var tvs = [
+	            // { id:1,textureId:"blue", icon : "img/bed-1.png", action: "objectSelect(tvs,0,\"tv\");", size : {length: 240, width : 220} ,color : "blue" },
+	            // { id:2,textureId:"green",icon : "img/bed-2.png", action: "objectSelect(tvs,1,\"tv\");", size : {length: 200, width : 180} ,color : "green" }
         	];
 
         	// the tables data array 
         	var tables = [
-	            { icon : "img/table-1.png", action: "objectSelect(tables,0,\"table\");", size : {length: 100, width : 60}, color : "blue" },
-	            { icon : "img/table-2.png", action: "objectSelect(tables,1,\"table\");", size : {length: 80, width : 40}, color : "green" },
-	            { icon : "img/table-3.png", action: "objectSelect(tables,2,\"table\");", size : {length: 120, width : 80}, color : "red" }
+	            { id:1,textureId:"blue",icon : "img/table-1.png", action: "objectSelect(tables,0,\"table\");", size : {length: 100, width : 60}, color : "blue" },
+	            { id:2,textureId:"green",icon : "img/table-2.png", action: "objectSelect(tables,1,\"table\");", size : {length: 80, width : 40}, color : "green" },
+	            { id:3,textureId:"red",icon : "img/table-3.png", action: "objectSelect(tables,2,\"table\");", size : {length: 120, width : 80}, color : "red" }
         	];
 
 
@@ -284,14 +341,14 @@
 
 
         	// the four points of a sofa
-        	var sofaPoints = [
-        		{x : 0, y : 0},
-        		{x : 0, y : 0},
-        		{x : 0, y : 0},
-        		{x : 0, y : 0}
-        	];
+        	// var sofaPoints = [
+        	// 	{x : 0, y : 0},
+        	// 	{x : 0, y : 0},
+        	// 	{x : 0, y : 0},
+        	// 	{x : 0, y : 0}
+        	// ];
 
-        	var sofaColor;
+        	// var sofaColor;
 
         	var m;
         	//mouse click position
@@ -299,6 +356,21 @@
         	//sofa position relative to the room
         	var rectX = 0;
         	var rectY = 0;
+
+        	var createPosition = {
+        		sofa : {
+        			x:0,
+        			y:0
+        		},
+        		table : {
+        			x:0,
+        			y:0
+        		},
+        		tv : {
+        			x:0,
+        			y:0
+        		}
+        	};
 
         	var menuPositionX = 0;
         	var menuPositionY = 0;
@@ -318,6 +390,10 @@
         	var imgHeight = 800, imgWidth = 1500,      // Image dimensions (don't change these)
             	width =  1500, height = 800,             // Dimensions of cropped region
             	translate0 = [0, 0], scale0 = 1;  // Initial offset & scale
+
+           	// var imgHeight = 800, imgWidth = 800,      // Image dimensions (don't change these)
+            // 	width =  800, height = 800,             // Dimensions of cropped region
+            // 	translate0 = [0, 0], scale0 = 1;  // Initial offset & scale
 
         	var zoom = d3.behavior.zoom()
 		    	.scaleExtent([1, 8])
@@ -341,7 +417,8 @@
           	container.append("g").attr("class","imgMap").attr("transform","translate(0,0)").append("image")
               	.attr("width",  imgWidth + "px")
               	.attr("height", imgHeight + "px")
-              	.attr("xlink:href", "img/big-room.png");
+             	.attr("xlink:href", "img/big-room.png");
+              	// .attr("xlink:href", "img/room-small.png");
 
           	container.append("g")
 		    	.attr("class", "x axis")
@@ -390,36 +467,59 @@
 			container.append("g").attr("class","g-sofa").attr("transform","translate(0,0)").append("text");
 
 			var meuble = container.append("g").attr("class","g-meuble").attr("transform","translate(0,0)");
-			var domBeds = meuble.append("g").attr("class","g-beds").attr("transform","translate(0,0)");
+			var domTvs = meuble.append("g").attr("class","g-tvs").attr("transform","translate(0,0)");
 			var domTables = meuble.append("g").attr("class","g-tables").attr("transform","translate(0,0)");
+			var domSofas = meuble.append("g").attr("class","g-sofas").attr("transform","translate(0,0)");
 
           	svg.on("dblclick",doubleClick);
 
-          	var drag = d3.behavior.drag()
-			    .on("dragstart", dragstarted)
-			    .on("drag", dragged)
-			    .on("dragend", dragended);
+       //    	var drag = d3.behavior.drag()
+			    // .on("dragstart", dragstarted)
+			    // .on("drag", dragged)
+			    // .on("dragend", dragended);
 			updateR(0);
 
 
 
-			function createMeubleSelectMenu(x,y){
-				changeLayer(true);
-	            if(m){
-	              m.hide();
-	            }
-	            
-	            d3.select("#menu-holder").selectAll("g").each(function(){
-	              d3.select(this).remove();
-	            });
-	            
-	            m = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
-	                        .appendTo("#menu-holder").show(meubleMenu);
+			function createMeubleSelectMenu(x,y,type){
+				switch(type){
+					case "tv":
+						changeMenuLayer(true,"tvMenu");
+			            if(mtv){
+			              mtv.hide();
+			            }
+			            
+			            d3.select("#menu-tv").selectAll("g").each(function(){
+			              d3.select(this).remove();
+			            });
+			            
+			            mtv = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
+			                        .appendTo("#menu-tv").show(meubleTvMenu);
 
-	            var menu = $("#piemenu");
-	            menu.css('position', 'absolute');
-	            menu.css("left", x - 200);
-	            menu.css("top", y - 200);
+			            var menu = $("#tvMenu");
+			            menu.css('position', 'absolute');
+			            menu.css("left", x - 200);
+			            menu.css("top", y - 200);
+						break;
+					default:
+						changeMenuLayer(true,"piemenu");
+			            if(m){
+			              m.hide();
+			            }
+			            
+			            d3.select("#menu-holder").selectAll("g").each(function(){
+			              d3.select(this).remove();
+			            });
+			            
+			            m = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
+			                        .appendTo("#menu-holder").show(meubleSofaMenu);
+
+			            var menu = $("#piemenu");
+			            menu.css('position', 'absolute');
+			            menu.css("left", x - 200);
+			            menu.css("top", y - 200);
+				}
+				
 			}
 
 			function doubleClick(){
@@ -437,10 +537,21 @@
 	            // console.log(clickY);
 	            // createMeubleSelectMenu(d3.event.pageX, d3.event.pageY);
 	            switch(selectValue){
-	            	case "table":createMenu(menuPositionX,menuPositionY,tables);break;
-	            	case "bed":createMenu(menuPositionX,menuPositionY,beds);break;
-	            	default: createMeubleSelectMenu(d3.event.pageX, d3.event.pageY);
+	            	// case "table":createMenu(menuPositionX,menuPositionY,tables);break;
+	            	// case "bed":createMenu(menuPositionX,menuPositionY,beds);break;
+	            	case "table":
+	            		createMenuMeuble(menuPositionX,menuPositionY,tables,"table",null);
+	            		break;
+	            	case "tv":
+	            		createMeubleSelectMenu(d3.event.pageX, d3.event.pageY,"tv");
+	            		break;
+	            	default: 
+	            		createMeubleSelectMenu(d3.event.pageX, d3.event.pageY,"sofa");
 	            };
+
+	            createPosition[selectValue].x = rectX;
+	            createPosition[selectValue].y = rectY;
+	            console.log(createPosition);
 			}	
 
 
@@ -450,71 +561,71 @@
             	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")rotate"+rotateValue);
           	}
 
-          	function dragstarted(d) {
-          		var postion = d3.select(this).attr("transform").split(/\(|\)|\,/);
-	          	rectX = parseFloat(postion[1],10);
-				rectY = parseFloat(postion[2],10);
+   //        	function dragstarted(d) {
+   //        		var postion = d3.select(this).attr("transform").split(/\(|\)|\,/);
+	  //         	rectX = parseFloat(postion[1],10);
+			// 	rectY = parseFloat(postion[2],10);
 
-			  	d3.event.sourceEvent.stopPropagation();
-			  	d3.select(this).classed("dragging", true);
-			  	d3.select(this.parentNode).select("text").text("Moving").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
-			  	sofaPlacedCheck.style("visibility","hidden");
-			}
+			//   	d3.event.sourceEvent.stopPropagation();
+			//   	d3.select(this).classed("dragging", true);
+			//   	d3.select(this.parentNode).select("text").text("Moving").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+			//   	sofaPlacedCheck.style("visibility","hidden");
+			// }
 
-			function dragged(d) {
-				rectX += d3.event.dx;
-				rectY += d3.event.dy;
-				var sofaWidth = parseFloat(d3.select(this).attr("width"),10);
-				var sofaHeight = parseFloat(d3.select(this).attr("height"),10);
+			// function dragged(d) {
+			// 	rectX += d3.event.dx;
+			// 	rectY += d3.event.dy;
+			// 	var sofaWidth = parseFloat(d3.select(this).attr("width"),10);
+			// 	var sofaHeight = parseFloat(d3.select(this).attr("height"),10);
 
-				setSofaPoints();
-			    // console.log(sofaPoints);
-			    // console.log(isSofaBadPlaced());
-				if(isSofaBadPlaced()){
-					d3.select(this).classed("badPlace",true);
-					d3.select(this.parentNode).select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
-				}else{
-					d3.select(this).classed("badPlace",false);
-					d3.select(this.parentNode).select("text").text("Moving").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");;
-				}
-				d3.select(this).attr('transform', "translate(" + rectX + "," + rectY + ")rotate(" + currentAngle + "," + sofaSelectedCenterX + "," + sofaSelectedCenterY + ")");;
+			// 	setSofaPoints();
+			//     // console.log(sofaPoints);
+			//     // console.log(isSofaBadPlaced());
+			// 	if(isSofaBadPlaced()){
+			// 		d3.select(this).classed("badPlace",true);
+			// 		d3.select(this.parentNode).select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+			// 	}else{
+			// 		d3.select(this).classed("badPlace",false);
+			// 		d3.select(this.parentNode).select("text").text("Moving").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");;
+			// 	}
+			// 	d3.select(this).attr('transform', "translate(" + rectX + "," + rectY + ")rotate(" + currentAngle + "," + sofaSelectedCenterX + "," + sofaSelectedCenterY + ")");;
 				
-			    sofaPlacedCheck.attr("transform","translate(" + (sofaPoints[2].x - 10) + "," + (sofaPoints[2].y - 10) + ")");
-			}
+			//     sofaPlacedCheck.attr("transform","translate(" + (sofaPoints[2].x - 10) + "," + (sofaPoints[2].y - 10) + ")");
+			// }
 
-			function dragended(d) {
+			// function dragended(d) {
 				
-			  	d3.select(this).classed("dragging", false);
-			  	if(isSofaBadPlaced()){
-			  		sofaPlacedCheck.style("visibility","hidden");
-			  		d3.select(this.parentNode).select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
-			  	}else{
-			  		sofaPlacedCheck.style("visibility","visible");
-			  		d3.select(this.parentNode).select("text").text("Check to place it.").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");;
-			  	}
-			}
+			//   	d3.select(this).classed("dragging", false);
+			//   	if(isSofaBadPlaced()){
+			//   		sofaPlacedCheck.style("visibility","hidden");
+			//   		d3.select(this.parentNode).select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+			//   	}else{
+			//   		sofaPlacedCheck.style("visibility","visible");
+			//   		d3.select(this.parentNode).select("text").text("Check to place it.").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");;
+			//   	}
+			// }
           
 
 
-          	function createMenu(x,y,menuElements){
-          		// selectSofaIndex = index;
-	            changeLayer(true);
-	            if(m){
-	              m.hide();
-	            }
+          	// function createMenu(x,y,menuElements){
+          	// 	// selectSofaIndex = index;
+	          //   changeLayer(true);
+	          //   if(m){
+	          //     m.hide();
+	          //   }
 	            
-	            d3.select("#menu-holder").selectAll("g").each(function(){
-	              d3.select(this).remove();
-	            });
+	          //   d3.select("#menu-holder").selectAll("g").each(function(){
+	          //     d3.select(this).remove();
+	          //   });
 	            
-	            m = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
-	                        .appendTo("#menu-holder").show(menuElements);
+	          //   m = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
+	          //               .appendTo("#menu-holder").show(menuElements);
 
-	            var menu = $("#piemenu");
-	            menu.css('position', 'absolute');
-	            menu.css("left", x - 200);
-	            menu.css("top", y - 200);
-          	}
+	          //   var menu = $("#piemenu");
+	          //   menu.css('position', 'absolute');
+	          //   menu.css("left", x - 200);
+	          //   menu.css("top", y - 200);
+          	// }
 
           
 
@@ -526,94 +637,94 @@
 	            }
           	}
 
-          	function sofaSelect(index){
-	            // console.log(index);
-	            if(m)m.hide();
-	            changeLayer(false);
-	            var sofa = sofas[index];
-	            sofaColor = sofa.color;
-	            sofaSelected = index;
-	            createSofa(clickX,clickY,sofa.size.width,sofa.size.length);
-	            console.log(sofaColor);
-	            // console.log(sofa.size);
-          	}
+          	// function sofaSelect(index){
+	          //   // console.log(index);
+	          //   if(m)m.hide();
+	          //   changeLayer(false);
+	          //   var sofa = sofas[index];
+	          //   sofaColor = sofa.color;
+	          //   sofaSelected = index;
+	          //   createSofa(clickX,clickY,sofa.size.width,sofa.size.length);
+	          //   console.log(sofaColor);
+	          //   // console.log(sofa.size);
+          	// }
 
-          	function createSofa(x,y,width,height){
-          		showResetButton();
-          		update(0);
-          		currentAngle = 0;
-          		sofaDemiDiagonal = Math.sqrt(width * width + height * height) / 2;
-          		sofaSelectedCenterX = width / 2;
-	            sofaSelectedCenterY = height / 2;
-	            setSofaPoints();
+    //       	function createSofa(x,y,width,height){
+    //       		showResetButton();
+    //       		update(0);
+    //       		currentAngle = 0;
+    //       		sofaDemiDiagonal = Math.sqrt(width * width + height * height) / 2;
+    //       		sofaSelectedCenterX = width / 2;
+	   //          sofaSelectedCenterY = height / 2;
+	   //          setSofaPoints();
 
-	            var c = "";
-	            switch(sofaColor){
-	            	case "beige":c = "#f5f5dc";break;
-	            	case "noir":c = "black";break;
-	            	default : c = "#A9A9A9";
-	            }
+	   //          var c = "";
+	   //          switch(sofaColor){
+	   //          	case "beige":c = "#f5f5dc";break;
+	   //          	case "noir":c = "black";break;
+	   //          	default : c = "#A9A9A9";
+	   //          }
 
-	            if(container.select(".g-sofa").select('rect')[0][0] !== null){
-	              container.select(".g-sofa").select('rect').remove();
-	            }
-	            container.select(".g-sofa").attr("transform","translate(0,0)").append('rect').attr("transform","translate(" + x + "," + y + ")rotate(0,0,0)").attr("fill-opacity","0.8").attr("width",width)
-	            	.attr("height",height).attr("fill",c).call(drag);
-	           	// container.select(".g-sofa").append("image").attr("id","sofaImage").attr("href","data:image/png;base64,"+meubleMenu[selectSofaIndex].sofaObject.textures[sofaColor].topImg).attr("height",meubleMenu[selectSofaIndex].sofaObject.size.z*100).attr("width",meubleMenu[selectSofaIndex].sofaObject.size.x*100).attr("transform","translate(" + x + "," + y + ")rotate(0,0,0)");
-	            if(sofaPlacedCheck)	
-	            	sofaPlacedCheck.remove();
+	   //          if(container.select(".g-sofa").select('rect')[0][0] !== null){
+	   //            container.select(".g-sofa").select('rect').remove();
+	   //          }
+	   //          container.select(".g-sofa").attr("transform","translate(0,0)").append('rect').attr("transform","translate(" + x + "," + y + ")rotate(0,0,0)").attr("fill-opacity","0.8").attr("width",width)
+	   //          	.attr("height",height).attr("fill",c).call(drag);
+	   //         	// container.select(".g-sofa").append("image").attr("id","sofaImage").attr("href","data:image/png;base64,"+meubleMenu[selectSofaIndex].sofaObject.textures[sofaColor].topImg).attr("height",meubleMenu[selectSofaIndex].sofaObject.size.z*100).attr("width",meubleMenu[selectSofaIndex].sofaObject.size.x*100).attr("transform","translate(" + x + "," + y + ")rotate(0,0,0)");
+	   //          if(sofaPlacedCheck)	
+	   //          	sofaPlacedCheck.remove();
 
-	            checkBox.size(20).x(sofaPoints[2].x - 10).y(sofaPoints[2].y - 10).rx(5).ry(5).markStrokeWidth(2).boxStrokeWidth(3).checked(false).clickEvent(function(){
-	            	if(checkBox.checked()){
-	            		d3.select("#sofaRotate").style("visibility","hidden");
-	            		container.select(".g-sofa").select("rect").classed("sofaPlaced",true).on('mousedown.drag', null);
-	            		container.select(".g-sofa").select("text").text("Placed").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+	   //          checkBox.size(20).x(sofaPoints[2].x - 10).y(sofaPoints[2].y - 10).rx(5).ry(5).markStrokeWidth(2).boxStrokeWidth(3).checked(false).clickEvent(function(){
+	   //          	if(checkBox.checked()){
+	   //          		d3.select("#sofaRotate").style("visibility","hidden");
+	   //          		container.select(".g-sofa").select("rect").classed("sofaPlaced",true).on('mousedown.drag', null);
+	   //          		container.select(".g-sofa").select("text").text("Placed").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 55) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
 
-	            		//Create sofa dimension table and send it to server
+	   //          		//Create sofa dimension table and send it to server
 
-	            		var o = meubleMenu[selectSofaIndex].sofaObject;
-	            		console.log(o);
+	   //          		var o = meubleMenu[selectSofaIndex].sofaObject;
+	   //          		console.log(o);
 
-					    var sofaObject = {
-					    	type : selectValue,
-					    	id:""+selectSofaIndex,
-					    	textureId:sofaColor,
-					    	position:{
-					    		x:2,
-					    		y:0.5,
-					    		z:2,
-					    		angle: (360 - currentAngle)
-					    	}
-					    };
-					    socket.emit('tableAddFurniture', sofaObject);
-					    console.log(sofaObject);
-					    console.log("sofa Send to server");
+				// 	    var sofaObject = {
+				// 	    	type : selectValue,
+				// 	    	id:""+selectSofaIndex,
+				// 	    	textureId:sofaColor,
+				// 	    	position:{
+				// 	    		x:2,
+				// 	    		y:0.5,
+				// 	    		z:2,
+				// 	    		angle: (360 - currentAngle)
+				// 	    	}
+				// 	    };
+				// 	    socket.emit('tableAddFurniture', sofaObject);
+				// 	    console.log(sofaObject);
+				// 	    console.log("sofa Send to server");
 
 
-	            	}else{
-	            		d3.select("#sofaRotate").style("visibility","visible");
-	            		container.select(".g-sofa").select("rect").classed("sofaPlaced",false).call(drag);
-	            		container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
-	            	}
-	            });
+	   //          	}else{
+	   //          		d3.select("#sofaRotate").style("visibility","visible");
+	   //          		container.select(".g-sofa").select("rect").classed("sofaPlaced",false).call(drag);
+	   //          		container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+	   //          	}
+	   //          });
 
 	            
-	            d3.select("#sofaRotate").style("visibility","visible");
-	            container.select(".g-sofa").call(checkBox);
-	            sofaPlacedCheck = d3.select(".g-sofa").select(".placeObject");
-	            if(isSofaBadPlaced()){
-					container.select(".g-sofa").select('rect').classed("badPlace",true);
-					container.select(".g-sofa").select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
-					if(sofaPlacedCheck)
-						sofaPlacedCheck.style("visibility","hidden");
-				}else{
-					container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
-					container.select(".g-sofa").select('rect').classed("badPlace",false);
-					if(sofaPlacedCheck)
-						sofaPlacedCheck.style("visibility","visible");
-				}
+	   //          d3.select("#sofaRotate").style("visibility","visible");
+	   //          container.select(".g-sofa").call(checkBox);
+	   //          sofaPlacedCheck = d3.select(".g-sofa").select(".placeObject");
+	   //          if(isSofaBadPlaced()){
+				// 	container.select(".g-sofa").select('rect').classed("badPlace",true);
+				// 	container.select(".g-sofa").select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+				// 	if(sofaPlacedCheck)
+				// 		sofaPlacedCheck.style("visibility","hidden");
+				// }else{
+				// 	container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+				// 	container.select(".g-sofa").select('rect').classed("badPlace",false);
+				// 	if(sofaPlacedCheck)
+				// 		sofaPlacedCheck.style("visibility","visible");
+				// }
 	            
-          	}
+    //       	}
 
 			function showResetButton(){
 				if(buttonSvg == null){
@@ -641,21 +752,37 @@
 				zoom.scale(1);
 				zoom.translate([0,0]);
 				d3.select('#resetButton').select("svg").remove();
-				d3.select(".zoomArea").attr("transform","translate(0,0)scale(1)");
-				if(container.select(".g-sofa").select('rect')[0][0] !== null){
-	              container.select(".g-sofa").select('rect').remove();
-	            }
+				d3.select(".zoomArea").attr("transform","translate(0,0)scale(1)rotate(0,750,400)");
+				// d3.select(".zoomArea").attr("transform","translate(0,0)scale(1)rotate(0,400,400)");
+				// if(container.select(".g-sofa").select('rect')[0][0] !== null){
+	   //            container.select(".g-sofa").select('rect').remove();
+	   //          }
 
-	            d3.select("#sofaRotate").style("visibility","hidden");
-	            container.select(".g-sofa").select("text").text("");
-	            if(sofaPlacedCheck)
-	            	sofaPlacedCheck.remove();
+	            container.select(".g-tables").selectAll('.g-element').each(function(){
+	            	d3.select(this).remove();
+	            });
+
+	            container.select(".g-tvs").selectAll('.g-element').each(function(){
+	            	d3.select(this).remove();
+	            });
+
+	            container.select(".g-sofas").selectAll('.g-element').each(function(){
+	            	d3.select(this).remove();
+	            });
+
+	            updateR(0);
+
+
+	            // d3.select("#sofaRotate").style("visibility","hidden");
+	            // container.select(".g-sofa").select("text").text("");
+	            // if(sofaPlacedCheck)
+	            // 	sofaPlacedCheck.remove();
 			}
 
 			// when the input range changes update the angle 
-			d3.select("#nAngle").on("input", function() {
-			  	update(+this.value);
-			});
+			// d3.select("#nAngle").on("input", function() {
+			//   	update(+this.value);
+			// });
 
 			// when the input range changes update the angle 
 			d3.select("#rAngle").on("input", function() {
@@ -669,8 +796,12 @@
 
 			  	if(rotElement == 'map'){
 			  		rotateMap(nAngle);
-			  	}else if(rotElement == 'menu'){
-			  		rotateMenu(nAngle);
+			  	}else if(rotElement == 'sofamenu'){
+			  		rotateMenu(nAngle,"menu-holder");
+			  	}else if(rotElement == 'tablemenu'){
+			  		rotateMenu(nAngle,"menu-table");
+			  	}else if(rotElement == 'tvmenu'){
+			  		rotateMenu(nAngle,"menu-tv");
 			  	}else if(rotElement == 'meuble'){
 			  		rotateMeubleSelected(nAngle);
 			  	}
@@ -681,42 +812,46 @@
 			function rotateMap(nAngle){
 				var transformZoomArea = d3.select(".zoomArea").attr("transform");
 			  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
-			  	d3.select('.zoomArea').attr("transform",splitTransformZoomArea + "rotate("+nAngle+",750,400)");
+			  	// d3.select('.zoomArea').attr("transform",splitTransformZoomArea + "rotate("+nAngle+",750,400)");
+			  	d3.select('.zoomArea').attr("transform",splitTransformZoomArea + "rotate("+nAngle+",400,400)");
 			}
 
-			function rotateMenu(nAngle){
-				var transformZoomArea = d3.select("#menu-holder").attr("transform");
+			function rotateMenu(nAngle,svgMenu){
+				var transformZoomArea = d3.select("#"+svgMenu).attr("transform");
 			  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
-			  	d3.select('#menu-holder').attr("transform",splitTransformZoomArea + "rotate("+nAngle+")");
-			  	d3.select(".arrow").attr("transform","rotate(" + (-nAngle) + ")");
+			  	d3.select('#'+svgMenu).attr("transform",splitTransformZoomArea + "rotate("+nAngle+")");
+			  	d3.select('#'+svgMenu).select(".arrow").attr("transform","rotate(" + (-nAngle) + ")");
 				
 			}
 
 			function rotateMeubleSelected(nAngle){
-				var transformZoomArea = d3.select(".meubleSelected").attr("transform");
-			  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
-			  	var rotateCenter = transformZoomArea.split("rotate")[1].split(",");
-			  	console.log(rotateCenter);
-			  	d3.select('.meubleSelected').attr("transform",splitTransformZoomArea + "rotate("+nAngle+","+rotateCenter[1]+","+rotateCenter[2]);
-			  	var objectList;
-			  	switch(d3.select('.meubleSelected').attr("meubleType")){
-			  		case "bed":
-			  			objectList = bedsOnMap;
-			  			break;
-			  		case "table":
-			  			objectList = tablesOnMap;
-			  			break;
-			  		default:;
-			  	}
+				if (d3.select('.meubleSelected')[0][0] != null){
+					var transformZoomArea = d3.select(".meubleSelected").attr("transform");
+				  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
+				  	var rotateCenter = transformZoomArea.split("rotate")[1].split(",");
+				  	// console.log(rotateCenter);
+				  	d3.select('.meubleSelected').attr("transform",splitTransformZoomArea + "rotate("+nAngle+","+rotateCenter[1]+","+rotateCenter[2]);
+				  	var objectList;
+				  	switch(d3.select('.meubleSelected').attr("meubleType")){
+				  		case "tv":
+				  			objectList = tvsOnMap;
+				  			break;
+				  		case "table":
+				  			objectList = tablesOnMap;
+				  			break;
+				  		default:
+				  			objectList = sofasOnMap;
+				  	}
 
-			  	objectList[d3.select('.meubleSelected').attr("meubleIndex")].angle = nAngle;
-			  			setObjectPoints(objectList,d3.select('.meubleSelected').attr("meubleIndex"));
+				  	objectList[d3.select('.meubleSelected').attr("meubleIndex")].angle = nAngle;
+				  			setObjectPoints(objectList,d3.select('.meubleSelected').attr("meubleIndex"));
 
-			  	if(isObjectBadPlaced(objectList,d3.select('.meubleSelected').attr("meubleIndex"))){
-			    	d3.select('.meubleSelected').classed("badPlaceObject",true);
-			    }else{
-			    	d3.select('.meubleSelected').classed("badPlaceObject",false);
-			    };
+				  	if(isObjectBadPlaced(objectList,d3.select('.meubleSelected').attr("meubleIndex"))){
+				    	d3.select('.meubleSelected').classed("badPlaceObject",true);
+				    }else{
+				    	d3.select('.meubleSelected').classed("badPlaceObject",false);
+				    };
+				}
 			    // console.log(d3.select('.meubleSelected'));
 			    // d3.select('.meubleSelected').parentNode.select(".removeObject").attr("transform","translate(" + (objectList[index].objectPoints[0].x - 10) + "," + (objectList[index].objectPoints[0].y - 10) + ")");
 			}
@@ -724,66 +859,83 @@
 			//--------------------------------------------  rotate function ---------------------------------------------------
 
 			// update the element
-			function update(nAngle) {
-			  	currentAngle = nAngle;
-			  	// adjust the text on the range slider
-			  	d3.select("#nAngle-value").text(nAngle);
-			  	d3.select("#nAngle").property("value", nAngle);
+			// function update(nAngle) {
+			//   	currentAngle = nAngle;
+			//   	// adjust the text on the range slider
+			//   	d3.select("#nAngle-value").text(nAngle);
+			//   	d3.select("#nAngle").property("value", nAngle);
 
-			  	// rotate
-			  	container.select(".g-sofa").select('rect') 
-			    	.attr("transform", "translate(" + rectX + "," + rectY + ")rotate(" + nAngle + "," + sofaSelectedCenterX + "," + sofaSelectedCenterY + ")");
-			    setSofaPoints();
-			    // console.log(sofaPoints);
-			    if(isSofaBadPlaced()){
-					container.select(".g-sofa").select('rect').classed("badPlace",true);
-					container.select(".g-sofa").select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
-					if(sofaPlacedCheck)
-						sofaPlacedCheck.style("visibility","hidden");
-				}else{
-					container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
-					container.select(".g-sofa").select('rect').classed("badPlace",false);
-					if(sofaPlacedCheck)
-						sofaPlacedCheck.style("visibility","visible");
-				}
-				if(sofaPlacedCheck)
-					sofaPlacedCheck.attr("transform","translate(" + (sofaPoints[2].x - 10) + "," + (sofaPoints[2].y - 10) + ")");
-			}
+			//   	// rotate
+			//   	container.select(".g-sofa").select('rect') 
+			//     	.attr("transform", "translate(" + rectX + "," + rectY + ")rotate(" + nAngle + "," + sofaSelectedCenterX + "," + sofaSelectedCenterY + ")");
+			//     setSofaPoints();
+			//     // console.log(sofaPoints);
+			//     if(isSofaBadPlaced()){
+			// 		container.select(".g-sofa").select('rect').classed("badPlace",true);
+			// 		container.select(".g-sofa").select("text").text("BadPlaced").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 85) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+			// 		if(sofaPlacedCheck)
+			// 			sofaPlacedCheck.style("visibility","hidden");
+			// 	}else{
+			// 		container.select(".g-sofa").select("text").text("Check to place it").attr("transform", "translate(" + (rectX + sofaSelectedCenterX - 120) + "," + (rectY + sofaSelectedCenterY + 8) + ")");
+			// 		container.select(".g-sofa").select('rect').classed("badPlace",false);
+			// 		if(sofaPlacedCheck)
+			// 			sofaPlacedCheck.style("visibility","visible");
+			// 	}
+			// 	if(sofaPlacedCheck)
+			// 		sofaPlacedCheck.attr("transform","translate(" + (sofaPoints[2].x - 10) + "," + (sofaPoints[2].y - 10) + ")");
+			// }
 
-			function setSofaPoints(){
-				sofaPoints[0].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
-				sofaPoints[0].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
-				sofaPoints[1].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
-				sofaPoints[1].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
-				sofaPoints[2].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
-				sofaPoints[2].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
-				sofaPoints[3].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
-				sofaPoints[3].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
-			}
+			// function setSofaPoints(){
+			// 	sofaPoints[0].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
+			// 	sofaPoints[0].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
+			// 	sofaPoints[1].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
+			// 	sofaPoints[1].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
+			// 	sofaPoints[2].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
+			// 	sofaPoints[2].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI - Math.atan(sofaSelectedCenterY / sofaSelectedCenterX));
+			// 	sofaPoints[3].x = sofaSelectedCenterX + rectX + sofaDemiDiagonal * Math.cos(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
+			// 	sofaPoints[3].y = sofaSelectedCenterY + rectY + sofaDemiDiagonal * Math.sin(currentAngle / 180 * Math.PI + Math.atan(sofaSelectedCenterY / sofaSelectedCenterX) + Math.PI);
+			// }
 
-			function isSofaBadPlaced(){
-				for(var i = 0; i < sofaPoints.length; i++){
-					if(sofaPoints[i].x < 60 || sofaPoints[i].x > 740 || sofaPoints[i].y < 60 || sofaPoints[i].y > 740)
-						return true;
-				}
-				return false;
-			}
+			// function isSofaBadPlaced(){
+			// 	for(var i = 0; i < sofaPoints.length; i++){
+			// 		if(sofaPoints[i].x < 60 || sofaPoints[i].x > 740 || sofaPoints[i].y < 60 || sofaPoints[i].y > 740)
+			// 			return true;
+			// 	}
+			// 	return false;
+			// }
 
 			//------------------------------------------------BEDS------------------------------------------------------
-        	var bedsOnMap = [];
+        	var tvsOnMap = [];
         	var tablesOnMap = [];
+        	var sofasOnMap = [];
         	//------------------------------------------------BEDS------------------------------------------------------
+        	var objectColor;
+        	//----------------------------------------------------------------------------------------------------------
 
         	function objectSelect(meuble, index, type){
 	            // console.log(index);
-	            if(m)m.hide();
-	            changeLayer(false);
-	            objectCreate(clickX,clickY,meuble[index].size.width,meuble[index].size.length,type);
+	            switch(type){
+	            	case "tv":
+	            		if(mtv)mtv.hide();
+	            		changeMenuLayer(false,"tvMenu");
+	            		break;
+	            	case "table":
+	            		if(mTable)mTable.hide();
+	            		changeMenuLayer(false,"tableMenu");
+	            		break;
+	            	default:
+	            		if(m)m.hide();
+	            		changeMenuLayer(false,"piemenu");
+	            }
+	            objectColor = meuble[index].color;
+	            console.log(objectColor);
+	            objectCreate(clickX,clickY,meuble[index].size.width,meuble[index].size.length,type, meuble[index].id, meuble[index].textureId);
 
           	}
 
 
-          	function objectCreate(px,py,width,height,type){
+          	function objectCreate(px,py,width,height,type, meubleId, textureId){
+          		showResetButton();
           		var angle = 0;
           		var demiDiagonal = Math.sqrt(width * width + height * height) / 2;
           		var objectCenterX = width / 2;
@@ -802,8 +954,10 @@
           			objectCenterX : objectCenterX,
           			objectCenterY : objectCenterY,
           			objectPoints : objectPoints,
-          			rectX : rectX,
-          			rectY : rectY,
+          			rectX : createPosition[type].x,
+          			rectY : createPosition[type].y,
+          			// rectX : rectX,
+          			// rectY : rectY,
           			width : width,
           			height : height
           		};
@@ -811,15 +965,18 @@
 
 
           		switch(type){
-          			case "bed":
-          				bedsOnMap.push(dataObject);
-          				addObjectOnMap(domBeds,bedsOnMap,bedsOnMap.length - 1,"bed");
+          			case "tv":
+          				tvsOnMap.push(dataObject);
+          				addObjectOnMap(domTvs,tvsOnMap,tvsOnMap.length - 1,"tv", meubleId, textureId);
           				break;
           			case "table":
           				tablesOnMap.push(dataObject);
-          				addObjectOnMap(domTables,tablesOnMap,tablesOnMap.length - 1,"table");
+          				addObjectOnMap(domTables,tablesOnMap,tablesOnMap.length - 1,"table", meubleId, textureId);
           				break;
-          			case "sofa":;break;
+          			case "sofa":
+          				sofasOnMap.push(dataObject);
+          				addObjectOnMap(domSofas,sofasOnMap,sofasOnMap.length - 1,"sofa", meubleId, textureId);
+          				break;
           			default:;
           		}
 
@@ -848,10 +1005,114 @@
 				objectMeuble.objectPoints[3].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
           	}
 
-          	function addObjectOnMap(meubleParent,objectList,index,type){
-          		var color;
-          		switch(type){
-          			case "bed":
+          	function addObjectOnMap(meubleParent,objectList,index,type, meubleId, textureId){
+          		// var color;
+          		// switch(type){
+          		// 	case "bed":
+          		// 		color = "#8A2BE2";
+          		// 		break;
+          		// 	case "table":
+          		// 		color = "#A52A2A";
+          		// 		break;
+          		// 	case "sofa":
+          		// 		color = "#FFD700";
+          		// 		break;
+          		// 	default:;
+          		// }    
+
+          		setObjectPoints(objectList, index);
+          		sendDataToVRServer(objectList,index,type,meubleId,textureId,"tableAddFurniture");
+
+
+          		switch(objectColor){
+	            	case "beige":objectColor = "#f5f5dc";break;
+	            	case "noir":objectColor = "black";break;
+	            	case "bordeau":objectColor = "red";break;
+	            	case "blanc":objectColor = "white";break;
+	            	case "gris":objectColor = "#A9A9A9";break;
+	            	default:;
+	            }
+
+
+
+          		var dragObject = d3.behavior.drag()
+			    	.on("dragstart", mouseOn)
+			    	.on("drag", mouseMove)
+			    	.on("dragend", mouseOff);
+
+			    var element = meubleParent.append("g").attr("class","g-element").attr("transform","translate(0,0)");
+				d3.select('.meubleSelected').classed("meubleSelected",false);
+
+          		element.append("rect").attr("meubleId",meubleId).attr("textureId",textureId).attr("meubleIndex",index).attr("meubleType",type).classed("meubleSelected",true).attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")").attr("width",objectList[index].width).attr("height",objectList[index].height).attr("opacity",0.5).style("fill",objectColor).call(dragObject);
+
+          		updateR(0);
+
+          		element.append("text").attr("transform","translate(" + objectList[index].objectPoints[3].x + "," + objectList[index].objectPoints[3].y + ")").text(type + "-" + index);
+           	}
+
+           	function isObjectBadPlaced(objectList,index){
+           		var objectMeuble = objectList[index];
+           		var areaX = [];
+
+				for(var i = 0; i < objectMeuble.objectPoints.length; i++){
+					if(objectMeuble.objectPoints[i].x < 60 || objectMeuble.objectPoints[i].x > 1440 || objectMeuble.objectPoints[i].y < 60 || objectMeuble.objectPoints[i].y > 740)
+						return true;
+					if(objectMeuble.objectPoints[i].x > 740 && objectMeuble.objectPoints[i].y < 340)
+						return true;
+
+					areaX.push(objectMeuble.objectPoints[i].x);
+				}
+				if(areaX[0] > 750 && areaX[1] > 750 && areaX[2] > 750 && areaX[3] > 750){
+					return false;
+				}else if(areaX[0] < 740 && areaX[1] < 740 && areaX[2] < 740 && areaX[3] < 740){
+					return false;
+				}
+				
+				return true;
+			}
+
+			// function isObjectBadPlaced(objectList,index){
+   //         		var objectMeuble = objectList[index];
+			// 	for(var i = 0; i < objectMeuble.objectPoints.length; i++){
+			// 		if(objectMeuble.objectPoints[i].x < 60 || objectMeuble.objectPoints[i].x > 740 || objectMeuble.objectPoints[i].y < 60 || objectMeuble.objectPoints[i].y > 740)
+			// 			return true;
+			// 	}
+			// 	return false;
+			// }
+
+			//drag function could be used in tuio
+			function tuioMouseOn(){
+
+			}
+
+			function tuioMouseMove(){
+
+			}
+
+			function tuioMouseOff(){
+
+			}
+
+			function tuioRotate(){
+				
+			}
+
+
+
+			var oList;
+			var oIndex;
+			var oType;
+
+
+
+			function mouseOn(d){
+				d3.select('.meubleSelected').classed("meubleSelected",false);
+			    d3.select(this).classed("meubleSelected",true);
+			    oType = d3.select('.meubleSelected').attr("meubleType");
+			    oIndex = d3.select('.meubleSelected').attr("meubleIndex");
+				var color;
+          		switch(oType){
+          			case "tv":
           				color = "#8A2BE2";
           				break;
           			case "table":
@@ -862,101 +1123,144 @@
           				break;
           			default:;
           		}
+          		d3.event.sourceEvent.stopPropagation();
+				d3.select(this).attr("opacity",0.9).style("stroke",color);
+				
+			    var r = d3.select('.meubleSelected').attr("transform").split("rotate(")[1].split(",")[0];
+			    updateR(r);
+			    
+			    switch(d3.select('.meubleSelected').attr("meubleType")){
+			  		case "tv":
+			  			oList = tvsOnMap;
+			  			break;
+			  		case "table":
+			  			oList = tablesOnMap;
+			  			break;
+			  		default:
+			  			oList = sofasOnMap;
 
-          		// var objCheckBox = new CheckBox();
-          		// var objRemoveBox = new RemoveBox();
+			  	}
+          	}
 
-          		var dragObject = d3.behavior.drag()
-			    	.on("dragstart", function(d){
-			   //  		objRectX = ;
-						// objRectY = ;
-						d3.event.sourceEvent.stopPropagation();
-						d3.select(this).attr("opacity",0.9).style("stroke",color);
-						// d3.select(this.parentNode).select(".placeObject").attr("visibility","hidden");
-						// d3.select(this.parentNode).select(".removeObject").attr("visibility","hidden");
-						d3.select('.meubleSelected').classed("meubleSelected",false);
-			    		d3.select(this).classed("meubleSelected",true);
-			    		var r = d3.select('.meubleSelected').attr("transform").split("rotate(")[1].split(",")[0];
-			    		updateR(r);
-			    	})
-			    	.on("drag", function(d){
-			    		
-			    		objectList[index].rectX += d3.event.dx;
-						objectList[index].rectY += d3.event.dy;
+          	function mouseMove(d){
+          		oList[oIndex].rectX += d3.event.dx;
+				oList[oIndex].rectY += d3.event.dy;
+		    	setObjectPoints(oList,oIndex);
+		    	if(isObjectBadPlaced(oList,oIndex)){
+		    		d3.select(this).classed("badPlaceObject",true);
+		    	}else{
+		    		d3.select(this).classed("badPlaceObject",false);
+		    	};
+				d3.select(this).attr("transform","translate(" + oList[oIndex].rectX + "," + oList[oIndex].rectY + ")rotate(" + oList[oIndex].angle + "," + oList[oIndex].objectCenterX + "," + oList[oIndex].objectCenterY + ")");
+				d3.select(this.parentNode).select("text").attr("transform","translate(" + oList[oIndex].rectX + "," + oList[oIndex].rectY + ")");
+       		}
 
-			    		setObjectPoints(objectList,index);
-			    		if(isObjectBadPlaced(objectList,index)){
-			    			d3.select(this).classed("badPlaceObject",true);
-			    		}else{
-			    			d3.select(this).classed("badPlaceObject",false);
-			    			
-			    		};
+          	function mouseOff(d){
+          		d3.select(this).attr("opacity",0.5).style("stroke","#FFFFFF");
+			   	if(isObjectBadPlaced(oList,oIndex)){
+			   		d3.select(this.parentNode).remove();
+			   		socket.emit("removeFurniture", {type : d3.select(this).attr("meubleType"), index : d3.select(this).attr("meubleIndex")});
+			   	}else{
+					d3.select(this).classed("badPlaceObject",false);
+					sendDataToVRServer(oList,oIndex, d3.select(this).attr("meubleType"),d3.select(this).attr("meubleId"),d3.select(this).attr("textureId"),"moveFurniture");
+			   	};
+          	}
 
-						d3.select(this).attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")");
-						d3.select(this.parentNode).select("text").attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")");
-						// d3.select(this.parentNode).select(".placeObject").attr("transform","translate(" + (objectList[index].objectPoints[2].x - 10) + "," + (objectList[index].objectPoints[2].y - 10) + ")");
-						// d3.select(this.parentNode).select(".removeObject").attr("transform","translate(" + (objectList[index].objectPoints[0].x - 10) + "," + (objectList[index].objectPoints[0].y - 10) + ")");
+          	function sendDataToVRServer(objectList, index, type, meubleId, textureId, actionType){
+          		var object = {
+				   	type : type,
+				   	id: meubleId,
+				   	textureId: textureId,
+				   	index:index,
+				   	position:{
+				   		x:objectList[index].objectPoints[3].x / 100,
+				   		y:0.5,
+				   		z:objectList[index].objectPoints[3].y / 100,
+				   		angle: (360 - objectList[index].angle)
+				   	}
+				};
+				socket.emit(actionType, object);
+				console.log(object);
 
+				console.log("sofa [" + actionType + "} Send to server");
+          	}
 
+          	var mtv, mTable;
 
-						
-			    	})
-			    	.on("dragend", function(d){
-			    		d3.select(this).attr("opacity",0.5).style("stroke","#FFFFFF");
-			    		if(isObjectBadPlaced(objectList,index)){
-			    			d3.select(this.parentNode).remove();
-			    // 			d3.select(this.parentNode).select(".placeObject").attr("visibility","hidden");
-							// d3.select(this.parentNode).select(".removeObject").attr("visibility","hidden");
-							// d3.select(this).classed("badPlaceObject",true);
-			    		}else{
-			    			// d3.select(this.parentNode).select(".placeObject").attr("visibility","visible");
-			    			
-							// d3.select(this.parentNode).select(".removeObject").attr("visibility","visible");
-							d3.select(this).classed("badPlaceObject",false);
-			    		};
-			    	});
+          	function createMenuMeuble(x,y,menuElements,type, id){
+          		var idMenu = "piemenu";
+          		var svgMenu = "menu-holder";
 
-			    var element = meubleParent.append("g").attr("class","g-element").attr("transform","translate(0,0)");
-				d3.select('.meubleSelected').classed("meubleSelected",false);
+          		var menuCorrespondantId = [];
 
-          		element.append("rect").attr("meubleIndex",index).attr("meubleType",type).classed("meubleSelected",true).attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")").attr("width",objectList[index].width).attr("height",objectList[index].height).attr("opacity",0.5).style("fill",color).call(dragObject);
+          		for(var i = 0; i < menuElements.length;i++){
+          			if(menuElements[i].id == id){
+          				menuCorrespondantId.push(menuElements[i]);
+          			}
+          		}
 
-          		updateR(0);
-
-          		// objCheckBox.size(20).x(objectList[index].objectPoints[2].x - 10).y(objectList[index].objectPoints[2].y - 10).rx(5).ry(5).markStrokeWidth(2).boxStrokeWidth(3).checked(false).clickEvent(function(){
-          		// 		if(objCheckBox.checked()){
-          		// 			element.select("rect").on('mousedown.drag', null).classed("placed",true);
-          		// 		}else{
-          		// 			element.select("rect").call(dragObject).classed("placed",false);
-          		// 		}
-
-          		// });
-
-          		// objRemoveBox.size(20).x(objectList[index].objectPoints[0].x - 10).y(objectList[index].objectPoints[0].y-10).rx(10).ry(10).markStrokeWidth(3).boxStrokeWidth(3).checked(true).clickEvent(function(){
-          		// 	element.remove();
-          		// });
+          		console.log(menuCorrespondantId);
           		
-          		// element.append("path").attr("d",attrPathDValue).style("stroke-width","2").style("stroke","black").style("fill","blue").style("opacity",0.6).call(dragObject);
-          		element.append("text").attr("transform","translate(" + objectList[index].objectPoints[3].x + "," + objectList[index].objectPoints[3].y + ")").text(type + "-" + index);
-          		// element
-          		// // .call(objCheckBox)
-          		// .call(objRemoveBox);
+	            
+          		switch(type){
+	            	case "table":
+	            		idMenu = "tableMenu";
+	            		svgMenu = "menu-table";
+	            		changeMenuLayer(true,idMenu);
+	            		d3.select("#" + svgMenu).selectAll("g").each(function(){
+			              	d3.select(this).remove();
+			            });
+	            		if(mTable){
+	              			mTable.hide();
+	            		}
+	            		mTable = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId);
+	            		break;
+	            	case "tv":
+	            		idMenu = "tvMenu";
+	            		svgMenu = "menu-tv";
+	            		changeMenuLayer(true,idMenu);
+	            		d3.select("#" + svgMenu).selectAll("g").each(function(){
+			              	d3.select(this).remove();
+			            });
+	            		if(mtv){
+	              			mtv.hide();
+	            		}
+	            		mtv = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId);
+	            		break;
+	            	default: 
+	            		idMenu = "piemenu";
+	            		svgMenu = "menu-holder";
+	            		changeMenuLayer(true,idMenu);
+	            		d3.select("#" + svgMenu).selectAll("g").each(function(){
+			              	d3.select(this).remove();
+			            });
+	            		if(m){
+	              			m.hide();
+	            		}
+	            		m = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/arrow.png")
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId);
+	            };
 
-          		// console.log(objectList);
-           	}
+	            if(idMenu == "tableMenu"){
+		            var menu = $("#" + idMenu);
+		            menu.css('position', 'absolute');
+		            menu.css("left", x - 200);
+		            menu.css("top", y - 200);
+		        }
+          	}
 
-           	function isObjectBadPlaced(objectList,index){
-           		var objectMeuble = objectList[index];
-				for(var i = 0; i < objectMeuble.objectPoints.length; i++){
-					if(objectMeuble.objectPoints[i].x < 60 || objectMeuble.objectPoints[i].x > 740 || objectMeuble.objectPoints[i].y < 60 || objectMeuble.objectPoints[i].y > 740)
-						return true;
-				}
-				return false;
-			}
+          
 
-           	// function getPathDAttr(dataObject){
-           	// 	return "M" + dataObject.objectPoints[0].x + "," + dataObject.objectPoints[0].y + " L" + dataObject.objectPoints[1].x + "," + dataObject.objectPoints[1].y +  " L" + dataObject.objectPoints[2].x + "," + dataObject.objectPoints[2].y +  " L" + dataObject.objectPoints[3].x + "," + dataObject.objectPoints[3].y +  " L" + dataObject.objectPoints[0].x + "," + dataObject.objectPoints[0].y;
-           	// }
+          	function changeMenuLayer(flag,idMenu){
+	            if(flag){
+	              	d3.select("#" + idMenu).attr("class","piemenufirstLayer");
+	            }else{
+	              	d3.select("#" + idMenu).attr("class","piemenuLastLayer");
+	            }
+          	}
+
 
         </script>
   </body>
