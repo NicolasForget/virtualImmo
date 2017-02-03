@@ -7,46 +7,102 @@ let socket = io(`http://mayl.me:8080`);
 let StereoEffect = require('three-stereo-effect')(THREE);
 let walls = [
     {
-        id: 3,
+        type: "wall",
         x: 0,
-        y: -5,
+        y: 0,
         length: 15,
         radius: 0
     },
     {
-        id: 4,
+        type: "wall",
         x: 15,
-        y: -5,
-        length: 5,
-        radius: 90
+        y: 0,
+        length: 6,
+        radius: 270
     },
     {
-        id: 4,
-        x: 4,
-        y: 0,
-        length: 7,
+        type: "wall",
+        x: 15,
+        y: 6,
+        length: 2,
+        radius: 270
+    },
+    {
+        type: "door",
+        x: 15,
+        y: 8,
+        length: 2,
+        radius: 270
+    },
+    {
+        type: "wall",
+        x: 15,
+        y: 10,
+        length: 5,
+        radius: 270
+    },
+    {
+        type: "wall",
+        x: 7.5,
+        y: 6,
+        length: 15,
         radius: 0
     },
     {
-        id: 4,
-        x: 8,
-        y: 0,
-        length: 10,
-        radius: 90
+        type: "wall",
+        x: 30,
+        y: 6,
+        length: 9,
+        radius: 270
     },
     {
-        id: 5,
-        x: 8,
-        y: 10,
-        length: 8,
+        type: "wall",
+        x: 11,
+        y: 15,
+        length: 11,
         radius: 180
     },
     {
-        id: 6,
+        type: "door",
+        x: 5.5,
+        y: 15,
+        length: 2,
+        radius: 0
+    },
+    {
+        type: "wall",
+        x: 6.5,
+        y: 15,
+        length: 2,
+        radius: 0
+    },
+    {
+        type: "wall",
+        x: 7.5,
+        y: 15,
+        length: 15,
+        radius: 0
+    },
+    {
+        type: "wall",
         x: 0,
-        y: 10,
+        y: 0,
         length: 15,
         radius: 270
+    },
+    {
+        type: "roof",
+        x: 0,
+        y: 0,
+        xLength: 15,
+        yLength: 15
+    },
+    {
+        type: "roof",
+        x: 15,
+        y: 6,
+        xLength: 15,
+        yLength: 9
     }
 ];
 
@@ -70,9 +126,9 @@ export default React.createClass({
             });
 
             socket.on('addFurniture', function (data) {
-                for (var i = 0; i < les_meubles.length; i++){
-                    if (les_meubles[i].furnitureIndex == data.index){
-                        if (les_meubles[i].furnitureType == data.type){
+                for (var i = 0; i < les_meubles.length; i++) {
+                    if (les_meubles[i].furnitureIndex == data.index) {
+                        if (les_meubles[i].furnitureType == data.type) {
                             scene.remove(les_meubles[i]);
                         }
                     }
@@ -91,11 +147,11 @@ export default React.createClass({
 
                 let material = new THREE.MeshBasicMaterial({map: texture});
                 let mesh = new THREE.Mesh(json.geometry, material);
-                console.log("TV",data.model3D);
+                console.log("TV", data.model3D);
                 mesh.position.x = data.position.x * -1;
                 mesh.position.y = data.position.y;
                 mesh.position.z = data.position.z * -1;
-                mesh.rotation.y = data.position.angle*(2.0*pi)/360.0;
+                mesh.rotation.y = data.position.angle * (2.0 * pi) / 360.0;
                 scene.add(mesh);
                 mesh.textures_availables = data.textures_availables;
                 mesh.selected_texture = data.selected_texture;
@@ -103,7 +159,7 @@ export default React.createClass({
                 mesh.furnitureId = data.id;
                 console.log(data.index);
                 mesh.furnitureIndex = data.index;
-                
+
 
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
@@ -114,9 +170,9 @@ export default React.createClass({
             socket.on("changedFurnitureTexture", function (data) {
                 var id = data.id;
 
-                for (var i  = 0; i< les_meubles.length; i++){
+                for (var i = 0; i < les_meubles.length; i++) {
                     if (les_meubles[i].furnitureIndex == data.index &&
-                        les_meubles[i].furnitureType == data.type){
+                        les_meubles[i].furnitureType == data.type) {
                         var image = new Image();
                         var texture = new THREE.Texture();
                         image.src = "data:image/jpeg;base64," + les_meubles[i].textures_availables[data.texture_id].texture;
@@ -136,26 +192,26 @@ export default React.createClass({
                 var index = data.index;
                 console.log(les_meubles);
 
-                for (var i = 0; i < les_meubles.length; i++){
-                    if (les_meubles[i].furnitureIndex == data.index){
-                        if (les_meubles[i].furnitureType == data.type){
+                for (var i = 0; i < les_meubles.length; i++) {
+                    if (les_meubles[i].furnitureIndex == data.index) {
+                        if (les_meubles[i].furnitureType == data.type) {
                             scene.remove(les_meubles[i]);
                         }
                     }
                 }
             });
 
-            socket.on('movedFurniture', function (data){
+            socket.on('movedFurniture', function (data) {
                 console.log("moving", data);
                 console.log(les_meubles);
-                for (var i = 0; i < les_meubles.length; i++){
-                    if (les_meubles[i].furnitureIndex == data.index && les_meubles[i].furnitureType == data.type){
+                for (var i = 0; i < les_meubles.length; i++) {
+                    if (les_meubles[i].furnitureIndex == data.index && les_meubles[i].furnitureType == data.type) {
                         console.log(les_meubles[i]);
                         les_meubles[i].position.x = -data.position.x;
                         les_meubles[i].position.y = data.position.y;
                         les_meubles[i].position.z = -data.position.z;
                         // (angle en radian) = (angles en degrés)*(2.0*pi)/360.0 
-                        les_meubles[i].rotation.y =  data.position.angle*(2.0*pi)/360.0;
+                        les_meubles[i].rotation.y = data.position.angle * (2.0 * pi) / 360.0;
                     }
                 }
             });
@@ -240,7 +296,6 @@ export default React.createClass({
                     return function (delta) {
 
                         if (this.freeze) return;
-
 
 
                         this.alpha = deviceOrientation.gamma ?
@@ -342,34 +397,65 @@ export default React.createClass({
             var b = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5), a);
 
             for (var i = 0; i < walls.length; i++) {
-                var wallBox = new THREE.BoxGeometry(walls[i].length, 5, 0.01);
-                var material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('../images/brick.jpg')});
-                var wall = new THREE.Mesh(wallBox, material);
-                var pivotMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+                if (walls[i].type === "roof") {
+                    console.log(walls[i].x, walls[i].y);
+                    var roofBox = new THREE.BoxGeometry(walls[i].xLength, 0.1, walls[i].yLength);
+                    var textureRoof = THREE.ImageUtils.loadTexture('../images/wall.jpg');
+                    textureRoof.wrapS = textureRoof.wrapT = THREE.RepeatWrapping;
+                    textureRoof.repeat.set(5, 5);
+                    var materialRoof = new THREE.MeshBasicMaterial({map: textureRoof});
+                    var roof = new THREE.Mesh(roofBox, materialRoof);
+                    roof.position.x = walls[i].x + walls[i].xLength / 2;
+                    roof.position.z = walls[i].y + walls[i].yLength / 2;
+                    roof.position.y = 6;
+                    scene.add(roof);
+                } else {
+                    var wallBox;
+                    var pivotMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+                    var pivot = new THREE.Mesh(new THREE.BoxGeometry(0, 0, 0), pivotMaterial);
+                    //var pivot = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.2));
+                    var wallHeight;
+                    pivot.position.x = walls[i].x;
+                    pivot.position.z = walls[i].y;
+                    if (walls[i].type == "door") {
+                        wallHeight = 2;
+                        wallBox = new THREE.BoxGeometry(walls[i].length, 2, 0.01);
+                        pivot.position.y = 5;
+                    } else {
+                        wallHeight = 6;
+                        wallBox = new THREE.BoxGeometry(walls[i].length, 6, 0.01);
+                        pivot.position.y = 3;
+                    }
 
-                var pivot = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.2), pivotMaterial);
-                pivot.position.x = walls[i].x;
-                pivot.position.z = walls[i].y;
-                pivot.position.y = 2.5;
-                pivot.add(wall);
+                    var textureWall = THREE.ImageUtils.loadTexture('../images/wall.jpg');
+                    textureWall.wrapS = textureWall.wrapT = THREE.RepeatWrapping;
+                    textureWall.repeat.set(walls[i].length / 2, wallHeight / 2);
+                    var material = new THREE.MeshBasicMaterial({map: textureWall});
+                    var wall = new THREE.Mesh(wallBox, material);
 
-                switch (walls[i].radius) {
-                    case 0:
-                        wall.position.x = pivot.position.x + walls[i].length / 2;
-                        break;
-                    case 90:
-                        wall.position.x = -walls[i].length / 2;
-                        break;
-                    case 180:
-                        wall.position.x = walls[i].x - walls[i].length / 2;
-                        break;
-                    case 270:
-                        wall.position.x = -walls[i].length / 2;
-                        break;
+                    pivot.add(wall);
+
+                    switch (walls[i].radius) {
+                        case 0:
+                            wall.position.x = pivot.position.x + walls[i].length / 2;
+                            break;
+                        case 90:
+                            wall.position.x = -walls[i].length / 2;
+                            break;
+                        case 180:
+                            wall.position.x = walls[i].x - walls[i].length / 2;
+                            break;
+                        case 270:
+                            wall.position.x = walls[i].length / 2;
+                            break;
+                    }
+                    pivot.rotation.y = walls[i].radius * 0.00872665 * 2;
+                    scene.add(pivot);
+
                 }
-                pivot.rotation.y = walls[i].radius * 0.00872665 * 2;
-                scene.add(pivot);
+
                 var loader = new THREE.JSONLoader();
+
                 var mtlLoader = new THREE.MTLLoader();
                 mtlLoader.setBaseUrl("../images/");
                 mtlLoader.setPath("../images/");
@@ -381,8 +467,8 @@ export default React.createClass({
                     objLoader.setMaterials(materials);
                     objLoader.setPath("../images/");
                     objLoader.load('sofa1.obj', function (object) {
-                        object.traverse( function ( child ) {
-                            if ( child instanceof THREE.Mesh ) {
+                        object.traverse(function (child) {
+                            if (child instanceof THREE.Mesh) {
                                 child.material.color.setHex(0xFFF3E0);
                             }
                         });
@@ -512,8 +598,8 @@ export default React.createClass({
             scene = new THREE.Scene();
             //scene.fog = new THREE.Fog(0xffffff, 0, 750);
             //var light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
-            var light = new THREE.SpotLight( 0xffffff );
-            light.position.set( 100, 1000, 100 );
+            var light = new THREE.SpotLight(0xffffff);
+            light.position.set(100, 1000, 100);
             light.castShadow = true;
 
             light.shadow.mapSize.width = 1024;
@@ -524,11 +610,9 @@ export default React.createClass({
             light.shadow.camera.fov = 30;
 
 
-            
-
             scene.add(light);
             controls = new PointerLockControls(THREE, camera);
-            controls.getObject().position.y = 2;
+            controls.getObject().position.y = 3;
             scene.add(controls.getObject());
             var onKeyDown = function (event) {
                 switch (event.keyCode) {
@@ -573,15 +657,15 @@ export default React.createClass({
             document.addEventListener('keydown', onKeyDown, false);
             document.addEventListener('keyup', onKeyUp, false);
             raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
-            var WORLD_SIZE = 15;
+            var WORLD_SIZE = 30;
 
             //ground
-            var cube = new THREE.BoxGeometry(1, 1, 1);
+            var cube = new THREE.BoxGeometry(5, 1, 5);
             var grassTexture = THREE.ImageUtils.loadTexture('../images/wood.png');
 
             var grassMesh = new THREE.MeshBasicMaterial({map: grassTexture});
-            for (var x = -WORLD_SIZE; x < WORLD_SIZE; x++) {
-                for (var z = -WORLD_SIZE; z < WORLD_SIZE; z++) {
+            for (var x = -WORLD_SIZE; x < WORLD_SIZE * 2; x += 5) {
+                for (var z = -WORLD_SIZE; z < WORLD_SIZE * 2; z += 5) {
                     var grassCube = new THREE.Mesh(cube, grassMesh);
                     grassCube.position.x = x;
                     grassCube.position.z = z;
@@ -689,7 +773,8 @@ export default React.createClass({
         var gachetteR = false;
         var gachetteD = false;
         var buttonRemove = false;
-
+        controls.getObject().position.x = 5;
+        controls.getObject().position.z = 5;
         function animate() {
             requestAnimationFrame(animate);
 
@@ -740,7 +825,7 @@ export default React.createClass({
                     controls.getObject().translateY(velocity.y * delta);
                     controls.getObject().translateZ(velocity.z * delta);
 
-                    controls.getObject().position.y = 2;
+                    controls.getObject().position.y = 3;
 
                     prevTime = time;
                 }
@@ -850,11 +935,13 @@ export default React.createClass({
                             var index = intersects[0].object.furnitureIndex;
                             var type = intersects[0].object.furnitureType;
 
-                                  
-                            socket.emit("removeFurniture",{index : index,
-                                type: intersects[0].object.furnitureType});
-                            for (var i = 0; i < les_meubles.length; i++){
-                                if (les_meubles[i].furnitureIndex == index && les_meubles[i].furnitureType == type ){
+
+                            socket.emit("removeFurniture", {
+                                index: index,
+                                type: intersects[0].object.furnitureType
+                            });
+                            for (var i = 0; i < les_meubles.length; i++) {
+                                if (les_meubles[i].furnitureIndex == index && les_meubles[i].furnitureType == type) {
 
                                     scene.remove(les_meubles[i]);
                                 }
