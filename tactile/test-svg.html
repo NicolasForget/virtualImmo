@@ -948,7 +948,7 @@
 				   		x: (objectList[index].objectPoints[3].x + objectList[index].objectPoints[1].x) / 2 / 50,
 				   		y:0.5,
 				   		z: (objectList[index].objectPoints[3].y + objectList[index].objectPoints[1].y) / 2 / 50,
-				   		angle: (360 - objectList[index].angle)
+				   		angle: -objectList[index].angle
 				   	}
 				};
 				socket.emit(actionType, object);
