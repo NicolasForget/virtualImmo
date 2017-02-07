@@ -100,7 +100,7 @@
     <br><br>
 
 
-    <button id="action2">change color : gris</button>
+    <button id="action2">change color</button>
     <button id="action3">Remove canape</button>
     <button id="action4">Move canape</button>
 
@@ -114,7 +114,10 @@
     socket.on('connect', function () {
         console.log("connected");
 
-
+        socket.emit("tableWantTypes", "");
+        socket.on("availableTypes", function(data){
+            console.log("types", data);
+        });
         socket.emit("tableWantFurniture", "sofa");
         socket.emit("tableWantFurniture", "tv");
 
@@ -179,8 +182,19 @@
                 console.log(data);
             });
         });
-        
-        
+
+        $("#action2").on('click', function(data){
+            var tosend = {
+                id : 0,
+                type: "sofa",
+                texture_id : "rose",
+                index: "my_first_canape"
+            };
+            console.log("change color");
+            socket.emit("changeFurnitureTexture", tosend);
+        });
+
+
         $("#sophie").on('click', function(data){
            
             var sofa = {
@@ -467,17 +481,6 @@
    
    
 
-
-
-        $("#action2").on('click', function(data){
-            var tosend = {
-                id : 0,
-                type: "sofa",
-                texture_id : "gris",
-                index: "my_first_canape"
-            };
-            socket.emit("changeFurnitureTexture", tosend);
-        });
 
         $("#action3").on('click', function(data){
             console.log("removing");

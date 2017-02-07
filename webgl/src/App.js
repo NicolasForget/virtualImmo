@@ -147,31 +147,27 @@ export default React.createClass({
                     objLoader.setPath("http://mayl.me:3000/");
                     console.log(data.model3D);
                     objLoader.load(data.model3D, function (object) {
-                        /*object.traverse( function ( child ) {
-                            if ( child instanceof THREE.Mesh ) {
-                                child.material.color.setHex(0xFFF3E0);
-                            }
-                        });*/
+                        
                         console.log(object)
                         object.position.x = data.position.x ;
                         object.position.y = 0.5;
                         object.position.z = data.position.z ;
+
+                        object.rotateY((data.position.angle * Math.PI)/180)
+
+
                         scene.add(object);
                         
-
 
                         object.textures_availables = data.textures_availables;
                         object.selected_texture = data.selected_texture;
                         object.furnitureType = data.type;
                         object.furnitureId = data.id;
                         object.furnitureIndex = data.index;
-
-                        if(object.furnitureId == 0 && object.furnitureType =="table"){
-                        	//object.
-                        }
+                        object.model3D = data.model3D;
+                        
 
                         console.log("after made",object);
-                        console.log("les_meubles",les_meubles);
                         les_meubles.push(object);
                     });
                 });
@@ -180,20 +176,34 @@ export default React.createClass({
 
             socket.on("changedFurnitureTexture", function (data) {
                 var id = data.id;
+                console.log("change color");
 
                 for (var i = 0; i < les_meubles.length; i++) {
                     if (les_meubles[i].furnitureIndex == data.index &&
                         les_meubles[i].furnitureType == data.type) {
-                        var image = new Image();
-                        var texture = new THREE.Texture();
-                        image.src = "data:image/jpeg;base64," + les_meubles[i].textures_availables[data.texture_id].texture;
-                        texture.image = image;
-                        image.onload = function () {
-                            texture.needsUpdate = true;
-                        };
-                        les_meubles[i].selected_texture = data.texture_id;
+                        var mtlLoader = new THREE.MTLLoader();
+		                mtlLoader.setPath("../furnitures/");
+		                console.log("URL", les_meubles[i].textures_availables[data.texture_id].texture);
+		                var i_tmp = i;
+		                mtlLoader.load(les_meubles[i_tmp].textures_availables[data.texture_id].texture, function (materials) {
 
-                        les_meubles[i].material = new THREE.MeshBasicMaterial({map: texture});
+	                    	materials.preload();
+
+		                    var objLoader = new THREE.OBJLoader();
+		                    objLoader.setMaterials(materials);
+		                    objLoader.setPath("http://mayl.me:3000/");
+		                    console.log(les_meubles[i_tmp].model3D);
+		                    objLoader.load(les_meubles[i_tmp].model3D, function (object) {
+		                        
+		                        console.log(object)
+		                        les_meubles[i_tmp].children = object.children
+
+		                       
+	                        	les_meubles[i_tmp].selected_texture = data.texture_id;
+	                        });
+
+	                        //les_meubles[i_tmp].material = materials.;
+	                    });
                     }
                 }
             });
@@ -221,6 +231,8 @@ export default React.createClass({
                         les_meubles[i].position.x = data.position.x;
                         les_meubles[i].position.y = data.position.y;
                         les_meubles[i].position.z = data.position.z;
+                        les_meubles[i].rotateY((data.position.angle * Math.PI)/180)
+
                         // (angle en radian) = (angles en degrés)*(2.0*pi)/360.0 
                         les_meubles[i].rotation.y = data.position.angle * (2.0 * pi) / 360.0;
                     }
