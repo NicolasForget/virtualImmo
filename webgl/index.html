@@ -62,20 +62,22 @@
         }
 
         .selector {
-            position: fixed;
-            top: 50%;
             border: solid grey 2px;
             border-radius: 50%;
             width: 2vw;
             height: 2vw;
         }
 
-        .selector.right {
+        .right {
+            position: fixed;
+            top: 50%;
             right: 25%;
             transform: translate(25%);
         }
 
-        .selector.left {
+        .left {
+            position: fixed;
+            top: 50%;
             left: 25%;
             transform: translate(-25%);
         }
@@ -83,6 +85,9 @@
         .selector.active {
             background: #fffda7;
             border-color: #fffda7;
+        }
+        .loading{
+            display: none;
         }
 
         #infos {
