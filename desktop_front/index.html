@@ -7,22 +7,6 @@
 </head>
 <body>
 
-
-<div class="root">
-    <h2>Super desktop front</h2>
-    <input id="input" type="text" placeholder="..."/>
-    <button id="action0">Send murs</button>
-
-    <button id="action1">Send amelie</button>
-    <button id="action5">Send tv</button>
-    <button id="action6">Send simple sofa</button>
-
-    <button id="action2">change color : gris</button>
-    <button id="action3">Remove canape</button>
-    <button id="action4">Move canape</button>
-
-</div>
-
 <style>
     * {
         margin: 0;
@@ -37,8 +21,8 @@
         border-radius: 5px;
         color: #a9a9a9;
         background-color: white;
-        width: 300px;
-        height: 200px;
+        width: 500px;
+        height: 400px;
         position: absolute;
         top: 50%;
         left: 50%;
@@ -87,6 +71,41 @@
 
 </style>
 
+
+<div class="root">
+    <h2>Super desktop front</h2>
+    <button id="action0">Send murs</button>
+    
+    <button id="control">Send control</button>
+
+    <button id="amelie"> amelie</button>
+    <button id="sophie"> sophie</button>
+
+    <button id="bobo"> bobo normal</button>
+    <button id="bobo_bleu"> bobo bleu </button>
+    <button id="bobo_rose"> bobo rose</button>
+
+    <br><br>
+    <button id="mesa"> mesa</button>
+    <button id="table_cafe"> table cafes</button>
+    <button id="marble"> table marbre</button>
+    <button id="basse_vitre"> table basse vitrée</button>
+    <button id="basse_carree"> table basse carrée</button>
+    <br><br>
+
+    <button id="letiboy">Lit boy</button>
+    <button id="letigirl">Lit girl</button>
+    <button id="letto">letto</button>
+    <button id="bedluxe">lit de luxe</button>
+    <br><br>
+
+
+    <button id="action2">change color</button>
+    <button id="action3">Remove canape</button>
+    <button id="action4">Move canape</button>
+
+</div>
+
 <script src="http://mayl.me:8080/socket.io/socket.io.js"></script>
 <script src="./node_modules/jquery/dist/jquery.min.js"></script>
 <script>
@@ -95,7 +114,10 @@
     socket.on('connect', function () {
         console.log("connected");
 
-
+        socket.emit("tableWantTypes", "");
+        socket.on("availableTypes", function(data){
+            console.log("types", data);
+        });
         socket.emit("tableWantFurniture", "sofa");
         socket.emit("tableWantFurniture", "tv");
 
@@ -110,7 +132,6 @@
         $("#input").on('input', function(data) {
             socket.emit('wallChange', {value: data.target.value});
         });
-
         $("#action0").on('click', function(data){
             var murs = [{
                         id: 1,
@@ -141,22 +162,17 @@
 
             socket.emit('wallTable', murs);
         });
-        $("#action1").on('click', function(data){
+        $("#amelie").on('click', function(data){
            
-            //socket.emit('wallTable', mur1);
-            //socket.emit('tableWantFurniture', 'sofa');
-            // socket.on("availableSofas", function(data){
-            //     console.log("sofas", data);
-            // });
             var sofa = {
                 type : "sofa",
                 id: 0,
-                textureId: 'taupe',
+                textureId: 'orange',
                 position: {
-                    x: 2,
+                    x: 0.84,
                     y: 0.5,
-                    z: 2,
-                    angle: 45
+                    z: 2.5,
+                    angle: 90
                 },
                 index: "my_first_canape"
             };
@@ -165,20 +181,31 @@
             socket.on("addFurniture", function(data){
                 console.log(data);
             });
-
         });
-        $("#action6").on('click', function(data){
+
+        $("#action2").on('click', function(data){
+            var tosend = {
+                id : 0,
+                type: "sofa",
+                textureId : "rose",
+                index: "my_first_canape"
+            };
+            console.log("change color");
+            socket.emit("changeFurnitureTexture", tosend);
+        });
+
+
+        $("#sophie").on('click', function(data){
            
-            
             var sofa = {
                 type : "sofa",
                 id: 1,
-                textureId: 'red',
+                textureId: 'cuir',
                 position: {
-                    x: -5,
+                    x: 3.17,
                     y: 0.5,
-                    z: 3,
-                    angle: 45
+                    z: 2.56,
+                    angle: 0
                 },
                 index: "big_canape"
             };
@@ -187,39 +214,273 @@
             socket.on("addFurniture", function(data){
                 console.log(data);
             });
-
         });
-        $("#action5").on('click', function(data){
+
+       
+        $("#bobo").on('click', function(data){
            
-            
             var tv = {
-                type : "tv",
-                id: 0,
-                textureId: 'blanc',
+                type : "sofa",
+                id: 2,
+                textureId: 'tissus',
                 position: {
-                    x: 4,
+                    x: 2.02,
                     y: 0.5,
-                    z: -1,
-                    angle: 90
+                    z: 7.06,
+                    angle: 0
                 },
-                index: "my_tv"
+                index: "my_bobo"
             };
             socket.emit("tableAddFurniture", tv);
             console.log(tv);
             socket.on("addFurniture", function(data){
                 console.log(data);
             });
-
         });
-        $("#action2").on('click', function(data){
-            var tosend = {
-                id : 0,
-                type: "sofa",
-                texture_id : "gris",
-                index: "my_first_canape"
+        $("#bobo_rose").on('click', function(data){
+           
+            var tv = {
+                type : "sofa",
+                id: 2,
+                textureId: 'rose',
+                position: {
+                    x: 2.02,
+                    y: 0.5,
+                    z: 5.36,
+                    angle: 0
+                },
+                index: "my_bobo_rose"
             };
-            socket.emit("changeFurnitureTexture", tosend);
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
         });
+        $("#bobo_bleu").on('click', function(data){
+           
+            var tv = {
+                type : "sofa",
+                id: 2,
+                textureId: 'bleu',
+                position: {
+                    x: 5.62,
+                    y: 0.5,
+                    z: 1.06,
+                    angle: 0
+                },
+                index: "my_bobo_bleu"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        $("#mesa").on('click', function(data){
+           
+            var tv = {
+                type : "table",
+                id: 0,
+                textureId: 'normal',
+                position: {
+                    x: 1.35,
+                    y: 0.5,
+                    z: 0.72,
+                    angle: 0
+                },
+                index: "table"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        
+        $("#table_cafe").on('click', function(data){
+           
+            var tv = {
+                type : "table",
+                id: 1,
+                textureId: 'normal',
+                position: {
+                    x: 0.75,
+                    y: 0.5,
+                    z: 0.6,
+                    angle: 0
+                },
+                index: "table_cafe"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        $("#marble").on('click', function(data){
+           
+            var tv = {
+                type : "table",
+                id: 2,
+                textureId: 'normal',
+                position: {
+                    x: 1.3,
+                    y: 0.5,
+                    z: 1.3,
+                    angle: 0
+                },
+                index: "marble"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        
+        $("#basse_vitre").on('click', function(data){
+           
+            var tv = {
+                type : "table",
+                id: 3,
+                textureId: 'normal',
+                position: {
+                    x: 0.98,
+                    y: 0.5,
+                    z: 0.61,
+                    angle: 0
+                },
+                index: "marble"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        $("#basse_carree").on('click', function(data){
+           
+            var tv = {
+                type : "table",
+                id: 4,
+                textureId: 'normal',
+                position: {
+                    x: 0.74,
+                    y: 0.5,
+                    z: 0.77,
+                    angle: 0
+                },
+                index: "carree"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        $("#letiboy").on('click', function(data){
+           
+            var tv = {
+                type : "bed",
+                id: 0,
+                textureId: 'boy',
+                position: {
+                    x: 1.76,
+                    y: 0.5,
+                    z: 0.79,
+                    angle: 0
+                },
+                index: "lit_garcon"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        $("#letigirl").on('click', function(data){
+           
+            var tv = {
+                type : "bed",
+                id: 0,
+                textureId: 'girl',
+                position: {
+                    x: 5.28,
+                    y: 0.5,
+                    z: 0.79,
+                    angle: 0
+                },
+                index: "lit_girl"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });$("#letto").on('click', function(data){
+           
+            var tv = {
+                type : "bed",
+                id: 1,
+                textureId: 'normal',
+                position: {
+                    x: 2.15,
+                    y: 0.5,
+                    z: 2.32,
+                    angle: 0
+                },
+                index: "letto"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        $("#bedluxe").on('click', function(data){
+           
+            var tv = {
+                type : "bed",
+                id: 2,
+                textureId: 'normal',
+                position: {
+                    x: 1.8,
+                    y: 0.5,
+                    z: 2.15,
+                    angle: 0
+                },
+                index: "lit_luxe"
+            };
+            socket.emit("tableAddFurniture", tv);
+            console.log(tv);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+        $("#control").on('click', function(data){
+           
+            var sofa = {
+                type : "bed",
+                id: 2,
+                textureId: 'normal',
+                position: {
+                    x: 6.45,
+                    y: 0.5,
+                    z: 2.32,
+                    angle: 0
+                },
+                index: "control"
+            };
+            socket.emit("tableAddFurniture", sofa);
+            console.log(sofa);
+            socket.on("addFurniture", function(data){
+                console.log(data);
+            });
+        });
+   
+   
+
 
         $("#action3").on('click', function(data){
             console.log("removing");
@@ -249,6 +510,9 @@
         });
         socket.on('removeFurniture', function (data) {
             console.log(data);
+        });
+        socket.on('position', function (data) {
+            console.log("position", data);
         });
 
     });
