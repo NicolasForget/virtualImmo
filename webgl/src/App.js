@@ -202,8 +202,10 @@ export default React.createClass({
             socket.on("changedFurnitureTexture", function (data) {
                 var id = data.id;
                 for (var i = 0; i < les_meubles.length; i++) {
+
                     if (les_meubles[i].furnitureIndex == data.index &&
                         les_meubles[i].furnitureType == data.type) {
+                    	console.log("test");
                     	isLoading();
                     	try{
 	                        var mtlLoader = new THREE.MTLLoader();
@@ -225,6 +227,9 @@ export default React.createClass({
 			                        object.position.z = les_meubles[i_tmp].position.z ;
 
 			                        //object.rotateY((data.position.angle * Math.PI)/180)
+			                        object.rotation.y = les_meubles[i_tmp].rotation.y ;
+			                        object.rotation.x = les_meubles[i_tmp].rotation.x ;
+			                        object.rotation.z = les_meubles[i_tmp].rotation.z ;
 
 
 			                        //scene.add(object);
@@ -246,6 +251,8 @@ export default React.createClass({
 				                });
 				            });
 				        }catch(e){
+				        	console.error(e);
+				        	console.log(error);
 	                        stopLoading();
 	                    }
                     }
@@ -846,6 +853,9 @@ export default React.createClass({
 					                        object.position.y = 0.5;
 					                        object.position.z = intersects[0].object.parent.position.z ;
 					                        
+					                        object.rotation.y = intersects[0].object.parent.rotation.y ;
+			                       	 		object.rotation.x = intersects[0].object.parent.rotation.x ;
+			                        		object.rotation.z = intersects[0].object.parent.rotation.z ;
 
 					                        object.textures_availables = intersects[0].object.parent.textures_availables;
 					                        object.selected_texture = texture_keys[i_tmp];
@@ -919,6 +929,11 @@ export default React.createClass({
 					                        object.position.x = intersects[0].object.parent.position.x ;
 					                        object.position.y = 0.5;
 					                        object.position.z = intersects[0].object.parent.position.z ;
+
+
+					                        object.rotation.y = intersects[0].object.parent.rotation.y ;
+			                       	 		object.rotation.x = intersects[0].object.parent.rotation.x ;
+			                        		object.rotation.z = intersects[0].object.parent.rotation.z ;
 					                        
 
 					                        object.textures_availables = intersects[0].object.parent.textures_availables;
