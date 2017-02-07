@@ -26,6 +26,10 @@ d3.radialMenu = function() {
 
     var arrowImg = "";
     var arrowSize = 60;
+
+    var centerAction="";
+
+
     
     //#endregion
 
@@ -171,7 +175,7 @@ d3.radialMenu = function() {
                              ;
         //arrow for menu
         arrow = target.append("g").attr("transform", "rotate(0)").attr("class","arrow");
-        arrow.append("image").attr("href",arrowImg).attr("width",arrowSize).attr("height",arrowSize).attr("x",-arrowSize/2).attr("y",-arrowSize/2);
+        arrow.append("image").attr("href",arrowImg).attr("width",arrowSize).attr("height",arrowSize).attr("x",-arrowSize/2).attr("y",-arrowSize/2).on("click",function(d){eval(centerAction)});
         
         return control;
     };
@@ -179,6 +183,14 @@ d3.radialMenu = function() {
     control.arrow = function(_){
         if (!arguments.length) return arrowImg;
         arrowImg = _;
+        return control;
+    }
+
+    control.centerAction = function(_){
+        if (!arguments.length) return centerAction;
+        
+        centerAction = _;
+        console.log(centerAction);
         return control;
     }
 

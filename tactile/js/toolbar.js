@@ -4,35 +4,15 @@ var hoverColor= "#0000ff";
 var pressedColor= "#000077";
 
 function createToolBar(){
+            d3.select(".rotaryKnob").style("display","inline");
+            d3.select("#loading").style("display","none");
 
-            var w= 1000;
-            var h= 50;
+            var w= 900;
+            var h= 80;
             var svgToolBar= d3.select("#toolBar")
                         .append("svg")
                         .attr("width",w)
                         .attr("height",h)
-
-            // var defs = svgToolBar.append("defs");
-            // var radialGradient = defs.append("radialGradient").attr("id","knobgradient");
-            // radialGradient.append("stop").attr("offset","0").attr("stop-color","gray");
-            // radialGradient.append("stop").attr("offset","4").attr("stop-color","silver");
-            // var g = svgToolBar.append("g").attr("class","knob");
-            // g.append("circle").attr("class","knob_center").attr("cx","0").attr("cy","0").attr("r","0.055625");
-
-            //             <defs>
-            //             <radialGradient id="knobgradient">
-            //               <stop offset="0" stop-color="gray"/>
-            //               <stop offset="4" stop-color="silver"/>
-            //             </radialGradient>
-            //           </defs>
-            //           <g class="knob">
-            //             <circle class="knob_center" cx="0" cy="0" r="0.055625"/>
-            //             <g class="knob_gfx">
-            //               <circle cx="0" cy="0" r="4"/>
-            //               <line x1="0" y1="-1.5" x2="0" y2="-3.5"/>
-            //             </g>
-            //             <text class="knob_number"/>
-            //           </g>
 
             //backdrop of color
            	var background = svgToolBar.append("rect")
@@ -42,16 +22,6 @@ function createToolBar(){
                                 .attr("x",0)
                                 .attr("y",0)
                                 .attr("fill","#FFFFFF")
-
-            //text that the radio button will toggle
-            // var number= svgToolBar.append("text")
-            //                 .attr("id","numberToggle")
-            //                 .attr("x",120)
-            //                 .attr("y",90)
-            //                 .attr("fill","green")
-            //                 .attr("font-size",24);
-                            // .text("[click a button]")
-
             //container for all buttons
             var allButtonsMeuble = svgToolBar.append("g").attr("transform","translate(600,0)")
                                 .attr("id","allButtonsMeuble")
@@ -61,19 +31,28 @@ function createToolBar(){
             //fontawesome button labels
             var labelsTouche= [{
                 "label":"\uf047",
-                "id":"touchMove"
+                "id":"touchMove",
+                "v":"visible"
             },{
                 "label":"\uf021",
-                "id":"touchRotate"
+                "id":"touchRotate",
+                "v":"hidden"
             }];
             var labels= [
-            // {
-            //     "label":"table",
-            //     "id":"table"
-            // },
+            {
+                "label":"table",
+                "id":"table",
+                "v":"visible"
+            },
             {
                 "label":"sofa",
-                "id":"sofa"
+                "id":"sofa",
+                "v":"visible"
+            },
+            {
+                "label":"bed",
+                "id":"bed",
+                "v":"visible"
             }];
 
             
@@ -85,8 +64,10 @@ function createToolBar(){
                                     .append("g")
                                     .attr("class","button").attr("id",function(d){return d.id;})
                                     .style("cursor","pointer")
+                                    .style("visibility",function(d){return d.v;})
                                     .on("click",function(d,i) {
                                         selectValue = d.id;
+                                        console.log(selectValue);
                                         updateButtonColors(d3.select(this), d3.select(this.parentNode))
                                         // d3.select("#numberToggle").text(i+1)
                                     })
@@ -112,8 +93,10 @@ function createToolBar(){
                                     .append("g")
                                     .attr("class","button").attr("id",function(d){return d.id;})
                                     .style("cursor","pointer")
+                                    .style("visibility",function(d){return d.v;})
                                     .on("click",function(d,i) {
                                         selectValue = d.id;
+                                        console.log(selectValue);
                                         updateButtonColors(d3.select(this), d3.select(this.parentNode))
                                         // d3.select("#numberToggle").text(i+1)
                                     })
@@ -133,7 +116,7 @@ function createToolBar(){
                                     });
 
             var bWidth= 60; //button width
-            var bHeight= 40; //button height
+            var bHeight= 60; //button height
             var bSpace= 20; //space between buttons
             var x0= 20; //x offset
             var y0= 10; //y offset
@@ -188,6 +171,9 @@ function createToolBar(){
                         .attr("dominant-baseline","central")
                         .attr("fill","white")
                         .text(function(d) {return d.label;})
+
+
+
 }
 
 
@@ -198,6 +184,11 @@ function updateButtonColors(button, parent) {
         .attr("fill",defaultColor);
     d3.select(".actionSelected").classed("actionSelected",false).style("stroke",null);
     parent.classed("actionSelected",true).style("stroke","red");
+    button.select("rect").attr("fill",pressedColor);
+    if(selectValue == "sofa" ||selectValue == "table" ||selectValue == "bed"){
+        d3.select("#touchRotate").style("visibility","hidden");
+    }else{
+        d3.select("#touchRotate").style("visibility","visible");
+    }
 
-    button.select("rect").attr("fill",pressedColor)
 }

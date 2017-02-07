@@ -51,12 +51,6 @@ var max_rotations = speed_to_rotations(36);
 var min_rotations = speed_to_rotations(0);
 
 function set_rotations(rotations) {
-  // if (snapping.checked) {
-  //   var divisions = parseInt(snapping_granularity.value, 10);
-  //   if (divisions >= 2) {
-  //     rotations = Math.round(rotations * divisions) / divisions;
-  //   }
-  // }
   
   if (max_rotations !== null && max_rotations !== undefined && rotations > max_rotations) {
     rotations = max_rotations;
@@ -74,20 +68,6 @@ function set_rotations(rotations) {
 function set_speed(speed) {
   set_rotations(speed_to_rotations(speed));
 }
-
-
-// Inspired by:
-// https://github.com/KaisarCode/Rotate/blob/master/kc-rotate-dial.js#L62
-// function get_position(elem) {
-//   var x = 0;
-//   var y = 0;
-//   while (elem) {
-//     x += elem.offsetLeft;
-//     y += elem.offsetTop;
-//     elem = elem.offsetParent;
-//   }
-//   return [x, y];
-// }
 
 function get_position(elem) {
   var rect = elem.getBoundingClientRect();
@@ -170,30 +150,8 @@ function set_event_listeners() {
   elem.addEventListener('touchstart', start_dragging);
   document.addEventListener('touchend', stop_dragging);
   document.addEventListener('touchmove', drag_rotate);
-  
-  // document.getElementById('rangetesting').addEventListener('input', function(e) {
-  //   var number = parseFloat(e.target.value);
-  //   set_speed(number);
-  // });
+
 }
 set_event_listeners();
 set_speed(0);
 
-
-
-// https://gist.github.com/mattneary/1362294
-// function plotF(a,b,c,color){var color=color||"#f00";var c=c||{xMin:-8,xMax:8,yMin:-8,yMax:8};c.yMax=[-c.yMin,c.yMin=-c.yMax][0];var d=b.height/(c.yMax-c.yMin),e=b.width/(c.xMax-c.xMin);axies={y:b.width*(0-c.xMin)/(c.xMax-c.xMin),x:b.height*(0-c.yMin)/(c.yMax-c.yMin)};if(b&&b.getContext){var f=b.getContext("2d");if(f){f.beginPath();f.strokeStyle="#000";f.lineWidth=1;f.moveTo(axies.y,0);f.lineTo(axies.y,b.height);f.moveTo(0,axies.x);f.lineTo(b.width,axies.x);f.stroke();f.closePath();f.beginPath();f.strokeStyle=color;f.fillStyle="#00f";f.lineWidth=2;var g=0,h=0;for(var i=axies.y/b.width*-50;i<(b.width-axies.y)/b.width*50;i++){var j=function(a){return(a-axies.y/b.width*-50)/50},k=c.xMin,l=c.xMax-c.xMin,m=c.yMax-c.yMin;f.moveTo(j(i)*b.width,axies.x-a(k+j(i)*l)/m*b.height);f.lineTo(j(i+1)*b.width,axies.x-a(k+j(i+1)*l)/m*b.height)}f.fill();f.stroke();f.closePath()}}}
-
-// Quick and dirty plotting, just to check if the function is correct.
-// plotF(speed_to_rotations, canvas1, {
-//   xMin: -16,
-//   xMax: 16,
-//   yMin: -6,
-//   yMax: 6
-// }, "#f00");
-// plotF(rotations_to_speed, canvas2, {
-//   xMin: -6,
-//   xMax: 6,
-//   yMin: -16,
-//   yMax: 16
-// }, "#00f");
