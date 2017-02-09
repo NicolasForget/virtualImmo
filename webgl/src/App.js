@@ -115,26 +115,23 @@ export default React.createClass({
 
     componentDidMount(){
 
-    	function isLoading(){
-    		$(".loading").css({display: "block"});
-    		$(".selector").css({display: "none"});
-		}
+        function isLoading() {
+            $(".loading").css({display: "block"});
+            $(".selector").css({display: "none"});
+        }
 
-    	function stopLoading(){
-    		$(".selector").css({display: "block"});
-    		$(".loading").css({display: "none"});
-    	}
+        function stopLoading() {
+            $(".selector").css({display: "block"});
+            $(".loading").css({display: "none"});
+        }
+
         socket = io.connect('http://mayl.me:8080');
         var les_meubles = [];
         var meubles_colors = [0xff0000, 0xf283b6, 0xb5bfa1, 0xedbfb7];
         THREE.ImageUtils.crossOrigin = '';
         socket.on("connect", () => {
-            console.log("connected");
+
             setInterval(function () {
-                console.log({
-                    x: controls.getObject().position.x,
-                    y: controls.getObject().position.z
-                })
                 socket.emit('position', {
                     x: controls.getObject().position.x,
                     y: controls.getObject().position.z
@@ -148,10 +145,10 @@ export default React.createClass({
 
             socket.on('addFurniture', function (data) {
 
-            	isLoading();
+                isLoading();
                 for (var i = 0; i < les_meubles.length; i++) {
-                    if (les_meubles[i].furnitureIndex == data.index) {
-                        if (les_meubles[i].furnitureType == data.type) {
+                    if (les_meubles[i].furnitureIndex === data.index) {
+                        if (les_meubles[i].furnitureType === data.type) {
                             scene.remove(les_meubles[i]);
                         }
                     }
@@ -167,10 +164,10 @@ export default React.createClass({
                     var objLoader = new THREE.OBJLoader();
                     objLoader.setMaterials(materials);
                     objLoader.setPath("http://mayl.me:3000/");
-                    console.log(data.model3D);
+
                     objLoader.load(data.model3D, function (object) {
 
-                        console.log(object)
+
                         object.position.x = data.position.x;
                         object.position.y = 0.5;
                         object.position.z = data.position.z;
@@ -184,15 +181,17 @@ export default React.createClass({
                         object.textures_availables = data.textures_availables;
                         object.selected_texture = data.selected_texture;
                         object.furnitureType = data.type;
-                   		//$("#infos").html("test type creation :"+ data.type);
+                        //$("#infos").html("test type creation :"+ data.type);
 
                         object.furnitureId = data.id;
                         object.furnitureIndex = data.index;
                         object.model3D = data.model3D;
+                        object.name = data.index+""+data.type;
 
 
-                        console.log("after made", object);
                         les_meubles.push(object);
+
+
                         stopLoading();
                     });
                 });
@@ -203,86 +202,103 @@ export default React.createClass({
                 var id = data.id;
                 for (var i = 0; i < les_meubles.length; i++) {
 
-                    if (les_meubles[i].furnitureIndex == data.index &&
-                        les_meubles[i].furnitureType == data.type) {
-                    	console.log("test");
-                    	isLoading();
-                    	try{
-	                        var mtlLoader = new THREE.MTLLoader();
-			                mtlLoader.setPath("../furnitures/");
-			                var i_tmp = i;
-			                mtlLoader.load(les_meubles[i_tmp].textures_availables[data.textureId].texture, function (materials) {
+                    if (les_meubles[i].furnitureIndex === data.index &&
+                        les_meubles[i].furnitureType === data.type) {
 
-		                    	materials.preload();
+                        isLoading();
+                        try {
+                            var mtlLoader = new THREE.MTLLoader();
+                            mtlLoader.setPath("../furnitures/");
+                            var i_tmp = i;
+                            mtlLoader.load(les_meubles[i_tmp].textures_availables[data.textureId].texture, function (materials) {
 
-			                    var objLoader = new THREE.OBJLoader();
-			                    objLoader.setMaterials(materials);
-			                    objLoader.setPath("http://mayl.me:3000/");
-			                    console.log(les_meubles[i_tmp].model3D);
-			                    objLoader.load(les_meubles[i_tmp].model3D, function (object) {
-			                        
-			                        console.log(object)
-			                        object.position.x = les_meubles[i_tmp].position.x ;
-			                        object.position.y = 0.5;
-			                        object.position.z = les_meubles[i_tmp].position.z ;
+                                materials.preload();
 
-			                        //object.rotateY((data.position.angle * Math.PI)/180)
-			                        object.rotation.y = les_meubles[i_tmp].rotation.y ;
-			                        object.rotation.x = les_meubles[i_tmp].rotation.x ;
-			                        object.rotation.z = les_meubles[i_tmp].rotation.z ;
+                                var objLoader = new THREE.OBJLoader();
+                                objLoader.setMaterials(materials);
+                                objLoader.setPath("http://mayl.me:3000/");
+
+                                objLoader.load(les_meubles[i_tmp].model3D, function (object) {
 
 
-			                        //scene.add(object);
-			                        
+                                    object.position.x = les_meubles[i_tmp].position.x;
+                                    object.position.y = 0.5;
+                                    object.position.z = les_meubles[i_tmp].position.z;
 
-			                        object.textures_availables = les_meubles[i_tmp].textures_availables;
-			                        object.selected_texture = les_meubles[i_tmp].selected_texture;
-			                        object.furnitureType = les_meubles[i_tmp].type;
-			                        object.furnitureId = les_meubles[i_tmp].id;
-			                        object.furnitureIndex = les_meubles[i_tmp].index;
-			                        object.model3D = les_meubles[i_tmp].model3D;
-			                        
+                                    //object.rotateY((data.position.angle * Math.PI)/180)
+                                    object.rotation.y = les_meubles[i_tmp].rotation.y;
+                                    object.rotation.x = les_meubles[i_tmp].rotation.x;
+                                    object.rotation.z = les_meubles[i_tmp].rotation.z;
 
-			                        console.log("after change",object);
-	                            	scene.remove(les_meubles[i_tmp]);
-	                            	scene.add(object);
-	                            	les_meubles[i_tmp] = object;
-	                            	stopLoading();
-				                });
-				            });
-				        }catch(e){
-				        	console.error(e);
-				        	console.log(error);
-	                        stopLoading();
-	                    }
-                    }
-	          	}
-            });
 
-            socket.on('removeFurniture', function (data) {
-                console.log("removing", data.index);
-                var index = data.index;
-                console.log(les_meubles);
+                                    //scene.add(object);
 
-                for (var i = 0; i < les_meubles.length; i++) {
-                    if (les_meubles[i].furnitureIndex == data.index) {
-                        if (les_meubles[i].furnitureType == data.type) {
-                            scene.remove(les_meubles[i]);
+
+                                    object.textures_availables = les_meubles[i_tmp].textures_availables;
+                                    object.selected_texture = les_meubles[i_tmp].selected_texture;
+                                    object.furnitureType = les_meubles[i_tmp].type;
+                                    object.furnitureId = les_meubles[i_tmp].furnitureId;
+                                    object.furnitureIndex = les_meubles[i_tmp].index;
+                                    object.model3D = les_meubles[i_tmp].model3D;
+
+
+                                    scene.remove(les_meubles[i_tmp]);
+                                    scene.add(object);
+                                    les_meubles[i_tmp] = object;
+                                    stopLoading();
+                                });
+                            });
+                        } catch (e) {
+                            console.error(e);
+
+                            stopLoading();
                         }
                     }
                 }
             });
 
-            socket.on('movedFurniture', function (data) {
-                console.log("moving", data);
-                console.log(les_meubles);
+            socket.on('removeFurniture', function (data) {
+                console.log("supresion");
+                var supprthis;
                 for (var i = 0; i < les_meubles.length; i++) {
-                    if (les_meubles[i].furnitureIndex == data.index && les_meubles[i].furnitureType == data.type) {
-                        console.log(les_meubles[i]);
+                    console.log('for', les_meubles[i]);
+                    console.log("data",data);
+                    if (les_meubles[i].furnitureIndex === data.index) {
+                        if (les_meubles[i].furnitureType === data.type) {
+                            //scene.remove(les_meubles[i]);
+                            //les_meubles[i].dispose();
+                            supprthis = i;
+                            var selectedObject = scene.getObjectByName(les_meubles[i].name);
+                            scene.remove( selectedObject );
+                            les_meubles = les_meubles.filter(function(item){
+                                return item.name !=  (data.index+data.type);
+                            });
+                            console.log("supression scene", supprthis);
+                        }
+                    }
+                }
+                console.log(scene);
+                console.log(les_meubles);
+                if (typeof supprthis != "undefined"){
+                    //delete(les_meubles[supprthis]);
+                }
+            });
+
+            socket.on('movedFurniture', function (data) {
+
+                console.log("furniture moved : ", data);
+                console.log("meubles", les_meubles);
+                for (var i = 0; i < les_meubles.length; i++) {
+                    if (les_meubles[i].furnitureIndex === data.index && les_meubles[i].furnitureType === data.type) {
+                        console.log("found")
+
+
+                        les_meubles[i].matrixAutoUpdate = true;
                         les_meubles[i].position.x = data.position.x;
                         les_meubles[i].position.y = data.position.y;
                         les_meubles[i].position.z = data.position.z;
                         les_meubles[i].rotation.y = (data.position.angle * Math.PI) / 180;
+
 
                         // (angle en radian) = (angles en degrés)*(2.0*pi)/360.0 
                         les_meubles[i].rotation.y = data.position.angle * (2.0 * pi) / 360.0;
@@ -472,17 +488,17 @@ export default React.createClass({
 
             for (var i = 0; i < walls.length; i++) {
                 if (walls[i].type === "roof") {
-                     console.log(walls[i].x, walls[i].y);
-                     var roofBox = new THREE.BoxGeometry(walls[i].xLength, 0.1, walls[i].yLength);
-                     var textureRoof = THREE.ImageUtils.loadTexture('../images/wall.jpg');
-                     textureRoof.wrapS = textureRoof.wrapT = THREE.RepeatWrapping;
-                     textureRoof.repeat.set(5, 5);
-                     var materialRoof = new THREE.MeshBasicMaterial({map: textureRoof});
-                     var roof = new THREE.Mesh(roofBox, materialRoof);
-                     roof.position.x = walls[i].x + walls[i].xLength / 2;
-                     roof.position.z = walls[i].y + walls[i].yLength / 2;
-                     roof.position.y = 7;
-                     scene.add(roof);
+
+                    var roofBox = new THREE.BoxGeometry(walls[i].xLength, 0.1, walls[i].yLength);
+                    var textureRoof = THREE.ImageUtils.loadTexture('../images/wall.jpg');
+                    textureRoof.wrapS = textureRoof.wrapT = THREE.RepeatWrapping;
+                    textureRoof.repeat.set(5, 5);
+                    var materialRoof = new THREE.MeshBasicMaterial({map: textureRoof});
+                    var roof = new THREE.Mesh(roofBox, materialRoof);
+                    roof.position.x = walls[i].x + walls[i].xLength / 2;
+                    roof.position.z = walls[i].y + walls[i].yLength / 2;
+                    roof.position.y = 7;
+                    scene.add(roof);
                 } else {
                     var wallBox;
                     var pivotMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
@@ -491,7 +507,7 @@ export default React.createClass({
                     var wallHeight;
                     pivot.position.x = walls[i].x;
                     pivot.position.z = walls[i].y;
-                    if (walls[i].type == "door") {
+                    if (walls[i].type === "door") {
                         wallHeight = 3;
                         wallBox = new THREE.BoxGeometry(walls[i].length, 3, 0.01);
                         pivot.position.y = 6.5;
@@ -598,6 +614,9 @@ export default React.createClass({
         var hasGP = false;
         var repGP;
 
+        var gachetteR = false;
+        var gachetteD = false;
+
         function canGame() {
             return "getGamepads" in navigator;
         }
@@ -625,6 +644,7 @@ export default React.createClass({
             controls.getObject().position.y = 3;
 
             scene.add(controls.getObject());
+
             var onKeyDown = function (event) {
                 switch (event.keyCode) {
                     case 38: // up
@@ -642,6 +662,16 @@ export default React.createClass({
                     case 39: // right
                     case 83:
                         moveRight = true;
+                        break;
+
+
+                    case 49: // &
+
+                        gachetteR = true;
+                        break;
+                    case 50:
+
+                        gachetteD = true;
                         break;
                 }
             };
@@ -707,7 +737,7 @@ export default React.createClass({
             renderer.shadowMap.type = 1;
             renderer.shadowMap.soft = true;
 
-            console.log(renderer.shadowMap);
+
             //renderer.setClearColor(0xffffff);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -740,12 +770,12 @@ export default React.createClass({
             stereoEffect.setSize(window.innerWidth, window.innerHeight);
         }
 
-        var gachetteR = false;
-        var gachetteD = false;
         var buttonRemove = false;
 
         controls.getObject().position.x = 5;
         controls.getObject().position.z = 5;
+        
+
         function animate() {
             requestAnimationFrame(animate);
 
@@ -776,8 +806,8 @@ export default React.createClass({
                     raycaster.ray.origin.copy(controls.getObject().position);
 
                     raycaster.ray.origin.y -= 10;
-                    var intersections = raycaster.intersectObjects(objects);
-                    var isOnObject = intersections.length > 0;
+                    //var intersections = raycaster.intersectObjects(objects);
+                    //var isOnObject = intersections.length > 0;
                     var time = performance.now();
                     var delta = ( time - prevTime ) / 1000;
                     velocity.x -= velocity.x * 10.0 * delta;
@@ -789,9 +819,9 @@ export default React.createClass({
                     if (moveRight) velocity.z += 40.0 * delta;
 
 
-                    if (isOnObject === true) {
-                        velocity.y = Math.max(0, velocity.y);
-                    }
+                    //if (isOnObject === true) {
+                    //    velocity.y = Math.max(0, velocity.y);
+                    //}
                     controls.getObject().translateX(velocity.x * delta);
                     controls.getObject().translateY(velocity.y * delta);
                     controls.getObject().translateZ(velocity.z * delta);
@@ -812,193 +842,231 @@ export default React.createClass({
 
                 var intersects = selector.intersectObjects(les_meubles, true);
                 if (intersects.length > 0) {
-                    $(".selector").addClass('active');
-                    
-                    var texture_keys = Object.keys(intersects[0].object.parent.textures_availables);
+                    // var selected_index;
+                    // for (var i = 0; i < les_meubles.length; i++){
+                    //     if (les_meubles[i].name === intersects[0].object.parent.name){
+                    //         console.log("index trouvé": i);
+                    //         selected_index = i;
+                    //     }
+                    // }
+                    var selected = scene.getObjectByName(intersects[0].object.parent.name);
+                    //console.log("selected", selected);
+                    if (selected && !(selected.type === "Scene")){
 
-                    var textures_availables = intersects[0].object.parent.textures_availables;
+                        $(".selector").addClass('active');
+                        //console.log("#######TEST", intersects[0].object.parent);
+
+                        var texture_keys = Object.keys(selected.textures_availables);
+
+                        var textures_availables = selected.textures_availables;
 
 
-                    if (navigator.getGamepads()[0]) {
-                        var gp = navigator.getGamepads()[0];
-                        var buttons = gp.buttons
-                        if (gp.buttons[4].pressed) {
-                            gachetteR = true;
-                        }
-                        else if(gachetteR == true && (!gp.buttons[4].pressed) ){
+                        if (navigator.getGamepads()[0] || gachetteD || gachetteR) {
 
-                            gachetteR = false;
-                            for (var i = 0; i < texture_keys.length; i++){
-
-                                if (texture_keys[i] == intersects[0].object.parent.selected_texture){
-
-                                    var i_tmp = i+1;
-                                    i_tmp = (i_tmp >=texture_keys.length )?0:i_tmp;
-
-                                    isLoading();
-                        			//$("#infos").html("texture", textures_availables[texture_keys[0]].texture);
-
-			                        var mtlLoader = new THREE.MTLLoader();
-					                mtlLoader.setPath("../furnitures/");
-					                mtlLoader.load(textures_availables[texture_keys[i_tmp]].texture, function (materials) {
-				                     	materials.preload();
-
-					                    var objLoader = new THREE.OBJLoader();
-					                    objLoader.setMaterials(materials);
-					                    objLoader.setPath("http://mayl.me:3000/");
-					                    objLoader.load(intersects[0].object.parent.model3D, function (object) {
-					                        
-					                        console.log(object)
-					                        object.position.x = intersects[0].object.parent.position.x ;
-					                        object.position.y = 0.5;
-					                        object.position.z = intersects[0].object.parent.position.z ;
-					                        
-					                        object.rotation.y = intersects[0].object.parent.rotation.y ;
-			                       	 		object.rotation.x = intersects[0].object.parent.rotation.x ;
-			                        		object.rotation.z = intersects[0].object.parent.rotation.z ;
-
-					                        object.textures_availables = intersects[0].object.parent.textures_availables;
-					                        object.selected_texture = texture_keys[i_tmp];
-					                        object.furnitureType = intersects[0].object.parent.furnitureType;
-					                        object.furnitureId = intersects[0].object.parent.furnitureId;
-					                        object.furnitureIndex = intersects[0].object.parent.furnitureIndex;
-					                        object.model3D = intersects[0].object.parent.model3D;
-					                        
-
-					                        console.log("after change",object);
-
-			                             	scene.remove(intersects[0].object.parent);
-			                            	scene.add(object);
-			                            	intersects[0].object.parent = object;
-
-			                            	var data = {
-									            id :  object.furnitureId,
-									            type: object.furnitureType,
-									            textureId: object.selected_texture,
-									            index: object.furnitureIndex
-									        }
-
-			                            	socket.emit("changeFurnitureTexture",data);
-			                            	stopLoading();
-						                });
-						        	});
-                                   
-                                }
-
+                            var gp = navigator.getGamepads()[0];
+                            var buttons = gp.buttons || {};
+                            if (gp.buttons[4].pressed) {
+                               gachetteR = true;
                             }
-                        } else {
-                            gachetteR = false;
-                        }
+                            else if (gachetteR === true && (!gp.buttons[4].pressed)) {
+
+                                gachetteR = false;
+                                for (var i = 0; i < texture_keys.length; i++) {
+
+                                    if (texture_keys[i] === selected.selected_texture) {
+
+                                        var i_tmp = i + 1;
+                                        i_tmp = (i_tmp >= texture_keys.length ) ? 0 : i_tmp;
+
+                                        isLoading();
+                                        //$("#infos").html("texture", textures_availables[texture_keys[0]].texture);
+
+                                        var mtlLoader = new THREE.MTLLoader();
+                                        mtlLoader.setPath("../furnitures/");
+
+                                        mtlLoader.load(textures_availables[texture_keys[i_tmp]].texture, function (materials) {
+                                            materials.preload();
+
+                                            var objLoader = new THREE.OBJLoader();
+                                            objLoader.setMaterials(materials);
+                                            objLoader.setPath("http://mayl.me:3000/");
+
+                                            objLoader.load(intersects[0].object.parent.model3D, function (object) {
+                                                 
+                                                object.position.x = intersects[0].object.parent.position.x;
+                                                object.position.y = 0.5;
+                                                object.position.z = intersects[0].object.parent.position.z;
+
+                                                object.rotation.y = intersects[0].object.parent.rotation.y;
+                                                object.rotation.x = intersects[0].object.parent.rotation.x;
+                                                object.rotation.z = intersects[0].object.parent.rotation.z;
+
+                                                object.textures_availables = intersects[0].object.parent.textures_availables;
+                                                object.selected_texture = texture_keys[i_tmp];
+                                                object.furnitureType = intersects[0].object.parent.furnitureType;
+                                                object.furnitureId = intersects[0].object.parent.furnitureId;
+                                                object.furnitureIndex = intersects[0].object.parent.furnitureIndex;
+                                                object.model3D = intersects[0].object.parent.model3D;
+                                                object.uuid = intersects[0].object.parent.uuid;
+                                                object.name = intersects[0].object.parent.name;
+
+                                                console.log("scene 1 ", scene.children.length);
+
+                                                scene.remove(intersects[0].object.parent);
+
+                                                console.log("scene 2 ", scene.children.length);
+                                                scene.add(object);
 
 
-                        if (gp.buttons[3].pressed) {
-                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+                                                les_meubles = les_meubles.filter(function(item){
+                                                    return item.name !=  object.name;
+                                                });
+                                                console.log(les_meubles);
 
-                            gachetteD = true;
-                        }
-                        else if (gachetteD == true && (!gp.buttons[3].pressed)) {
-                            gachetteD = false;
-
-                            for (var i = texture_keys.length; i >=0 ; i--){
+                                                les_meubles.push(object);
 
 
+                                                var data = {
+                                                    id: object.furnitureId,
+                                                    type:object.furnitureType,
+                                                    textureId: object.selected_texture,
+                                                    index: object.furnitureIndex
+                                                }
 
-                                if (texture_keys[i] == intersects[0].object.parent.selected_texture){
-                            		var i_tmp = i - 1;
+                                                socket.emit("changeFurnitureTexture", data);
+                                                stopLoading();
+                                            });
+                                        });
 
-                                    
-                                    if (i_tmp < 0){
-                                    	i_tmp = texture_keys.length -1
-                                    	//$("#infos").html("test i apres :"+ textures_availables[texture_keys[i_tmp]].texture);
                                     }
 
-                                    isLoading();
-                        			console.log(textures_availables[texture_keys[0]].texture);
-
-			                        var mtlLoader = new THREE.MTLLoader();
-					                mtlLoader.setPath("../furnitures/");
-					                mtlLoader.load(textures_availables[texture_keys[i_tmp]].texture, function (materials) {
-				                     	materials.preload();
-
-					                    var objLoader = new THREE.OBJLoader();
-					                    objLoader.setMaterials(materials);
-					                    objLoader.setPath("http://mayl.me:3000/");
-					                    objLoader.load(intersects[0].object.parent.model3D, function (object) {
-					                        
-					                        console.log(object)
-					                        object.position.x = intersects[0].object.parent.position.x ;
-					                        object.position.y = 0.5;
-					                        object.position.z = intersects[0].object.parent.position.z ;
-
-
-					                        object.rotation.y = intersects[0].object.parent.rotation.y ;
-			                       	 		object.rotation.x = intersects[0].object.parent.rotation.x ;
-			                        		object.rotation.z = intersects[0].object.parent.rotation.z ;
-					                        
-
-					                        object.textures_availables = intersects[0].object.parent.textures_availables;
-					                        object.selected_texture = texture_keys[i_tmp];
-					                        object.furnitureType = intersects[0].object.parent.furnitureType;
-					                        object.furnitureId = intersects[0].object.parent.furnitureId;
-					                        object.furnitureIndex = intersects[0].object.parent.furnitureIndex;
-					                        object.model3D = intersects[0].object.parent.model3D;
-					                        
-
-					                        console.log("after change",object);
-
-			                             	scene.remove(intersects[0].object.parent);
-			                            	scene.add(object);
-			                            	intersects[0].object.parent = object;
-
-			                            	var data = {
-									            id :  object.furnitureId,
-									            type: object.furnitureType,
-									            textureId: object.selected_texture,
-									            index: object.furnitureIndex
-									        }
-									        //$("#infos").html("test i apres :"+ data.type);
-
-			                            	socket.emit("changeFurnitureTexture",data);
-			                            	stopLoading();
-						                });
-						        	});
-							        
                                 }
-                            }
-                        }else{
-
-                            gachetteD = false;
-                        }
-
-
-                        if (gp.buttons[2].pressed) {
-                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
-
-                            buttonRemove = true;
-                        }
-                        else if (buttonRemove == true && (!gp.buttons[2].pressed)) {
-                            buttonRemove = false;
-
-                            var index = intersects[0].object.parent.furnitureIndex;
-                            var type = intersects[0].object.parent.furnitureType;
-
-
-                            socket.emit("removeFurniture", {
-                                index: index,
-                                type: intersects[0].object.parent.furnitureType
-                            });
-                            for (var i = 0; i < les_meubles.length; i++) {
-                                if (les_meubles[i].furnitureIndex == index && les_meubles[i].furnitureType == type) {
-
-                                    scene.remove(les_meubles[i]);
-                                }
+                            } else {
+                                gachetteR = false;
                             }
 
-                        } else {
-                            buttonRemove = false;
+
+                            if (gp.buttons[3].pressed) {
+                               //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+                            
+                               gachetteD = true;
+                            }
+                            else if (gachetteD === true && (!gp.buttons[3].pressed)) {
+                                gachetteD = false;
+
+                                for (var i = texture_keys.length; i >= 0; i--) {
+
+
+                                    if (texture_keys[i] === intersects[0].object.parent.selected_texture) {
+                                        var i_tmp = i - 1;
+
+
+                                        if (i_tmp < 0) {
+                                            i_tmp = texture_keys.length - 1
+                                            //$("#infos").html("test i apres :"+ textures_availables[texture_keys[i_tmp]].texture);
+                                        }
+
+                                        isLoading();
+
+
+                                        var mtlLoader = new THREE.MTLLoader();
+                                        mtlLoader.setPath("../furnitures/");
+                                        mtlLoader.load(textures_availables[texture_keys[i_tmp]].texture, function (materials) {
+                                            materials.preload();
+
+                                            var objLoader = new THREE.OBJLoader();
+                                            objLoader.setMaterials(materials);
+                                            objLoader.setPath("http://mayl.me:3000/");
+                                            objLoader.load(intersects[0].object.parent.model3D, function (object) {
+
+
+                                                object.position.x = intersects[0].object.parent.position.x;
+                                                object.position.y = 0.5;
+                                                object.position.z = intersects[0].object.parent.position.z;
+
+                                                object.rotation.y = intersects[0].object.parent.rotation.y;
+                                                object.rotation.x = intersects[0].object.parent.rotation.x;
+                                                object.rotation.z = intersects[0].object.parent.rotation.z;
+
+                                                object.textures_availables = intersects[0].object.parent.textures_availables;
+                                                object.selected_texture = texture_keys[i_tmp];
+                                                object.furnitureType = intersects[0].object.parent.furnitureType;
+                                                object.furnitureId = intersects[0].object.parent.furnitureId;
+                                                object.furnitureIndex = intersects[0].object.parent.furnitureIndex;
+                                                object.model3D = intersects[0].object.parent.model3D;
+                                                object.uuid = intersects[0].object.parent.uuid;
+                                                object.name = intersects[0].object.parent.name;
+
+                                                console.log("scene 1 ", scene.children.length);
+
+                                                scene.remove(intersects[0].object.parent);
+
+                                                console.log("scene 2 ", scene.children.length);
+                                                scene.add(object);
+
+
+                                                les_meubles = les_meubles.filter(function(item){
+                                                    return item.name !=  object.name;
+                                                });
+                                                console.log(les_meubles);
+
+                                                les_meubles.push(object);
+
+
+                                                var data = {
+                                                    id: object.furnitureId,
+                                                    type:object.furnitureType,
+                                                    textureId: object.selected_texture,
+                                                    index: object.furnitureIndex
+                                                }
+
+                                                socket.emit("changeFurnitureTexture", data);
+                                                stopLoading();
+                                            });
+                                        });
+
+                                    }
+                                }
+                            } else {
+
+                                gachetteD = false;
+                            }
+
+
+                            if (gp.buttons[2].pressed) {
+                                //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+
+                                buttonRemove = true;
+                            }
+                            else if (buttonRemove === true && (!gp.buttons[2].pressed)) {
+                                buttonRemove = false;
+
+                                var index = intersects[0].object.parent.furnitureIndex;
+                                var type = intersects[0].object.parent.furnitureType;
+
+
+                                socket.emit("removeFurniture", {
+                                    index: index,
+                                    type: intersects[0].object.parent.furnitureType
+                                });
+                                for (var i = 0; i < les_meubles.length; i++) {
+                                    if (les_meubles[i].furnitureIndex === index && les_meubles[i].furnitureType === type) {
+                                        scene.remove(les_meubles[i]);
+                                        les_meubles = les_meubles.filter(function(item){
+                                            return item.name !=  intersects[0].object.parent.name;
+                                        });
+                                    }
+                                }
+
+                            } else {
+                                buttonRemove = false;
+                            }
                         }
+                    } else {
+                        $(".selector").removeClass('active');
+                        console.log("existe pas dans la scene", intersects[0].object.parent);
+                        console.log(les_meubles);
                     }
-
                 } else {
                     $(".selector").removeClass('active');
                 }
@@ -1022,10 +1090,10 @@ export default React.createClass({
                 <div className="selector right">
                 </div>
                 <div className="loading left">
-                	<img src="../images/Loading.gif"/>
+                    <img src="../images/Loading.gif"/>
                 </div>
                 <div className="loading right">
-                	<img src="../images/Loading.gif"/>
+                    <img src="../images/Loading.gif"/>
                 </div>
                 <div className="animatelog">
                 </div>
@@ -1035,3 +1103,16 @@ export default React.createClass({
         );
     }
 });
+
+
+function filter(obj1, obj2) {
+    var result = {};
+    for (var key in obj1) {
+        if (obj2[key] != obj1[key]) result[key] = obj2[key];
+        if (typeof obj2[key] == 'array' && typeof obj1[key] == 'array')
+            result[key] = arguments.callee(obj1[key], obj2[key]);
+        if (typeof obj2[key] == 'object' && typeof obj1[key] == 'object')
+            result[key] = arguments.callee(obj1[key], obj2[key]);
+    }
+    return result;
+}
