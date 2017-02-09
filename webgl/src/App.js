@@ -282,7 +282,7 @@ export default React.createClass({
                         les_meubles[i].position.x = data.position.x;
                         les_meubles[i].position.y = data.position.y;
                         les_meubles[i].position.z = data.position.z;
-                        les_meubles[i].rotateY((data.position.angle * Math.PI) / 180)
+                        les_meubles[i].rotation.y = (data.position.angle * Math.PI) / 180;
 
                         // (angle en radian) = (angles en degrés)*(2.0*pi)/360.0 
                         les_meubles[i].rotation.y = data.position.angle * (2.0 * pi) / 360.0;
