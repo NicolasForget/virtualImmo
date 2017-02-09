@@ -353,21 +353,11 @@
 		   	socket.on("changedFurnitureTexture",function(data){
 		   		// var c = "";
 		   		console.log("[changedFurnitureTexture]" + data);
-	            // switch(data.texture_id){
-	            // 	case "beige":objectColor = "#f5f5dc";break;
-	            // 	case "noir":objectColor = "black";break;
-	            // 	case "bordeau":objectColor = "red";break;
-	            // 	case "blanc":objectColor = "white";break;
-	            // 	case "gris":objectColor = "#A9A9A9";break;
-	            // 	case "cuir":objectColor = "gray";break;
-	            // 	case "taupe":objectColor = "#483C32";break;
-	            // 	case "tissus":objectColor = "#DEB887";break;
-	            // 	default : c = "#A9A9A9";
-	            // }
 		   		
 				container.select(".g-"+data.type+"s").selectAll(".g-element").each(function(){
 					if(data.index == d3.select(this).select("rect").attr("meubleIndex")){
 						d3.select(this).select("rect").style("fill","url(#"+data.type+data.id+data.textureId+")");
+						d3.select(this).select("rect").attr("textureId",data.textureId);
 					}
 				});
 				console.log("url(#"+data.type+data.id+data.textureId+")");
@@ -515,6 +505,7 @@
 
 
 			function createMeubleSelectMenu(x,y,type){
+
 				switch(type){
 					case "bed":
 						changeMenuLayer(true,"bedMenu");
@@ -931,7 +922,7 @@
           		d3.select(this).attr("opacity",0.5).style("stroke","#FFFFFF");
 			   	if(isObjectBadPlaced(oList,oIndex)){
 			   		d3.select(this.parentNode).remove();
-			   		socket.emit("removeFurniture", {type : d3.select(this).attr("meubleType"), index : d3.select(this).attr("meubleIndex")});
+			   		socket.emit("removeFurniture", {type : d3.select(this).attr("meubleType"), index : parseInt(d3.select(this).attr("meubleIndex"))});
 			   	}else{
 					d3.select(this).classed("badPlaceObject",false);
 					sendDataToVRServer(oList,oIndex, d3.select(this).attr("meubleType"),d3.select(this).attr("meubleId"),d3.select(this).attr("textureId"),"moveFurniture");
@@ -941,12 +932,12 @@
           	function sendDataToVRServer(objectList, index, type, meubleId, textureId, actionType){
           		var object = {
 				   	type : type,
-				   	id: meubleId,
+				   	id: parseInt(meubleId),
 				   	textureId: textureId,
-				   	index:index,
+				   	index:parseInt(index),
 				   	position:{
 				   		x: (objectList[index].objectPoints[3].x + objectList[index].objectPoints[1].x) / 2 / 50,
-				   		y:0.5,
+				   		y: 0.5,
 				   		z: (objectList[index].objectPoints[3].y + objectList[index].objectPoints[1].y) / 2 / 50,
 				   		angle: -objectList[index].angle
 				   	}
