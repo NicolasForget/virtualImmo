@@ -922,7 +922,7 @@
           		d3.select(this).attr("opacity",0.5).style("stroke","#FFFFFF");
 			   	if(isObjectBadPlaced(oList,oIndex)){
 			   		d3.select(this.parentNode).remove();
-			   		socket.emit("removeFurniture", {type : parseInt(d3.select(this).attr("meubleType")), index : parseInt(d3.select(this).attr("meubleIndex"))});
+			   		socket.emit("removeFurniture", {type : d3.select(this).attr("meubleType"), index : parseInt(d3.select(this).attr("meubleIndex"))});
 			   	}else{
 					d3.select(this).classed("badPlaceObject",false);
 					sendDataToVRServer(oList,oIndex, d3.select(this).attr("meubleType"),d3.select(this).attr("meubleId"),d3.select(this).attr("textureId"),"moveFurniture");
