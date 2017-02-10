@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="style/style.css" />
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <!-- library of d3 -->
+        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+        <script src="http://mayl.me:8080/socket.io/socket.io.js"></script>
+
+        <!--<script src="script/connect.js"></script>-->
+        <!--<script src="script/app.js"></script>
+<script src="script/menu.js"></script>-->
+
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>KanaP</title>
+    </head>
+    <body>
+       
+       <div id="loading">Loading ...<img src="assets/loading.gif" width="120" height="80"></div>
+       
+        <div id="app" class="container-fluid">
+            <div class="row">
+                <div class="center-block" id="main-content">
+                    <svg id="roomMap" width="1500" height="750"></svg>
+                </div>
+            </div>
+        </div>
+
+        <div id="sofaMenu" class="piemenuLastLayer">
+            <svg width="400" height="400">
+                <g id="menu-sofa" transform="translate(200,200)"></g>
+            </svg>
+        </div>
+
+        <div id="tableMenu" class="piemenuLastLayer">
+            <svg width="400" height="400">
+                <g id="menu-table" transform="translate(200,200)"></g>
+            </svg>
+        </div>
+
+        <div id="bedMenu" class="piemenuLastLayer">
+            <svg width="400" height="400">
+                <g id="menu-bed" transform="translate(200,200)"></g>
+            </svg>
+        </div>
+
+        <div id="player"></div>
+        <style>
+            #player{
+                width: 24px;
+                background: #4bb6c3;
+                height: 24px;
+                position: absolute;
+                border-radius: 50%;
+            }
+        </style>
+
+    </body>
+</html>

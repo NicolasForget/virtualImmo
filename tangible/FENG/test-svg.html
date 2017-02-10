@@ -1,0 +1,1049 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+    	<meta charset="UTF-8">
+	    <link rel="stylesheet" type="text/css" href="style-svg.css" />
+	    <!-- Latest compiled and minified CSS -->
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+	    <!-- jQuery library -->
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+	    <!-- Latest compiled JavaScript -->
+	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	    <!-- library of d3 -->
+	    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	    <!-- pie menu -->
+	    <script type="text/javascript" src="js/menu.js"></script>
+	    <!-- button -->
+	    <script type="text/javascript" src="js/button.js"></script>
+	    <!-- checkbox -->
+	    <!-- <script type="text/javascript" src="js/checkbox.js"></script> -->
+
+	    <!-- <script type="text/javascript" src="js/removebox.js"></script> -->
+
+
+
+
+	    
+	</head>
+	<body>
+
+	    <!-- main div -->
+	    <div class="container-fluid">
+	    	<div class="row">
+		    	<div id="rotateController" class="center-block" style="display: none">
+					<input id="rAngle" type="range" min="0" max="360">
+					<span id="rAngle-value">0</span>
+		    	</div>
+			</div>
+
+			
+
+	      	<div class="row">
+	        	<div class="center-block" id="main-content">
+	             	<svg id="roomMap" width="1500" height="800"></svg>
+	        	</div>
+	      	</div>
+	      	<div id="toolBar"></div>
+	      	<div id="loading">Loading ...<img src="img/loading.gif" width="120" height="80"></div>
+		    <svg viewBox="-6 -6 12 12" class="dial rotaryKnob" id="foobar" style="display: none">
+				<defs>
+					<radialGradient id="knobgradient">
+						<stop offset="0" stop-color="gray"/>
+					    <stop offset="4" stop-color="silver"/>
+					</radialGradient>
+				</defs>
+				<g class="knob">
+					<circle class="knob_center" cx="0" cy="0" r="0.055625"/>
+					<g class="knob_gfx">
+						<circle cx="0" cy="0" r="5"/>
+					    <line x1="0" y1="-1.5" x2="0" y2="-4.5"/>
+					</g>
+					<text class="knob_number"/>
+				</g>
+			</svg>
+		    <!-- pie menu div -->
+		    <div id="sofaMenu" class="piemenuLastLayer">
+		      	<svg width="400" height="400">
+		        	<g id="menu-sofa" transform="translate(200,200)"></g>
+		      	</svg>
+		    </div>
+
+		    <div id="tableMenu" class="piemenuLastLayer">
+		      	<svg width="400" height="400">
+		        	<g id="menu-table" transform="translate(200,200)"></g>
+		      	</svg>
+		    </div>
+
+		    <div id="bedMenu" class="piemenuLastLayer">
+		      	<svg width="400" height="400">
+		        	<g id="menu-bed" transform="translate(200,200)"></g>
+		      	</svg>
+		    </div>
+
+
+		    <div id="resetButton"></div>
+		    <script type="text/javascript" src="js/toolbar.js"></script>
+
+
+		    
+		    <script type="text/javascript" src="js/rotaryKnob.js"></script>
+		    
+		    <script src="http://mayl.me:8080/socket.io/socket.io.js"></script>
+			<script>
+
+		
+
+		   var selectValue = "";
+
+		   function changeSelectValue(value){
+		   		selectValue = value;
+		   }
+
+		   var defs = d3.select("#roomMap").append("defs");
+		   var socket = io.connect('http://mayl.me:8080');
+
+			//init socket for create the wall.
+		    // var socket = io.connect('http://192.168.43.43:4200');
+		   //  socket.on('connect', function () {
+		   //          var murs = [
+					//     {
+					//         type: "wall",
+					//         x: 0,
+					//         y: 0,
+					//         length: 15,
+					//         radius: 0
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 15,
+					//         y: 0,
+					//         length: 6,
+					//         radius: 270
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 15,
+					//         y: 6,
+					//         length: 2,
+					//         radius: 270
+					//     },
+					//     {
+					//         type: "door",
+					//         x: 15,
+					//         y: 8,
+					//         length: 2,
+					//         radius: 270
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 15,
+					//         y: 10,
+					//         length: 5,
+					//         radius: 270
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 7.5,
+					//         y: 6,
+					//         length: 15,
+					//         radius: 0
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 30,
+					//         y: 6,
+					//         length: 9,
+					//         radius: 270
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 11,
+					//         y: 15,
+					//         length: 11,
+					//         radius: 180
+					//     },
+					//     {
+					//         type: "door",
+					//         x: 5.5,
+					//         y: 15,
+					//         length: 2,
+					//         radius: 0
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 6.5,
+					//         y: 15,
+					//         length: 2,
+					//         radius: 0
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 7.5,
+					//         y: 15,
+					//         length: 15,
+					//         radius: 0
+					//     },
+					//     {
+					//         type: "wall",
+					//         x: 0,
+					//         y: 0,
+					//         length: 15,
+					//         radius: 270
+					//     },
+					//     {
+					//         type: "roof",
+					//         x: 0,
+					//         y: 0,
+					//         xLength: 15,
+					//         yLength: 15
+					//     },
+					//     {
+					//         type: "roof",
+					//         x: 15,
+					//         y: 6,
+					//         xLength: 15,
+					//         yLength: 9
+					//     }
+					// ];
+		   //          socket.emit('wallTable', murs);
+		   //  });
+
+		   //sofa data from server
+		   
+		   socket.emit("tableWantFurniture","sofa");
+
+		   socket.on('availableSofas', function (data) {
+		   		console.log(data);
+		   		if(data.length > 2){
+		   		for (var i = 0; i < data.length;i++){
+		   			var sofaMenuInfo = data[i];
+		   			// var sofas=[];
+
+		   			var s = [];
+
+			   		var size = sofaMenuInfo.size
+			   		var colors = Object.keys(sofaMenuInfo.textures);
+			   		for (var k = 0; k < colors.length;k++){
+			   			// console.log(k);
+			   			var color = colors[k];
+			   			var texture = sofaMenuInfo.textures[color];
+			   			// console.log(texture);
+				   		var sofaColors = {
+				   			id : sofaMenuInfo.id,
+				   			textureId:texture.id,
+							icon:texture.topImg,
+							action:"objectSelect(sofas["+sofaMenuInfo.id+"]," + k + ",\"sofa\");",
+							size:{
+								length: (size.z * 50),
+								width: (size.x * 50)
+							},
+							color: color
+						};
+						// sofas.push(sofaColors);
+						s.push(sofaColors);
+						createPatternOfMeuble(sofaColors,"sofa");
+					}
+					sofas[i] = s;
+
+					// sofass.push(sofas);
+
+
+					var sofa = {
+						id:i,
+						icon:sofaMenuInfo.miniature,
+						action:"createMenuMeuble(menuPositionX,menuPositionY,sofas,\"sofa\","+i+");",
+						object: data[i]
+					}
+					meubleSofaMenu.push(sofa);
+				}
+			}
+
+		   });
+
+		   //table data from server
+
+		   socket.emit("tableWantFurniture","table");
+
+		   socket.on('availableTables', function (data) {
+		   		console.log(data);
+		   		for (var i = 0; i < data.length;i++){
+		   			var tableMenuInfo = data[i];
+		   			var t = [];
+			   		var size = tableMenuInfo.size
+			   		var colors = Object.keys(tableMenuInfo.textures);
+			   		
+			   		for (var k = 0; k < colors.length;k++){
+			   			var color = colors[k];
+			   			var texture = tableMenuInfo.textures[color];
+				   		var tableColors = {
+				   			id : tableMenuInfo.id,
+				   			textureId:texture.id,
+							icon:texture.topImg,
+							action:"objectSelect(tables[" + i + "]," + k + ",\"table\");",
+							size:{
+								length: (size.z * 50),
+								width: (size.x * 50)
+							},
+							color: color
+						};
+						t.push(tableColors);
+						createPatternOfMeuble(tableColors,"table");
+					}
+
+					tables[i] = t;
+
+					var table = {
+						id:i,
+						icon:tableMenuInfo.miniature,
+						action:"createMenuMeuble(menuPositionX,menuPositionY,tables,\"table\","+i+");",
+						object: data[i]
+					}
+					meubleTableMenu.push(table);
+				}
+		   });
+
+		   //bed data from server
+
+		   socket.emit("tableWantFurniture","bed");
+
+		   socket.on('availableBeds', function (data) {
+		   		console.log(data);
+		   		for (var i = 0; i < data.length;i++){
+		   			var bedMenuInfo = data[i];
+		   			var t = [];
+			   		var size = bedMenuInfo.size
+			   		var colors = Object.keys(bedMenuInfo.textures);
+			   		
+			   		for (var k = 0; k < colors.length;k++){
+			   			var color = colors[k];
+			   			var texture = bedMenuInfo.textures[color];
+				   		var bedColors = {
+				   			id : bedMenuInfo.id,
+				   			textureId:texture.id,
+							icon:texture.topImg,
+							action:"objectSelect(beds[" + i + "]," + k + ",\"bed\");",
+							size:{
+								length: (size.z * 50),
+								width: (size.x * 50)
+							},
+							color: color
+						};
+						t.push(bedColors);
+						createPatternOfMeuble(bedColors,"bed");
+					}
+
+					beds[i] = t;
+
+					var bed = {
+						id:i,
+						icon:bedMenuInfo.miniature,
+						action:"createMenuMeuble(menuPositionX,menuPositionY,beds,\"bed\","+i+");",
+						object: data[i]
+					}
+					meubleBedMenu.push(bed);
+				}
+				createToolBar();
+		   });
+		   
+
+
+		   	socket.on("changedFurnitureTexture",function(data){
+		   		// var c = "";
+		   		console.log("[changedFurnitureTexture]" + data);
+	            // switch(data.texture_id){
+	            // 	case "beige":objectColor = "#f5f5dc";break;
+	            // 	case "noir":objectColor = "black";break;
+	            // 	case "bordeau":objectColor = "red";break;
+	            // 	case "blanc":objectColor = "white";break;
+	            // 	case "gris":objectColor = "#A9A9A9";break;
+	            // 	case "cuir":objectColor = "gray";break;
+	            // 	case "taupe":objectColor = "#483C32";break;
+	            // 	case "tissus":objectColor = "#DEB887";break;
+	            // 	default : c = "#A9A9A9";
+	            // }
+		   		
+				container.select(".g-"+data.type+"s").selectAll(".g-element").each(function(){
+					if(data.index == d3.select(this).select("rect").attr("meubleIndex")){
+						d3.select(this).select("rect").style("fill","url(#"+data.type+data.id+data.textureId+")");
+					}
+				});
+				console.log("url(#"+data.type+data.id+data.textureId+")");
+				console.log(data);
+			});
+
+			socket.on("removeFurniture",function(data){
+		   		console.log("[removeFurniture] "+data);
+		   		container.select(".g-"+data.type+"s").selectAll(".g-element").each(function(){
+					if(data.index == d3.select(this).select("rect").attr("meubleIndex")){
+						d3.select(this).remove();
+					}
+				});
+			});
+
+
+
+		</script>
+
+
+
+        <script>
+
+        	//-----------------select rotate element -------------------
+
+        	var rotElement = "map";
+
+
+        	// the sofa data array 
+        	var meubleSofaMenu = [];
+        	var meubleTableMenu = [];
+        	var meubleBedMenu = [];
+
+
+        	// the sofa data array 
+        	var sofas = [];
+
+        	// the beds data array 
+        	var beds = [];
+
+        	// the tables data array 
+        	var tables = [];
+
+        	var mSofa, mTable, mBed;
+        	//mouse click position
+        	var clickX,clickY;
+
+        	var rectX = 0;
+        	var rectY = 0;
+
+        	var createPosition = {
+        		sofa : {
+        			x:0,
+        			y:0
+        		},
+        		table : {
+        			x:0,
+        			y:0
+        		},
+        		bed : {
+        			x:0,
+        			y:0
+        		}
+        	};
+
+        	var menuPositionX = 0;
+        	var menuPositionY = 0;
+
+        	//------------------------------------------------BEDS------------------------------------------------------
+        	var tablesOnMap = [];
+        	var bedsOnMap = [];
+        	var sofasOnMap = [];
+        	//------------------------------------------------BEDS------------------------------------------------------
+        	// var objectColor;
+        	//----------------------------------------------------------------------------------------------------------
+
+
+			var oList;
+			var oIndex;
+			var oType;
+
+
+
+        	var currentAngle = 0;
+        	var buttonSvg;
+
+        	var imgHeight = 750, imgWidth = 1500,      // Image dimensions (don't change these)
+            	width =  1500, height = 750,             // Dimensions of cropped region
+            	translate0 = [0, 0], scale0 = 1;  // Initial offset & scale
+
+        	var zoom = d3.behavior.zoom()
+		    	.scaleExtent([1, 8])
+		    	.on("zoom", zoomed);
+
+        	svg = d3.select("#roomMap")
+            	.attr("width",  width + "px")
+            	.attr("height", height + "px")
+            	.append("g")
+            	.attr("transform", "translate(" + translate0 + ")").attr("id","g-map")
+            	.call(zoom)
+            	.on("dblclick.zoom", null);
+
+          	var rect = svg.append("rect")
+              	.attr("fill","#ffffff")
+              	.attr("class", "overlay")
+              	.attr("width", width + "px")
+              	.attr("height", height + "px");
+
+          	var container = svg.append("g").attr("class","zoomArea").attr("transform","translate(0,0)scale(1)");
+          	container.append("g").attr("class","imgMap").attr("transform","translate(0,0)").append("image")
+              	.attr("width",  imgWidth + "px")
+              	.attr("height", imgHeight + "px")
+             	.attr("xlink:href", "img/big-room.png");
+              	// .attr("xlink:href", "img/room-small.png");
+
+          	container.append("g")
+		    	.attr("class", "x axis")
+		  		.selectAll("line")
+		    	.data(d3.range(0, width, 50))
+		  		.enter().append("line")
+			    .attr("x1", function(d) { return d; })
+			    .attr("y1", 0)
+			    .attr("x2", function(d) { return d; })
+			    .attr("y2", height);
+
+			container.append("g")
+			    .attr("class", "y axis")
+			  	.selectAll("line")
+			    .data(d3.range(0, height, 50))
+			  	.enter().append("line")
+			    .attr("x1", 0)
+			    .attr("y1", function(d) { return d; })
+			    .attr("x2", width)
+			    .attr("y2", function(d) { return d; });
+
+			var meuble = container.append("g").attr("class","g-meuble").attr("transform","translate(0,0)");
+			var domBeds = meuble.append("g").attr("class","g-beds").attr("transform","translate(0,0)");
+			var domTables = meuble.append("g").attr("class","g-tables").attr("transform","translate(0,0)");
+			var domSofas = meuble.append("g").attr("class","g-sofas").attr("transform","translate(0,0)");
+
+          	svg.on("click",doubleClick);
+
+			updateR(0);
+
+
+
+			function createMeubleSelectMenu(x,y,type){
+				switch(type){
+					case "bed":
+						changeMenuLayer(true,"bedMenu");
+			            if(mBed){
+			              mBed.hide();
+			            }
+			            
+			            d3.select("#menu-bed").selectAll("g").each(function(){
+			              d3.select(this).remove();
+			            });
+			            
+			            mBed = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/cross.png")
+			                        .appendTo("#menu-bed").show(meubleBedMenu).centerAction("changeMenuLayer(false,\"bedMenu\");");
+
+			            var menu = $("#bedMenu");
+			            menu.css('position', 'absolute');
+			            menu.css("left", x - 200);
+			            menu.css("top", y - 200);
+						break;
+					case "table":
+						changeMenuLayer(true,"tableMenu");
+			            if(mTable){
+			              mTable.hide();
+			            }
+			            
+			            d3.select("#menu-table").selectAll("g").each(function(){
+			              d3.select(this).remove();
+			            });
+			            
+			            mTable = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/cross.png")
+			                        .appendTo("#menu-table").show(meubleTableMenu).centerAction("changeMenuLayer(false,\"tableMenu\");");
+
+			            var menu = $("#tableMenu");
+			            menu.css('position', 'absolute');
+			            menu.css("left", x - 200);
+			            menu.css("top", y - 200);
+						break;
+					default:
+						changeMenuLayer(true,"sofaMenu");
+			            if(mSofa){
+			              mSofa.hide();
+			            }
+			            
+			            d3.select("#menu-sofa").selectAll("g").each(function(){
+			              d3.select(this).remove();
+			            });
+			            
+			            mSofa = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/cross.png")
+			                        .appendTo("#menu-sofa").show(meubleSofaMenu).centerAction("changeMenuLayer(false,\"sofaMenu\");");
+
+			            var menu = $("#sofaMenu");
+			            menu.css('position', 'absolute');
+			            menu.css("left", x - 200);
+			            menu.css("top", y - 200);
+				}
+				
+			}
+
+			function doubleClick(){
+				if(selectValue == "sofa" || selectValue == "table" || selectValue == "bed"){
+					var zoomAreaPosition = d3.select(".zoomArea").attr("transform").split(/\(|\,|\)/);
+		            
+		            clickX = d3.mouse(this)[0] - parseFloat(zoomAreaPosition[1],10);
+		            clickY = d3.mouse(this)[1] - parseFloat(zoomAreaPosition[2],10);
+
+		            rectX = clickX;
+		            rectY = clickY;
+
+		            menuPositionX = d3.event.pageX;
+		            menuPositionY = d3.event.pageY;
+
+		            switch(selectValue){
+		            	case "bed":
+		            		createMeubleSelectMenu(d3.event.pageX, d3.event.pageY,"bed");
+		            		break;
+		            	case "table":
+		            		createMeubleSelectMenu(d3.event.pageX, d3.event.pageY,"table");
+		            		break;
+		            	default: 
+		            		createMeubleSelectMenu(d3.event.pageX, d3.event.pageY,"sofa");
+		            };
+
+		            createPosition[selectValue].x = rectX;
+		            createPosition[selectValue].y = rectY;
+		            console.log(createPosition);
+		        }
+			}	
+
+
+          	function zoomed() {
+          		showResetButton();
+          		var rotateValue = container.attr("transform").split("rotate")[1];
+            	container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")rotate"+rotateValue);
+          	}
+
+
+			function showResetButton(){
+				if(buttonSvg == null){
+					buttonSvg = d3.select('#resetButton').append('svg')
+					    .attr('width', 200)
+					    .attr('height', 100)
+
+					var gButton = buttonSvg.append('g')
+					    .attr('class', 'button')
+					    .attr('transform', 'translate(100,50)')
+
+					var text = gButton.append('text')
+					    .text('Map Reset');
+
+					button()
+					  .container(gButton)
+					  .text(text)
+					  .count(0)
+					  .cb(function() { hideResetButton(); })();
+				}
+			}
+
+			function hideResetButton(){
+				buttonSvg = null;
+				zoom.scale(1);
+				zoom.translate([0,0]);
+				d3.select('#resetButton').select("svg").remove();
+				d3.select(".zoomArea").attr("transform","translate(0,0)scale(1)rotate(0,750,400)");
+
+	            updateR(0);
+			}
+
+
+			// when the input range changes update the angle 
+			d3.select("#rAngle").on("input", function() {
+			  	updateR(+this.value);
+			});
+
+			// update the element
+			function updateR(nAngle) {
+			  	d3.select("#rAngle-value").text(nAngle);
+			  	d3.select("#rAngle").property("value", nAngle);
+
+			  	if(selectValue == 'sofa'){
+			  		rotateMenu(nAngle,"menu-sofa");
+			  	}
+			  	else if(selectValue == 'bed'){
+			  		rotateMenu(nAngle,"menu-bed");
+			  	}
+			  	else if(selectValue == 'table'){
+			  		rotateMenu(nAngle,"menu-table");
+			  	}else{
+			  		rotateMap(nAngle);
+			  	}
+			  	// else if(selectValue == 'touchRotate'){
+			  	// 	rotateMeubleSelected(nAngle);
+			  	// }
+
+			}
+
+			//------------------------------------------   rotate function --------------------------------------------------
+			function rotateMap(nAngle){
+				var transformZoomArea = d3.select(".zoomArea").attr("transform");
+			  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
+			  	d3.select('.zoomArea').attr("transform",splitTransformZoomArea + "rotate("+nAngle+",750,400)");
+			  	// d3.select('.zoomArea').attr("transform",splitTransformZoomArea + "rotate("+nAngle+",400,400)");
+			}
+
+			function rotateMenu(nAngle,svgMenu){
+				var transformZoomArea = d3.select("#"+svgMenu).attr("transform");
+			  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
+			  	d3.select('#'+svgMenu).attr("transform",splitTransformZoomArea + "rotate("+nAngle+")");
+			  	d3.select('#'+svgMenu).select(".arrow").attr("transform","rotate(" + (-nAngle) + ")");
+				
+			}
+
+			function rotateMeubleSelected(nAngle){
+				if (d3.select('.meubleSelected')[0][0] != null){
+					var transformZoomArea = d3.select(".meubleSelected").attr("transform");
+				  	var splitTransformZoomArea = transformZoomArea.split("rotate")[0];
+				  	var rotateCenter = transformZoomArea.split("rotate")[1].split(",");
+				  	// console.log(rotateCenter);
+				  	d3.select('.meubleSelected').attr("transform",splitTransformZoomArea + "rotate("+nAngle+","+rotateCenter[1]+","+rotateCenter[2]);
+				  	var objectList;
+				  	switch(d3.select('.meubleSelected').attr("meubleType")){
+				  		case "table":
+				  			objectList = tablesOnMap;
+				  			break;
+				  		case "bed":
+				  			objectList = bedsOnMap;
+				  			break;
+				  		default:
+				  			objectList = sofasOnMap;
+				  	}
+
+				  	objectList[d3.select('.meubleSelected').attr("meubleIndex")].angle = nAngle;
+				  			setObjectPoints(objectList,d3.select('.meubleSelected').attr("meubleIndex"));
+
+				  	if(isObjectBadPlaced(objectList,d3.select('.meubleSelected').attr("meubleIndex"))){
+				    	d3.select('.meubleSelected').classed("badPlaceObject",true);
+				    }else{
+				    	d3.select('.meubleSelected').classed("badPlaceObject",false);
+				    };
+				}
+			}
+
+
+
+
+        	function objectSelect(meuble, index, type){
+	            // console.log(index);
+	            switch(type){
+	            	case "table":
+	            		if(mTable)mTable.hide();
+	            		changeMenuLayer(false,"tableMenu");
+	            		break;
+	            	case "bed":
+	            		if(mBed)mBed.hide();
+	            		changeMenuLayer(false,"bedMenu");
+	            		break;
+	            	default:
+	            		if(mSofa)mSofa.hide();
+	            		changeMenuLayer(false,"sofaMenu");
+	            }
+	            // objectColor = meuble[index].color;
+	            // console.log(objectColor);
+	            objectCreate(clickX,clickY,meuble[index].size.width,meuble[index].size.length,type, meuble[index].id, meuble[index].textureId);
+	            selectValue = "touchMove";
+	            updateButtonColors(d3.select("#touchMove"),d3.select("#touchMove").select(this.parentNode));
+          	}
+
+
+          	function objectCreate(px,py,width,height,type, meubleId, textureId){
+          		showResetButton();
+          		var angle = 0;
+          		var demiDiagonal = Math.sqrt(width * width + height * height) / 2;
+          		var objectCenterX = width / 2;
+	            var objectCenterY = height / 2;
+	            var objectPoints = [
+	        		{x : 0, y : 0},
+	        		{x : 0, y : 0},
+	        		{x : 0, y : 0},
+	        		{x : 0, y : 0}
+	        	];
+	            initObjectPointsPosition(objectPoints,px,py,width,height);
+
+          		var dataObject = {
+          			angle : angle,
+          			demiDiagonal : demiDiagonal,
+          			objectCenterX : objectCenterX,
+          			objectCenterY : objectCenterY,
+          			objectPoints : objectPoints,
+          			rectX : createPosition[type].x,
+          			rectY : createPosition[type].y,
+          			width : width,
+          			height : height
+          		};
+          		
+
+
+          		switch(type){
+          			case "table":
+          				tablesOnMap.push(dataObject);
+          				addObjectOnMap(domTables,tablesOnMap,tablesOnMap.length - 1,"table", meubleId, textureId);
+          				break;
+          			case "bed":
+          				bedsOnMap.push(dataObject);
+          				addObjectOnMap(domBeds,bedsOnMap,bedsOnMap.length - 1,"bed", meubleId, textureId);
+          				break;
+          			case "sofa":
+          				sofasOnMap.push(dataObject);
+          				addObjectOnMap(domSofas,sofasOnMap,sofasOnMap.length - 1,"sofa", meubleId, textureId);
+          				break;
+          			default:;
+          		}
+
+          	}
+
+          	function initObjectPointsPosition(objectPoints,px,py,width,height){
+          		objectPoints[0].x = px;
+				objectPoints[0].y = py + height;
+				objectPoints[1].x = px + width;
+				objectPoints[1].y = py + height;
+				objectPoints[2].x = px + width;
+				objectPoints[2].y = py;
+				objectPoints[3].x = px;
+				objectPoints[3].y = py;
+          	}
+
+          	function setObjectPoints(objectList, index){
+          		var objectMeuble = objectList[index];
+          		objectMeuble.objectPoints[0].x = objectMeuble.objectCenterX + objectMeuble.rectX + objectMeuble.demiDiagonal * Math.cos(objectMeuble.angle / 180 * Math.PI - Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
+				objectMeuble.objectPoints[0].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI - Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
+				objectMeuble.objectPoints[1].x = objectMeuble.objectCenterX + objectMeuble.rectX + objectMeuble.demiDiagonal * Math.cos(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX));
+				objectMeuble.objectPoints[1].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX));
+				objectMeuble.objectPoints[2].x = objectMeuble.objectCenterX + objectMeuble.rectX + objectMeuble.demiDiagonal * Math.cos(objectMeuble.angle / 180 * Math.PI - Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX));
+				objectMeuble.objectPoints[2].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI - Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX));
+				objectMeuble.objectPoints[3].x = objectMeuble.objectCenterX + objectMeuble.rectX + objectMeuble.demiDiagonal * Math.cos(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
+				objectMeuble.objectPoints[3].y = objectMeuble.objectCenterY + objectMeuble.rectY + objectMeuble.demiDiagonal * Math.sin(objectMeuble.angle / 180 * Math.PI + Math.atan(objectMeuble.objectCenterY / objectMeuble.objectCenterX) + Math.PI);
+          	}
+
+          	function addObjectOnMap(meubleParent,objectList,index,type, meubleId, textureId){
+          		   
+
+          		setObjectPoints(objectList, index);
+          		sendDataToVRServer(objectList,index,type,meubleId,textureId,"tableAddFurniture");
+
+
+          		// switch(objectColor){
+	           //  	case "beige":objectColor = "#f5f5dc";break;
+	           //  	case "noir":objectColor = "black";break;
+	           //  	case "bordeau":objectColor = "red";break;
+	           //  	case "blanc":objectColor = "white";break;
+	           //  	case "gris":objectColor = "#A9A9A9";break;
+	           //  	case "cuir":objectColor = "gray";break;
+	           //  	case "taupe":objectColor = "#483C32";break;
+	           //  	case "tissus":objectColor = "#DEB887";break;
+	           //  	default:;
+	           //  }
+
+
+
+          		var dragObject = d3.behavior.drag()
+			    	.on("dragstart", mouseOn)
+			    	.on("drag", mouseMove)
+			    	.on("dragend", mouseOff);
+
+			    var element = meubleParent.append("g").attr("class","g-element").attr("transform","translate(0,0)");
+				d3.select('.meubleSelected').classed("meubleSelected",false);
+
+          		element.append("rect").attr("meubleId",meubleId).attr("textureId",textureId).attr("meubleIndex",index).attr("meubleType",type).classed("meubleSelected",true).attr("transform","translate(" + objectList[index].rectX + "," + objectList[index].rectY + ")rotate(" + objectList[index].angle + "," + objectList[index].objectCenterX + "," + objectList[index].objectCenterY + ")").attr("width",objectList[index].width).attr("height",objectList[index].height).attr("opacity",0.5).style("fill","url(#"+type+meubleId+textureId+")").call(dragObject);
+
+          		updateR(0);
+
+          		element.append("text").attr("transform","translate(" + objectList[index].objectPoints[3].x + "," + objectList[index].objectPoints[3].y + ")").text(type + "-" + index);
+           	}
+
+           	function isObjectBadPlaced(objectList,index){
+           		var objectMeuble = objectList[index];
+           		var areaX = [];
+
+				for(var i = 0; i < objectMeuble.objectPoints.length; i++){
+					if(objectMeuble.objectPoints[i].x < 0 || objectMeuble.objectPoints[i].x > 1500 || objectMeuble.objectPoints[i].y < 0 || objectMeuble.objectPoints[i].y > 750)
+						return true;
+					if(objectMeuble.objectPoints[i].x > 750 && objectMeuble.objectPoints[i].y < 300)
+						return true;
+
+					areaX.push(objectMeuble.objectPoints[i].x);
+				}
+				if(areaX[0] > 750 && areaX[1] > 750 && areaX[2] > 750 && areaX[3] > 750){
+					return false;
+				}else if(areaX[0] < 740 && areaX[1] < 740 && areaX[2] < 740 && areaX[3] < 740){
+					return false;
+				}
+				
+				return true;
+			}
+
+
+			function mouseOn(d){
+				d3.select('.meubleSelected').classed("meubleSelected",false);
+			    d3.select(this).classed("meubleSelected",true);
+			    oType = d3.select('.meubleSelected').attr("meubleType");
+			    oIndex = d3.select('.meubleSelected').attr("meubleIndex");
+				var color;
+          		switch(oType){
+          			case "table":
+          				color = "#8A2BE2";
+          				break;
+          			case "bed":
+          				color = "#A52A2A";
+          				break;
+          			case "sofa":
+          				color = "#FFD700";
+          				break;
+          			default:;
+          		}
+          		d3.event.sourceEvent.stopPropagation();
+				d3.select(this).attr("opacity",0.9).style("stroke",color);
+				
+			    // var r = d3.select('.meubleSelected').attr("transform").split("rotate(")[1].split(",")[0];
+			    // updateR(r);
+			    
+			    switch(d3.select('.meubleSelected').attr("meubleType")){
+			  		case "table":
+			  			oList = tablesOnMap;
+			  			break;
+			  		case "bed":
+			  			oList = bedsOnMap;
+			  			break;
+			  		default:
+			  			oList = sofasOnMap;
+
+			  	}
+          	}
+
+          	function mouseMove(d){
+          		if(selectValue == "touchMove"){
+	          		oList[oIndex].rectX += d3.event.dx;
+					oList[oIndex].rectY += d3.event.dy;
+
+			    	setObjectPoints(oList,oIndex);
+			    	if(isObjectBadPlaced(oList,oIndex)){
+			    		d3.select(this).classed("badPlaceObject",true);
+			    	}else{
+			    		d3.select(this).classed("badPlaceObject",false);
+			    	};
+					d3.select(this).attr("transform","translate(" + oList[oIndex].rectX + "," + oList[oIndex].rectY + ")rotate(" + oList[oIndex].angle + "," + oList[oIndex].objectCenterX + "," + oList[oIndex].objectCenterY + ")");
+					d3.select(this.parentNode).select("text").attr("transform","translate(" + oList[oIndex].rectX + "," + oList[oIndex].rectY + ")");
+				}else if(selectValue == "touchRotate"){
+					var centerRotateX = oList[oIndex].rectX + oList[oIndex].objectCenterX;
+					var centerRotateY = oList[oIndex].rectY + oList[oIndex].objectCenterY;
+					rotateMeubleSelected((Math.atan2(centerRotateY - d3.event.sourceEvent.clientY,centerRotateX - d3.event.sourceEvent.clientX) + Math.PI) * 360/2/Math.PI);
+
+				}
+       		}
+
+          	function mouseOff(d){
+          		d3.select(this).attr("opacity",0.5).style("stroke","#FFFFFF");
+			   	if(isObjectBadPlaced(oList,oIndex)){
+			   		d3.select(this.parentNode).remove();
+			   		socket.emit("removeFurniture", {type : d3.select(this).attr("meubleType"), index : d3.select(this).attr("meubleIndex")});
+			   	}else{
+					d3.select(this).classed("badPlaceObject",false);
+					sendDataToVRServer(oList,oIndex, d3.select(this).attr("meubleType"),d3.select(this).attr("meubleId"),d3.select(this).attr("textureId"),"moveFurniture");
+			   	};
+          	}
+
+          	function sendDataToVRServer(objectList, index, type, meubleId, textureId, actionType){
+          		var object = {
+				   	type : type,
+				   	id: meubleId,
+				   	textureId: textureId,
+				   	index:index,
+				   	position:{
+				   		x: (objectList[index].objectPoints[3].x + objectList[index].objectPoints[1].x) / 2 / 50,
+				   		y:0.5,
+				   		z: (objectList[index].objectPoints[3].y + objectList[index].objectPoints[1].y) / 2 / 50,
+				   		angle: (360 - objectList[index].angle)
+				   	}
+				};
+				socket.emit(actionType, object);
+				console.log(object);
+
+				console.log(type + " [" + actionType + "} Send to server");
+          	}
+
+          	function createMenuMeuble(x,y,menuElements,type, id){
+          		var idMenu = "sofaMenu";
+          		var svgMenu = "menu-sofa";
+
+          		var menuCorrespondantId = menuElements[id];
+
+          		console.log(menuCorrespondantId);
+          		
+	            
+          		switch(type){
+	            	case "bed":
+	            		idMenu = "bedMenu";
+	            		svgMenu = "menu-bed";
+	            		changeMenuLayer(true,idMenu);
+	            		d3.select("#" + svgMenu).selectAll("g").each(function(){
+			              	d3.select(this).remove();
+			            });
+	            		if(mBed){
+	              			mBed.hide();
+	            		}
+	            		mBed = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/return.png")
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId).centerAction("createMeubleSelectMenu(createPosition.bed.x,createPosition.bed.y,\"bed\")");
+	            		break;
+	            	case "table":
+	            		idMenu = "tableMenu";
+	            		svgMenu = "menu-table";
+	            		changeMenuLayer(true,idMenu);
+	            		d3.select("#" + svgMenu).selectAll("g").each(function(){
+			              	d3.select(this).remove();
+			            });
+	            		if(mTable){
+	              			mTable.hide();
+	            		}
+	            		mTable = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/return.png")
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId).centerAction("createMeubleSelectMenu(createPosition.table.x,createPosition.table.y,\"table\")");
+	            		break;
+	            	default: 
+	            		idMenu = "sofaMenu";
+	            		svgMenu = "menu-sofa";
+	            		changeMenuLayer(true,idMenu);
+	            		d3.select("#" + svgMenu).selectAll("g").each(function(){
+			              	d3.select(this).remove();
+			            });
+	            		if(mSofa){
+	              			mSofa.hide();
+	            		}
+	            		mSofa = new d3.radialMenu().radius(50).thickness(150).iconSize(120).arrow("img/return.png")
+	                        .appendTo("#" + svgMenu).show(menuCorrespondantId).centerAction("createMeubleSelectMenu(createPosition.sofa.x,createPosition.sofa.y,\"sofa\")");
+	            };
+
+	         //    if(idMenu == "bedMenu"){
+		        //     var menu = $("#" + idMenu);
+		        //     menu.css('position', 'absolute');
+		        //     menu.css("left", x - 200);
+		        //     menu.css("top", y - 200);
+		        // }
+          	}
+
+          
+
+          	function changeMenuLayer(flag,idMenu){
+	            if(flag){
+	              	d3.select("#" + idMenu).attr("class","piemenufirstLayer");
+	            }else{
+	              	d3.select("#" + idMenu).attr("class","piemenuLastLayer");
+	            }
+          	}
+
+          	function createPatternOfMeuble(meuble,type){
+          		defs.append("pattern")
+          			.attr("id",type+meuble.id+meuble.textureId)
+          			.attr("patternUnits","userSpaceOnUse")
+          			.attr("width",meuble.size.width)
+          			.attr("height",meuble.size.length)
+          			.append("image")
+          			.attr("xlink:href","data:image/png;base64,"+meuble.icon)
+          			.attr("x","0")
+          			.attr("y","0")
+          			.attr("width",meuble.size.width)
+          			.attr("height",meuble.size.length);
+          	}
+
+
+
+
+        </script>
+
+  </body>
+</html>
+

@@ -1,0 +1,328 @@
+.piemenufirstLayer{
+	display: inline;
+  z-index: 3;
+}
+
+.piemenuLastLayer{
+	display: none;
+  z-index: 0;
+}
+
+.menu-segment {
+    fill: #4679bd;
+}
+
+.menu-segment:hover {
+    fill: #5689cd;
+}
+
+.menu-icon {
+    pointer-events: none;
+}
+
+#main-content{
+  margin-top: 50px;
+  text-align: center;
+  /*border: solid 1px black;*/
+}
+
+
+.axis line {
+  fill: none;
+  stroke: #ddd;
+  shape-rendering: crispEdges;
+  vector-effect: non-scaling-stroke;
+}
+
+.legend-line line {
+  fill: none;
+  stroke: #000;
+  stroke-width:1;
+  shape-rendering: crispEdges;
+  vector-effect: non-scaling-stroke;
+}
+
+.meubleSelected{
+  stroke-width: 4px !important;
+  stroke: black !important;
+}
+
+
+.g-sofa text{
+  font-size: 250%;
+}
+
+#resetButton{
+  position:absolute;
+  left : 100px;
+  bottom:100px;
+}
+
+
+.g-element rect {
+    fill: lightsteelblue;
+    stroke: #F0FFFF;
+    stroke-width: 2px;
+}
+
+.g-element rect.placed{
+    opacity: 1;
+    stroke: green !important;
+    stroke-width: 4px !important;
+}
+
+.g-element rect.badPlaceObject{
+    stroke: #ff0000 !important;
+    stroke-width: 4px !important;
+}
+/*-------------------------button---------------------------*/
+body {
+  font-family: Univers, Arial, sans-serif;
+}
+
+.button rect {
+  stroke: #1f628d;
+  stroke-width: 2px;
+}
+
+.button #gradient-start {
+/*  stop-color: #3498db; */
+  stop-color: #4d9fb6; /* 70% */
+  stop-opacity: 1;
+}
+
+.button #gradient-stop {
+/*  stop-color: #2980b9; */
+  stop-color: #1a84a2; /* 100% */
+  stop-opacity: 1;
+}
+
+.button #gradient-start.active {
+/*  stop-color: #3cb0fd; */
+  stop-color: #99c8d5; /* 40% */
+}
+
+.button #gradient-stop.active {
+/*  stop-color: #3498db; */
+  stop-color: #4d9fb6; /* 70% */
+}
+
+.button text {
+  font-size: 30px;
+  fill: #eee;
+  pointer-events: none;
+  text-anchor: middle;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+/*-------------------------button---------------------------*/
+
+/*-------------------------input----------------------------*/
+
+#nAngle {
+  -webkit-appearance: none;
+  width: calc(100% - (73px));
+  height: 10px;
+  border-radius: 5px;
+  background: #d7dcdf;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  display: inline !important;
+}
+#nAngle::-webkit-slider-thumb {
+  -webkit-appearance: none;
+          appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2c3e50;
+  cursor: pointer;
+  -webkit-transition: background .15s ease-in-out;
+  transition: background .15s ease-in-out;
+}
+#nAngle::-webkit-slider-thumb:hover {
+  background: #1abc9c;
+}
+#nAngle:active::-webkit-slider-thumb {
+  background: #1abc9c;
+}
+#nAngle::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: #2c3e50;
+  cursor: pointer;
+  -webkit-transition: background .15s ease-in-out;
+  transition: background .15s ease-in-out;
+}
+#nAngle::-moz-range-thumb:hover {
+  background: #1abc9c;
+}
+#nAngle:active::-moz-range-thumb {
+  background: #1abc9c;
+}
+
+#nAngle-value {
+  display: inline-block;
+  position: relative;
+  width: 60px;
+  color: #fff;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 3px;
+  background: #2c3e50;
+  padding: 5px 10px;
+  margin-left: 8px;
+}
+#nAngle-value:after {
+  position: absolute;
+  top: 8px;
+  left: -7px;
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-right: 7px solid #2c3e50;
+  border-bottom: 7px solid transparent;
+  content: '';
+}
+
+::-moz-range-track {
+  background: #d7dcdf;
+  border: 0;
+}
+
+input::-moz-focus-inner,
+input::-moz-focus-outer {
+  border: 0;
+}
+/*-------------------------input----------------------------*/
+
+/*-------------------------input----------------------------*/
+#rotateController {
+  width: 100%;
+}
+
+#rAngle {
+  -webkit-appearance: none;
+  width: calc(100% - (73px));
+  height: 10px;
+  border-radius: 5px;
+  background: #d7dcdf;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  display: inline !important;
+}
+#rAngle::-webkit-slider-thumb {
+  -webkit-appearance: none;
+          appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2c3e50;
+  cursor: pointer;
+  -webkit-transition: background .15s ease-in-out;
+  transition: background .15s ease-in-out;
+}
+#rAngle::-webkit-slider-thumb:hover {
+  background: #1abc9c;
+}
+#rAngle:active::-webkit-slider-thumb {
+  background: #1abc9c;
+}
+#rAngle::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: #2c3e50;
+  cursor: pointer;
+  -webkit-transition: background .15s ease-in-out;
+  transition: background .15s ease-in-out;
+}
+#rAngle::-moz-range-thumb:hover {
+  background: #1abc9c;
+}
+#rAngle:active::-moz-range-thumb {
+  background: #1abc9c;
+}
+
+#rAngle-value {
+  display: inline-block;
+  position: relative;
+  width: 60px;
+  color: #fff;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 3px;
+  background: #2c3e50;
+  padding: 5px 10px;
+  margin-left: 8px;
+}
+#rAngle-value:after {
+  position: absolute;
+  top: 8px;
+  left: -7px;
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-right: 7px solid #2c3e50;
+  border-bottom: 7px solid transparent;
+  content: '';
+}
+
+::-moz-range-track {
+  background: #d7dcdf;
+  border: 0;
+}
+
+input::-moz-focus-inner,
+input::-moz-focus-outer {
+  border: 0;
+}
+/*-------------------------input----------------------------*/
+svg.dial {
+  width: 80px;
+  height: 80px;
+  /*border: 1px gray dotted;*/
+}
+
+.dial .knob {
+  /*transition: 500ms transform;*/
+}
+.dial .knob circle {
+  stroke: gray;
+  stroke-width: 0.25px;
+  fill: url(#knobgradient);
+}
+.dial .knob line {
+  stroke: gray;
+  stroke-width: 0.5px;
+  stroke-linecap: round;
+}
+.dial .knob_number {
+  fill: white;
+  stroke: gray;
+  stroke-width: 0.0625px;
+  font-size: 4px;
+  font-family: "Helvetica", "Arial", sans-serif;
+  letter-spacing: -0.5px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  
+  /* https://stackoverflow.com/questions/826782/css-rule-to-disable-text-selection-highlighting */
+  -webkit-touch-callout: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#toolBar{
+  display: inline !important;
+}
