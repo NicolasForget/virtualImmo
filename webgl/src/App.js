@@ -186,6 +186,7 @@ export default React.createClass({
                         object.furnitureId = data.id;
                         object.furnitureIndex = data.index;
                         object.model3D = data.model3D;
+                        object.name = data.index+""+data.type;
 
 
                         les_meubles.push(object);
@@ -257,16 +258,29 @@ export default React.createClass({
             });
 
             socket.on('removeFurniture', function (data) {
-
-                var index = data.index;
-
-
+                console.log("supresion");
+                var supprthis;
                 for (var i = 0; i < les_meubles.length; i++) {
+                    console.log('for', les_meubles[i]);
+                    console.log("data",data);
                     if (les_meubles[i].furnitureIndex === data.index) {
                         if (les_meubles[i].furnitureType === data.type) {
-                            scene.remove(les_meubles[i]);
+                            //scene.remove(les_meubles[i]);
+                            //les_meubles[i].dispose();
+                            supprthis = i;
+                            var selectedObject = scene.getObjectByName(les_meubles[i].name);
+                            scene.remove( selectedObject );
+                            les_meubles = les_meubles.filter(function(item){
+                                return item.name !=  (data.index+data.type);
+                            });
+                            console.log("supression scene", supprthis);
                         }
                     }
+                }
+                console.log(scene);
+                console.log(les_meubles);
+                if (typeof supprthis != "undefined"){
+                    //delete(les_meubles[supprthis]);
                 }
             });
 
@@ -283,7 +297,8 @@ export default React.createClass({
                         les_meubles[i].position.x = data.position.x;
                         les_meubles[i].position.y = data.position.y;
                         les_meubles[i].position.z = data.position.z;
-                        les_meubles[i].rotateY((data.position.angle * Math.PI) / 180);
+                        les_meubles[i].rotation.y = (data.position.angle * Math.PI) / 180;
+
 
                         // (angle en radian) = (angles en degrés)*(2.0*pi)/360.0 
                         les_meubles[i].rotation.y = data.position.angle * (2.0 * pi) / 360.0;
@@ -759,6 +774,8 @@ export default React.createClass({
 
         controls.getObject().position.x = 5;
         controls.getObject().position.z = 5;
+        
+
         function animate() {
             requestAnimationFrame(animate);
 
@@ -825,200 +842,231 @@ export default React.createClass({
 
                 var intersects = selector.intersectObjects(les_meubles, true);
                 if (intersects.length > 0) {
-                    $(".selector").addClass('active');
+                    // var selected_index;
+                    // for (var i = 0; i < les_meubles.length; i++){
+                    //     if (les_meubles[i].name === intersects[0].object.parent.name){
+                    //         console.log("index trouvé": i);
+                    //         selected_index = i;
+                    //     }
+                    // }
+                    var selected = scene.getObjectByName(intersects[0].object.parent.name);
+                    //console.log("selected", selected);
+                    if (selected && !(selected.type === "Scene")){
 
-                    var texture_keys = Object.keys(intersects[0].object.parent.textures_availables);
+                        $(".selector").addClass('active');
+                        //console.log("#######TEST", intersects[0].object.parent);
 
-                    var textures_availables = intersects[0].object.parent.textures_availables;
+                        var texture_keys = Object.keys(selected.textures_availables);
 
-
-                    if (navigator.getGamepads()[0] || gachetteD || gachetteR) {
-
-                        //var gp = navigator.getGamepads()[0];
-                        //var buttons = gp.buttons || {};
-                        //if (gp.buttons[4].pressed) {
-                        //    gachetteR = true;
-                        //}
-                        //else if (gachetteR === true && (!gp.buttons[4].pressed)) {
-                        if (gachetteR) {
-
-                            gachetteR = false;
-                            for (var i = 0; i < texture_keys.length; i++) {
-
-                                if (texture_keys[i] === intersects[0].object.parent.selected_texture) {
-
-                                    var i_tmp = i + 1;
-                                    i_tmp = (i_tmp >= texture_keys.length ) ? 0 : i_tmp;
-
-                                    isLoading();
-                                    //$("#infos").html("texture", textures_availables[texture_keys[0]].texture);
-
-                                    var mtlLoader = new THREE.MTLLoader();
-                                    mtlLoader.setPath("../furnitures/");
-                                    mtlLoader.load(textures_availables[texture_keys[i_tmp]].texture, function (materials) {
-                                        materials.preload();
-
-                                        var objLoader = new THREE.OBJLoader();
-                                        objLoader.setMaterials(materials);
-                                        objLoader.setPath("http://mayl.me:3000/");
-                                        objLoader.load(intersects[0].object.parent.model3D, function (object) {
+                        var textures_availables = selected.textures_availables;
 
 
-                                            object.position.x = intersects[0].object.parent.position.x + 3;
-                                            object.position.y = 0.5;
-                                            object.position.z = intersects[0].object.parent.position.z;
+                        if (navigator.getGamepads()[0] || gachetteD || gachetteR) {
 
-                                            object.rotation.y = intersects[0].object.parent.rotation.y;
-                                            object.rotation.x = intersects[0].object.parent.rotation.x;
-                                            object.rotation.z = intersects[0].object.parent.rotation.z;
-
-                                            object.textures_availables = intersects[0].object.parent.textures_availables;
-                                            object.selected_texture = texture_keys[i_tmp];
-                                            object.furnitureType = intersects[0].object.parent.furnitureType;
-                                            object.furnitureId = intersects[0].object.parent.furnitureId;
-                                            object.furnitureIndex = intersects[0].object.parent.furnitureIndex;
-                                            object.model3D = intersects[0].object.parent.model3D;
-                                            object.uuid = intersects[0].object.parent.uuid;
-                                            console.log("scene 1 ", scene.children.length);
-                                            scene.remove(intersects[0].object.parent);
-                                            console.log("scene 2 ", scene.children.length);
-                                            //scene.add(object);
-
-
-                                            for (var i = 0; i < les_meubles.length; i++) {
-                                                if (les_meubles[i].furnitureIndex === object.index) {
-                                                    if (les_meubles[i].furnitureType === object.type) {
-                                                        delete les_meubles[i];
-                                                    }
-                                                }
-                                            }
-
-                                            var data = {
-                                                id: object.furnitureId,
-                                                type: object.furnitureType,
-                                                textureId: object.selected_texture,
-                                                index: object.furnitureIndex
-                                            }
-
-                                            socket.emit("changeFurnitureTexture", data);
-                                            stopLoading();
-                                        });
-                                    });
-
-                                }
-
+                            var gp = navigator.getGamepads()[0];
+                            var buttons = gp.buttons || {};
+                            if (gp.buttons[4].pressed) {
+                               gachetteR = true;
                             }
-                        } else {
-                            gachetteR = false;
-                        }
+                            else if (gachetteR === true && (!gp.buttons[4].pressed)) {
+
+                                gachetteR = false;
+                                for (var i = 0; i < texture_keys.length; i++) {
+
+                                    if (texture_keys[i] === selected.selected_texture) {
+
+                                        var i_tmp = i + 1;
+                                        i_tmp = (i_tmp >= texture_keys.length ) ? 0 : i_tmp;
+
+                                        isLoading();
+                                        //$("#infos").html("texture", textures_availables[texture_keys[0]].texture);
+
+                                        var mtlLoader = new THREE.MTLLoader();
+                                        mtlLoader.setPath("../furnitures/");
+
+                                        mtlLoader.load(textures_availables[texture_keys[i_tmp]].texture, function (materials) {
+                                            materials.preload();
+
+                                            var objLoader = new THREE.OBJLoader();
+                                            objLoader.setMaterials(materials);
+                                            objLoader.setPath("http://mayl.me:3000/");
+
+                                            objLoader.load(intersects[0].object.parent.model3D, function (object) {
+                                                 
+                                                object.position.x = intersects[0].object.parent.position.x;
+                                                object.position.y = 0.5;
+                                                object.position.z = intersects[0].object.parent.position.z;
+
+                                                object.rotation.y = intersects[0].object.parent.rotation.y;
+                                                object.rotation.x = intersects[0].object.parent.rotation.x;
+                                                object.rotation.z = intersects[0].object.parent.rotation.z;
+
+                                                object.textures_availables = intersects[0].object.parent.textures_availables;
+                                                object.selected_texture = texture_keys[i_tmp];
+                                                object.furnitureType = intersects[0].object.parent.furnitureType;
+                                                object.furnitureId = intersects[0].object.parent.furnitureId;
+                                                object.furnitureIndex = intersects[0].object.parent.furnitureIndex;
+                                                object.model3D = intersects[0].object.parent.model3D;
+                                                object.uuid = intersects[0].object.parent.uuid;
+                                                object.name = intersects[0].object.parent.name;
+
+                                                console.log("scene 1 ", scene.children.length);
+
+                                                scene.remove(intersects[0].object.parent);
+
+                                                console.log("scene 2 ", scene.children.length);
+                                                scene.add(object);
 
 
-                        //if (gp.buttons[3].pressed) {
-                        //    //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
-                        //
-                        //    gachetteD = true;
-                        //}
-                        //else if (gachetteD === true && (!gp.buttons[3].pressed)) {
-                        if (gachetteD) {
-                            gachetteD = false;
+                                                les_meubles = les_meubles.filter(function(item){
+                                                    return item.name !=  object.name;
+                                                });
+                                                console.log(les_meubles);
 
-                            for (var i = texture_keys.length; i >= 0; i--) {
+                                                les_meubles.push(object);
 
 
-                                if (texture_keys[i] === intersects[0].object.parent.selected_texture) {
-                                    var i_tmp = i - 1;
+                                                var data = {
+                                                    id: object.furnitureId,
+                                                    type:object.furnitureType,
+                                                    textureId: object.selected_texture,
+                                                    index: object.furnitureIndex
+                                                }
 
+                                                socket.emit("changeFurnitureTexture", data);
+                                                stopLoading();
+                                            });
+                                        });
 
-                                    if (i_tmp < 0) {
-                                        i_tmp = texture_keys.length - 1
-                                        //$("#infos").html("test i apres :"+ textures_availables[texture_keys[i_tmp]].texture);
                                     }
 
-                                    isLoading();
+                                }
+                            } else {
+                                gachetteR = false;
+                            }
 
 
-                                    var mtlLoader = new THREE.MTLLoader();
-                                    mtlLoader.setPath("../furnitures/");
-                                    mtlLoader.load(textures_availables[texture_keys[i_tmp]].texture, function (materials) {
-                                        materials.preload();
+                            if (gp.buttons[3].pressed) {
+                               //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+                            
+                               gachetteD = true;
+                            }
+                            else if (gachetteD === true && (!gp.buttons[3].pressed)) {
+                                gachetteD = false;
 
-                                        var objLoader = new THREE.OBJLoader();
-                                        objLoader.setMaterials(materials);
-                                        objLoader.setPath("http://mayl.me:3000/");
-                                        objLoader.load(intersects[0].object.parent.model3D, function (object) {
-
-
-                                            object.position.x = intersects[0].object.parent.position.x;
-                                            object.position.y = 0.5;
-                                            object.position.z = intersects[0].object.parent.position.z;
+                                for (var i = texture_keys.length; i >= 0; i--) {
 
 
-                                            object.rotation.y = intersects[0].object.parent.rotation.y;
-                                            object.rotation.x = intersects[0].object.parent.rotation.x;
-                                            object.rotation.z = intersects[0].object.parent.rotation.z;
+                                    if (texture_keys[i] === intersects[0].object.parent.selected_texture) {
+                                        var i_tmp = i - 1;
 
 
-                                            object.textures_availables = intersects[0].object.parent.textures_availables;
-                                            object.selected_texture = texture_keys[i_tmp];
-                                            object.furnitureType = intersects[0].object.parent.furnitureType;
-                                            object.furnitureId = intersects[0].object.parent.furnitureId;
-                                            object.furnitureIndex = intersects[0].object.parent.furnitureIndex;
-                                            object.model3D = intersects[0].object.parent.model3D;
+                                        if (i_tmp < 0) {
+                                            i_tmp = texture_keys.length - 1
+                                            //$("#infos").html("test i apres :"+ textures_availables[texture_keys[i_tmp]].texture);
+                                        }
+
+                                        isLoading();
 
 
-                                            scene.remove(intersects[0].object.parent);
-                                            scene.add(object);
+                                        var mtlLoader = new THREE.MTLLoader();
+                                        mtlLoader.setPath("../furnitures/");
+                                        mtlLoader.load(textures_availables[texture_keys[i_tmp]].texture, function (materials) {
+                                            materials.preload();
 
-                                            intersects[0].object.parent = object;
+                                            var objLoader = new THREE.OBJLoader();
+                                            objLoader.setMaterials(materials);
+                                            objLoader.setPath("http://mayl.me:3000/");
+                                            objLoader.load(intersects[0].object.parent.model3D, function (object) {
 
-                                            var data = {
-                                                id: object.furnitureId,
-                                                type: object.furnitureType,
-                                                textureId: object.selected_texture,
-                                                index: object.furnitureIndex
-                                            }
-                                            //$("#infos").html("test i apres :"+ data.type);
 
-                                            socket.emit("changeFurnitureTexture", data);
-                                            stopLoading();
+                                                object.position.x = intersects[0].object.parent.position.x;
+                                                object.position.y = 0.5;
+                                                object.position.z = intersects[0].object.parent.position.z;
+
+                                                object.rotation.y = intersects[0].object.parent.rotation.y;
+                                                object.rotation.x = intersects[0].object.parent.rotation.x;
+                                                object.rotation.z = intersects[0].object.parent.rotation.z;
+
+                                                object.textures_availables = intersects[0].object.parent.textures_availables;
+                                                object.selected_texture = texture_keys[i_tmp];
+                                                object.furnitureType = intersects[0].object.parent.furnitureType;
+                                                object.furnitureId = intersects[0].object.parent.furnitureId;
+                                                object.furnitureIndex = intersects[0].object.parent.furnitureIndex;
+                                                object.model3D = intersects[0].object.parent.model3D;
+                                                object.uuid = intersects[0].object.parent.uuid;
+                                                object.name = intersects[0].object.parent.name;
+
+                                                console.log("scene 1 ", scene.children.length);
+
+                                                scene.remove(intersects[0].object.parent);
+
+                                                console.log("scene 2 ", scene.children.length);
+                                                scene.add(object);
+
+
+                                                les_meubles = les_meubles.filter(function(item){
+                                                    return item.name !=  object.name;
+                                                });
+                                                console.log(les_meubles);
+
+                                                les_meubles.push(object);
+
+
+                                                var data = {
+                                                    id: object.furnitureId,
+                                                    type:object.furnitureType,
+                                                    textureId: object.selected_texture,
+                                                    index: object.furnitureIndex
+                                                }
+
+                                                socket.emit("changeFurnitureTexture", data);
+                                                stopLoading();
+                                            });
                                         });
-                                    });
 
+                                    }
                                 }
-                            }
-                        } else {
+                            } else {
 
-                            gachetteD = false;
-                        }
-
-
-                        if (gp.buttons[2].pressed) {
-                            //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
-
-                            buttonRemove = true;
-                        }
-                        else if (buttonRemove === true && (!gp.buttons[2].pressed)) {
-                            buttonRemove = false;
-
-                            var index = intersects[0].object.parent.furnitureIndex;
-                            var type = intersects[0].object.parent.furnitureType;
-
-
-                            socket.emit("removeFurniture", {
-                                index: index,
-                                type: intersects[0].object.parent.furnitureType
-                            });
-                            for (var i = 0; i < les_meubles.length; i++) {
-                                if (les_meubles[i].furnitureIndex === index && les_meubles[i].furnitureType === type) {
-                                    scene.remove(les_meubles[i]);
-                                }
+                                gachetteD = false;
                             }
 
-                        } else {
-                            buttonRemove = false;
+
+                            if (gp.buttons[2].pressed) {
+                                //$("#infos").html(gp.buttons[4].pressed+" "+ gachetteR);
+
+                                buttonRemove = true;
+                            }
+                            else if (buttonRemove === true && (!gp.buttons[2].pressed)) {
+                                buttonRemove = false;
+
+                                var index = intersects[0].object.parent.furnitureIndex;
+                                var type = intersects[0].object.parent.furnitureType;
+
+
+                                socket.emit("removeFurniture", {
+                                    index: index,
+                                    type: intersects[0].object.parent.furnitureType
+                                });
+                                for (var i = 0; i < les_meubles.length; i++) {
+                                    if (les_meubles[i].furnitureIndex === index && les_meubles[i].furnitureType === type) {
+                                        scene.remove(les_meubles[i]);
+                                        les_meubles = les_meubles.filter(function(item){
+                                            return item.name !=  intersects[0].object.parent.name;
+                                        });
+                                    }
+                                }
+
+                            } else {
+                                buttonRemove = false;
+                            }
                         }
+                    } else {
+                        $(".selector").removeClass('active');
+                        console.log("existe pas dans la scene", intersects[0].object.parent);
+                        console.log(les_meubles);
                     }
-
                 } else {
                     $(".selector").removeClass('active');
                 }
