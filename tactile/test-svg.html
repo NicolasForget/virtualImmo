@@ -85,7 +85,20 @@
 
 
 		    <div id="resetButton"></div>
+
+		    <div id="player"></div>
+	        <style>
+	            #player{
+	                width: 24px;
+	                background: #4bb6c3;
+	                height: 24px;
+	                position: absolute;
+	                border-radius: 50%;
+	            }
+	        </style>
 		    <script type="text/javascript" src="js/toolbar.js"></script>
+
+
 
 
 		    
@@ -363,6 +376,12 @@
 				console.log("url(#"+data.type+data.id+data.textureId+")");
 				console.log(data);
 			});
+
+			socket.on("position", function(data){
+                var player = $("#player");
+                player.css("left", data.x*50 );
+                player.css("top", data.y*50 );
+            });
 
 			socket.on("removeFurniture",function(data){
 		   		console.log("[removeFurniture] "+data);
